@@ -54,12 +54,12 @@ export function Input({
 
   return (
     <div className="flex flex-col">
-      <label className="label-md">{label}</label>
-      <div className="relative mt-2">
+      {label && <label className="label-md">{label}</label>}
+      <div className={cn("relative", label && "mt-2")}>
         {icon && onIconClick && (
           <button
             onClick={onIconClick}
-            className="flex items-center justify-center rounded-sm transition-all duration-300 ease-out button-transparent h-[32px] w-[32px] absolute top-[8px] left-[8px]"
+            className="flex items-center justify-center rounded-sm transition-all duration-300 ease-out button-transparent h-[32px] w-[32px] absolute top-1/2 -translate-y-1/2 left-[8px]"
             aria-label={iconAriaLabel}
             data-testid={dataTestId ? `${dataTestId}-icon-button` : 'input-icon-button'}
           >
@@ -68,7 +68,7 @@ export function Input({
         )}
 
         {icon && !onIconClick && (
-          <span className="absolute top-0 left-[16px] h-full flex items-center" data-testid={dataTestId ? `${dataTestId}-icon` : 'input-icon'}>
+          <span className="absolute left-[16px] top-1/2 -translate-y-1/2 flex items-center" data-testid={dataTestId ? `${dataTestId}-icon` : 'input-icon'}>
             {icon}
           </span>
         )}

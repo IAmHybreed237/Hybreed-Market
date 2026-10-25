@@ -23,7 +23,7 @@
 @tailwind utilities;
 
 body {
-  font-family: "Funnel Display", sans-serif;
+  font-family: "Google Sans", "Segoe UI", -apple-system, Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
 }
 
 /* Typography */
@@ -195,4 +195,16 @@ button:disabled svg path {
 }
 .no-arrows-number-input {
   -moz-appearance: textfield;
+}
+
+/* Hybreed marketplace header — WB-style brand gradient (blue in place of purple) */
+.header-gradient {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05)),
+    linear-gradient(97.26deg, #2563eb 0%, #1d4ed8 35%, #6d28d9 75%, #8b33ef 100%);
+}
+
+/* Prevent horizontal wiggle on mobile — clamp any overshoot */
+html, body {
+  overflow-x: clip;
 }

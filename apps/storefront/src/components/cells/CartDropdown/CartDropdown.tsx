@@ -77,7 +77,7 @@ export const CartDropdown = () => {
         className="relative"
         aria-label="Go to cart"
       >
-        <CartIcon size={20} />
+        <CartIcon size={24} />
         {Boolean(cartItemsCount) && (
           <Badge className="absolute -top-2 -right-2 w-4 h-4 p-0">
             {cartItemsCount}
@@ -112,8 +112,11 @@ export const CartDropdown = () => {
                   <div className="text-secondary flex justify-between items-center">
                     Total <p className="label-xl text-primary">{total}</p>
                   </div>
-                  <LocalizedClientLink href="/cart">
-                    <Button className="w-full mt-4 py-3">Go to cart</Button>
+                  <LocalizedClientLink
+                    href="/cart"
+                    className="block w-full mt-4 py-3 text-center bg-action hover:bg-action-hover text-action-on-primary rounded-sm font-semibold"
+                  >
+                    Go to cart
                   </LocalizedClientLink>
                 </div>
               </div>
@@ -125,8 +128,11 @@ export const CartDropdown = () => {
                 <p className="text-lg text-center py-4">
                   Are you looging for inspiration?
                 </p>
-                <LocalizedClientLink href="/categories">
-                  <Button className="w-full py-3">Explore Home Page</Button>
+                <LocalizedClientLink
+                  href="/categories"
+                  className="block w-full py-3 text-center bg-action hover:bg-action-hover text-action-on-primary rounded-sm font-semibold"
+                >
+                  Explore Home Page
                 </LocalizedClientLink>
               </div>
             )}

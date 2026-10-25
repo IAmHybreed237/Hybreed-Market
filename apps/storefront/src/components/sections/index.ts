@@ -1,3 +1,7 @@
+import { MobileCategories } from "./MobileCategories/MobileCategories"
+import { ProductShelf } from "./ProductShelf/ProductShelf"
+import { SlimBanner } from "./SlimBanner/SlimBanner"
+import { HeroCarousel } from "./HeroCarousel/HeroCarousel"
 import { Hero } from "./Hero/Hero"
 import { HomeProductSection } from "./HomeProductSection/HomeProductSection"
 import { HomeCategories } from "./HomeCategories/HomeCategories"
@@ -14,6 +18,10 @@ import { OrdersPagination } from "../organisms/OrdersPagination/OrdersPagination
 
 export {
   Hero,
+  HeroCarousel,
+  MobileCategories,
+  SlimBanner,
+  ProductShelf,
   HomeProductSection,
   HomeCategories,
   BannerSection,

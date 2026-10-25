@@ -4,6 +4,7 @@ import { listOffers } from "@/lib/data/offers"
 import { StoreOffer } from "@/lib/helpers/buybox"
 import { HomeProductSection } from "../HomeProductSection/HomeProductSection"
 import NotFound from "@/app/not-found"
+import { TrackView } from "@/components/cells/TrackView/TrackView"
 
 export const ProductDetailsPage = async ({
   handle,
@@ -30,6 +31,10 @@ export const ProductDetailsPage = async ({
 
   return (
     <>
+      <TrackView
+        productId={prod.id}
+        categoryIds={(prod as any).categories?.map((c: any) => c.id) || []}
+      />
       <div className="flex flex-col md:flex-row lg:gap-12" data-testid="product-details-page">
         <div className="md:w-1/2 md:px-2" data-testid="product-gallery-container">
           <ProductGallery images={prod?.images || []} />

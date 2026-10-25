@@ -1,11 +1,14 @@
 import {
   BannerSection,
   BlogSection,
-  Hero,
+  HeroCarousel,
+  SlimBanner,
   HomeCategories,
-  HomeProductSection,
+  MobileCategories,
+  ProductShelf,
   ShopByStyleSection,
 } from "@/components/sections"
+import { ForYouShelf } from "@/components/sections/ForYouShelf/ForYouShelf"
 
 import type { Metadata } from "next"
 import { headers } from "next/headers"
@@ -149,27 +152,16 @@ export default async function Home({
         }}
       />
 
-      <Hero
-        image="/images/hero/Image.jpg"
-        heading="Snag your style in a flash"
-        paragraph="Buy, sell, and discover pre-loved gems from the trendiest brands."
-        buttons={[
-          { label: "Buy now", path: "/categories" },
-          {
-            label: "Sell now",
-            path:
-              process.env.NEXT_PUBLIC_VENDOR_URL ||
-              "https://vendor.mercurjs.com",
-          },
-        ]}
-      />
-      <div className="px-4 lg:px-8 w-full">
-        <HomeProductSection heading="trending listings" locale={locale} home />
+      <SlimBanner />
+      <HeroCarousel />
+      <MobileCategories />
+      <div className="px-[5px] w-full">
+        <HomeCategories heading="Shop by category" />
       </div>
-      <div className="px-4 lg:px-8 w-full">
-        <HomeCategories heading="SHOP BY CATEGORY" />
-      </div>
+      <ProductShelf locale={locale} withLocation />
+      <ForYouShelf locale={locale} />
       <BannerSection />
+      <ProductShelf heading="More to love" locale={locale} offset={10} />
       <ShopByStyleSection />
       <BlogSection />
     </main>
