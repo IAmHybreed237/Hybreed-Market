@@ -455,22 +455,21 @@ class NotchPayProviderService extends AbstractPaymentProvider<NotchPayOptions> {
 
     switch (eventType) {
       case "payment.complete":
-        // Final confirmation: re-fetch the transaction so a spoofed or
-        // replayed webhook cannot mark an unpaid session as paid.
-        if (txn.status !== "complete") {
-          try {
-            const fresh = await this.client_.getPayment(
-              transactionReference(txn) ?? String(txn.id)
-            );
-            if (fresh.status !== "complete") {
-              return {
-                action: PaymentActions.PENDING,
-                data: { session_id: sessionId, amount },
-              };
-            }
-          } catch {
-            return { action: PaymentActions.NOT_SUPPORTED };
+        // Final confirmation: always re-fetch the transaction so a spoofed
+        // or replayed webhook cannot mark an unpaid session as paid —
+        // the embedded payload's status is never trusted.
+        try {
+          const fresh = await this.client_.getPayment(
+            transactionReference(txn) ?? String(txn.id)
+          );
+          if (fresh.status !== "complete") {
+            return {
+              action: PaymentActions.PENDING,
+              data: { session_id: sessionId, amount },
+            };
           }
+        } catch {
+          return { action: PaymentActions.NOT_SUPPORTED };
         }
         return {
           action: PaymentActions.SUCCESSFUL,
