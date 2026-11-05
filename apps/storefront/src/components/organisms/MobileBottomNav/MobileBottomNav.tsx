@@ -59,7 +59,7 @@ export const MobileBottomNav = () => {
 
   const items = [
     { href: "/", Icon: HomeSearchIcon, label: "Home", badge: 0 },
-    { href: "/categories", Icon: MenuIcon, label: "Catalog", badge: 0 },
+    { href: "/catalog", Icon: MenuIcon, label: "Catalog", badge: 0 },
     { href: "/user/wallet", Icon: WalletIcon, label: "Wallet", badge: 0 },
     { href: "/cart", Icon: CartIcon, label: "Cart", badge: cartCount },
     { href: "/user", Icon: ProfileIcon, label: "Profile", badge: 1 },

@@ -29,7 +29,7 @@ const ShieldIcon = () => (
 export const SlimBanner = () => {
   return (
     <section
-      className="hidden lg:block w-full px-[5px] mt-4 lg:mt-6"
+      className="hidden lg:block w-full px-[5px] lg:px-10 mt-4 lg:mt-2 -mb-4"
       data-testid="slim-banner"
     >
       <div className="max-w-[1400px] mx-auto rounded-2xl bg-action-secondary flex items-center justify-center gap-3 px-4 h-10 text-center">

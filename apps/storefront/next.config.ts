@@ -31,6 +31,10 @@ const nextConfig: NextConfig = {
         hostname: 'localhost'
       },
       {
+        protocol: 'http',
+        hostname: '192.168.31.130'
+      },
+      {
         protocol: 'https',
         hostname: 'api-sandbox.mercurjs.com',
         pathname: '/static/**'

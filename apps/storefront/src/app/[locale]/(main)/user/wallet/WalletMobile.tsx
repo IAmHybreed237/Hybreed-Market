@@ -1,7 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useTopUpSheet } from "@/components/cells/TopUpSheet/TopUpSheet"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
+import { HbMark } from "@/components/atoms"
 
 /* ---------- icons ---------- */
 const I = ({ d, s = 20, c = "currentColor" }: { d: string; s?: number; c?: string }) => (
@@ -54,6 +56,7 @@ const promos = [
 ]
 
 export const WalletMobile = () => {
+  const topUp = useTopUpSheet()
   const [scrolled, setScrolled] = useState(false)
   const [tick, setTick] = useState(0)
   const [sheet, setSheet] = useState<"none" | "more" | "soon" | "all">("none")
@@ -155,9 +158,9 @@ export const WalletMobile = () => {
       >
         <div className="flex items-center h-11 pl-4 pr-1.5">
           <div className="flex items-center gap-1.5">
-            <span className="w-9 h-6 rounded-xl bg-[#2563EB] text-white text-[15px] font-bold flex items-center justify-center">HB</span>
-            <span className="text-[26px] font-semibold" style={{ color: "var(--text)" }}>Wallet</span>
-            <LocalizedClientLink href="/user" className="ml-2 h-[26px] px-2.5 bg-white border border-black/[0.06] rounded-lg flex items-center gap-0.5 text-sm font-semibold uppercase" style={{ color: "var(--text)" }}>
+            <HbMark h={24} />
+            <span className="text-[24px] font-semibold leading-none" style={{ color: "var(--text)" }}>Wallet</span>
+            <LocalizedClientLink href="/user" className="ml-2 h-[24px] px-2.5 bg-white border border-black/[0.06] rounded-full flex items-center gap-0.5 text-[13px] font-semibold uppercase" style={{ color: "var(--text)" }}>
               Start
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6" /></svg>
             </LocalizedClientLink>
@@ -183,11 +186,11 @@ export const WalletMobile = () => {
         <div className="grid grid-cols-2 gap-2">
           {/* left column */}
           <div className="flex flex-col gap-2">
-            <div className={`${tile} h-[194px] flex flex-col px-4 pt-3`}>
-              <p className="text-xs truncate" style={{ color: "var(--text)", fontWeight: 450 }}>
+            <div className={`${tile} h-[194px] flex flex-col px-3 pt-2`}>
+              <p className="text-[14px]" style={{ color: "var(--text)", fontWeight: 450 }}>
                 Your discount: 3%
               </p>
-              <div className="mt-1.5 rounded-[22px] h-[127px] relative overflow-hidden -mx-4" style={{ background: "#1E3A8A" }}>
+              <div className="mt-1.5 rounded-[22px] h-[127px] relative overflow-hidden -mx-3" style={{ background: "#1E3A8A url('/images/carbon-texture.png') center/cover no-repeat" }}>
                 <style>{`
                   @keyframes wmOut { from { transform: translateY(0); opacity: 1 } to { transform: translateY(100%); opacity: 0 } }
                   @keyframes wmIn { from { transform: translateY(100%); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
@@ -226,14 +229,14 @@ export const WalletMobile = () => {
             </div>
             <div className={`${tile} h-[31px] rounded-full flex items-center justify-center gap-1.5`}>
               <span className="text-base font-medium" style={{ color: "var(--brand)" }}>Get 1,000</span>
-              <span className="bg-[#2563EB] text-white text-[13px] font-semibold px-2 py-px rounded-full">HB</span>
+              <HbMark h={18} />
             </div>
           </div>
 
           {/* right column */}
           <div className="flex flex-col gap-2">
-            <div className={`${tile} h-[69px] px-4 py-3 flex flex-col justify-center`}>
-              <p className="text-[11px] whitespace-nowrap" style={{ color: "var(--muted)" }}>Monthly spending</p>
+            <LocalizedClientLink href="/user/spending" className={`${tile} h-[69px] px-4 py-3 flex flex-col justify-center`}>
+              <p className="text-[13px] whitespace-nowrap -mt-1 font-[450]" style={{ color: "var(--muted)" }}>Monthly spending</p>
               <div className="flex items-center justify-between mt-0.5">
                 <p className="text-[15px] font-medium" style={{ color: "var(--text)" }}>0 XAF</p>
                 <div className="flex items-center -space-x-2">
@@ -242,19 +245,19 @@ export const WalletMobile = () => {
                   <span className="w-[27px] h-[27px] rounded-full bg-[#93C5FD] flex items-center justify-center z-10"><I d={ic.wallet} s={13} c="#fff" /></span>
                 </div>
               </div>
-            </div>
+            </LocalizedClientLink>
             <div className="grid grid-cols-2 gap-2">
               <button className={`${tile} h-[77px] flex flex-col items-center justify-center gap-1 p-1.5 relative`}>
                 <I d={ic.qr} s={28} c="var(--text)" />
-                <span className="text-sm leading-[1.3] text-center" style={{ color: "var(--muted)" }}>Pay with QR Code</span>
+                <span className="text-[13px] leading-[1.3] text-center" style={{ color: "var(--muted)" }}>Pay with QR Code</span>
               </button>
               <button className={`${tile} h-[77px] flex flex-col items-center justify-center gap-1 p-1.5 relative`}>
                 <span className="absolute top-2 right-2 w-4 h-4 rounded-full bg-[#22C55E]" />
                 <I d={ic.swap} s={28} c="var(--text)" />
-                <span className="text-sm leading-[1.3] text-center" style={{ color: "var(--muted)" }}>Transfers and Payments</span>
+                <span className="text-[13px] leading-[1.15] text-center" style={{ color: "var(--muted)" }}>Transfers and Payments</span>
               </button>
             </div>
-            <button onClick={() => setSheet("soon")} className={`${tile} h-[69px] flex flex-col items-center justify-center gap-0.5`}>
+            <button onClick={() => topUp.open()} className={`${tile} h-[69px] flex flex-col items-center justify-center gap-0.5`}>
               <I d={ic.plus} s={28} c="var(--text)" />
               <span className="text-base font-medium" style={{ color: "var(--text)" }}>Top up Wallet</span>
             </button>
@@ -349,7 +352,7 @@ export const WalletMobile = () => {
             )}
             <div className="mt-auto pt-6 flex items-baseline gap-1.5">
               {c.v && <span className="text-[26px]" style={{ color: "var(--text)" }}>{c.v}</span>}
-              {c.hbPill && <span className="bg-[#2563EB] text-white text-[15px] font-semibold px-2.5 py-0.5 rounded-full">HB</span>}
+              {c.hbPill && <HbMark h={20} />}
             </div>
             {c.apply && (
               <span className="inline-block mt-2 h-[37px] px-5 rounded-[14px] bg-[#F0F0F3] text-[17px] font-medium flex items-center w-fit" style={{ color: "var(--text)" }}>

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
 import './globals.css';
 
@@ -6,6 +6,8 @@ import { Toaster } from '@medusajs/ui';
 import Head from 'next/head';
 
 import { HtmlLangSetter } from '@/components/atoms/HtmlLangSetter/HtmlLangSetter';
+import { SplashScreen } from '@/components/atoms/SplashScreen/SplashScreen';
+import { StatusBarColor } from '@/components/atoms/StatusBarColor/StatusBarColor';
 import { retrieveCart } from '@/lib/data/cart';
 
 import { Providers } from './providers';
@@ -19,7 +21,26 @@ export const metadata: Metadata = {
   },
   description:
     process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Mercur B2C Demo - Marketplace Storefront',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    title: 'Hybreed',
+    statusBarStyle: 'default'
+  },
+  icons: {
+    icon: '/icon-192.png',
+    apple: '/apple-touch-icon.png'
+  }
+};
+
+export const viewport: Viewport = {
+  themeColor: '#2563EB',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover'
 };
 
 export default async function RootLayout({
@@ -87,6 +108,8 @@ export default async function RootLayout({
       </Head>
       <body className="relative bg-primary text-secondary antialiased">
         <HtmlLangSetter />
+        <StatusBarColor />
+        <SplashScreen />
         <Providers cart={cart}>{children}</Providers>
         <Toaster position="top-right" />
       </body>

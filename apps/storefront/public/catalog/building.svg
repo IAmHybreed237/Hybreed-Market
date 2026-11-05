@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+<defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#60A5FA"/><stop offset="1" stop-color="#2563EB"/></linearGradient>
+<linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5EEAD4"/><stop offset="1" stop-color="#14B8A6"/></linearGradient></defs>
+<ellipse cx="60" cy="106" rx="36" ry="6" fill="#1F1F23" opacity=".08"/>
+<rect x="70" y="52" width="34" height="52" rx="8" fill="url(#b)"/>
+<rect x="76" y="60" width="8" height="8" rx="2" fill="#F0FDFA"/><rect x="88" y="60" width="8" height="8" rx="2" fill="#F0FDFA"/><rect x="76" y="74" width="8" height="8" rx="2" fill="#F0FDFA"/><rect x="88" y="74" width="8" height="8" rx="2" fill="#F0FDFA"/>
+<rect x="22" y="18" width="44" height="86" rx="10" fill="url(#a)"/>
+<g fill="#EFF6FF"><rect x="30" y="28" width="10" height="10" rx="2"/><rect x="46" y="28" width="10" height="10" rx="2"/><rect x="30" y="44" width="10" height="10" rx="2"/><rect x="46" y="44" width="10" height="10" rx="2"/><rect x="30" y="60" width="10" height="10" rx="2"/><rect x="46" y="60" width="10" height="10" rx="2"/><rect x="30" y="76" width="10" height="10" rx="2"/><rect x="46" y="76" width="10" height="10" rx="2"/></g>
+<ellipse cx="38" cy="26" rx="14" ry="6" fill="#fff" opacity=".3" transform="rotate(-8 38 26)"/>
+</svg>

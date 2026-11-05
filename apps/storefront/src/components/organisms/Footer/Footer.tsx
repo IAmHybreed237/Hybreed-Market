@@ -55,7 +55,7 @@ const columns = [
 export function Footer() {
   return (
     <footer className="bg-white border-t border-black/[0.06] mt-10" data-testid="footer">
-      <div className="max-w-[1400px] mx-auto px-[5px] py-10">
+      <div className="max-w-[1400px] mx-auto px-[5px] lg:px-10 py-10">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {columns.map((col) => (
             <nav key={col.title} aria-label={`${col.title} links`}>

@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
+import { HbMark } from "@/components/atoms"
 
 /* ---------- icons ---------- */
 const BackIcon = () => (
@@ -37,14 +38,26 @@ const GiftBox = () => (
   </svg>
 )
 
-/* ---------- placeholder data (needs: real loyalty backend) ---------- */
-const LEVEL = { n: 2, name: "A good start" }
-const POINTS = 1600
-const SPEND = { cur: 0, max: 5000 }
-const XP = { cur: 253, max: 300 }
-const WOW_OFFERS = 3
+/* ---------- loyalty config ---------- */
+const LEVELS = [
+  { n: 1, name: "M-m-m-m, I think", xp: 300 },
+  { n: 2, name: "A good start", xp: 1500 },
+  { n: 3, name: "Hybreed regular", xp: 5000 },
+]
 const STREAK_DAYS = [5, 8, 10, 15, 20, 25, 50]
-const STREAK_DONE = 3
+const WOW_OFFERS = 3
+
+type MyHybreedData = {
+  xpTotal: number
+  points: number
+  spendCur: number
+  spendMax: number
+  streakDone: number
+  claimedToday: boolean
+  hasAddress: boolean
+  hasPhone: boolean
+  hasOrders: boolean
+}
 const TASK_CATS = ["All", "Earn more", "Discovery", "Partners", "Trust"]
 const now = Date.now()
 const TASKS = [
@@ -69,18 +82,162 @@ const fmtLeft = (ms: number) => {
   return d > 0 ? `${d} d ${h} h` : `${h} h ${m} m`
 }
 
-export const MyHybreedClient = () => {
+const DayTile = ({
+  day,
+  xp,
+  claimed,
+  today,
+  quarter,
+}: {
+  day: number
+  xp: number
+  claimed: boolean
+  today: boolean
+  quarter?: boolean
+}) => (
+  <div
+    className={`${quarter ? "shrink-0" : "flex-1"} rounded-[20px] bg-white px-2 pt-2.5 pb-2 flex flex-col`}
+    style={{
+      border: today ? "2px solid var(--xp)" : "1.5px solid #E4E4EA",
+      ...(quarter ? { width: "calc((100% - 30px) / 4)" } : {}),
+    }}
+  >
+    <span className="text-[14px] font-semibold text-center" style={{ color: "var(--muted)" }}>
+      Day {day}
+    </span>
+    <span
+      className="mt-2 rounded-[16px] py-2.5 flex items-center justify-center gap-1 relative"
+      style={{ border: "2px dashed var(--xp-soft)" }}
+    >
+      <span className="text-[22px] leading-none font-bold" style={{ color: "var(--text)" }}>
+        {xp}
+      </span>
+      <span className="h-[18px] px-1.5 rounded-full bg-[#F97316] text-white text-[11px] font-semibold flex items-center">
+        XP
+      </span>
+      {claimed && (
+        <span className="absolute inset-0 rounded-[14px] bg-[#F97316]/50 flex items-center justify-center">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </span>
+      )}
+    </span>
+  </div>
+)
+
+export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [cat, setCat] = useState("All")
   const [, setMinute] = useState(0)
+  const [loy, setLoy] = useState({
+    xp: data.xpTotal,
+    points: data.points,
+    streakDone: data.streakDone,
+    claimedToday: data.claimedToday,
+  })
+
+  // derived live values
+  let li = LEVELS.findIndex((l) => loy.xp < l.xp)
+  if (li < 0) li = LEVELS.length - 1
+  const prevXp = li > 0 ? LEVELS[li - 1].xp : 0
+  const LEVEL = LEVELS[li]
+  const XP = { cur: loy.xp - prevXp, max: LEVELS[li].xp - prevXp }
+  const SPEND = { cur: data.spendCur, max: data.spendMax }
+  const POINTS = loy.points
+  const streakDone = loy.streakDone
+  const todayIdx = loy.claimedToday ? loy.streakDone - 1 : loy.streakDone
+
+  const taskDone = (t: (typeof TASKS)[number]) =>
+    t.done ||
+    (t.id === 2 && data.hasOrders) ||
+    (t.id === 9 && data.hasPhone) ||
+    (t.id === 11 && data.hasAddress)
+
+  // claim today's daily XP on visit (idempotent — safe to re-fire)
+  useEffect(() => {
+    fetch("/api/loyalty/daily-xp", { method: "POST" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (j && typeof j.xp === "number")
+          setLoy({ xp: j.xp, points: j.points, streakDone: j.streakDone, claimedToday: j.claimedToday })
+      })
+      .catch(() => {})
+  }, [])
+  const [pullY, setPullY] = useState(0)
+  const [pullEdge, setPullEdge] = useState<"top" | "bottom">("top")
+  const [refreshing, setRefreshing] = useState(false)
+  const [dailyOpen, setDailyOpen] = useState(false)
+
+  useEffect(() => {
+    if (!dailyOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [dailyOpen])
+  const pullStart = useRef<{ y: number; edge: "top" | "bottom" } | null>(null)
+
+  const onPullStart = (e: React.TouchEvent) => {
+    if (refreshing) return
+    const doc = document.documentElement
+    const atTop = window.scrollY <= 0
+    const atBottom =
+      window.scrollY + window.innerHeight >= doc.scrollHeight - 2
+    if (atTop || atBottom) {
+      const edge = atTop ? ("top" as const) : ("bottom" as const)
+      pullStart.current = { y: e.touches[0].clientY, edge }
+      setPullEdge(edge)
+    }
+  }
+  const onPullMove = (e: React.TouchEvent) => {
+    const s = pullStart.current
+    if (!s) return
+    const dy = e.touches[0].clientY - s.y
+    const amt = s.edge === "top" ? dy : -dy
+    if (amt > 0) setPullY(Math.min(amt * 0.5, 90))
+    else {
+      pullStart.current = null
+      setPullY(0)
+    }
+  }
+  const onPullEnd = () => {
+    if (pullStart.current == null) return
+    pullStart.current = null
+    if (pullY >= 56) {
+      setRefreshing(true)
+      router.refresh()
+      setTimeout(() => {
+        setRefreshing(false)
+        setPullY(0)
+      }, 900)
+    } else setPullY(0)
+  }
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
     const iv = setInterval(() => setMinute((v) => v + 1), 60e3)
+    // match overscroll/status-bar area to the hero and stop rubber-band gap
+    const html = document.documentElement
+    const prev = {
+      obH: html.style.overscrollBehaviorY,
+      obB: document.body.style.overscrollBehaviorY,
+      bgH: html.style.backgroundColor,
+      bgB: document.body.style.backgroundColor,
+    }
+    html.style.overscrollBehaviorY = "none"
+    document.body.style.overscrollBehaviorY = "none"
+    html.style.backgroundColor = "#BFDBFE"
+    document.body.style.backgroundColor = "#BFDBFE"
     return () => {
       cancelAnimationFrame(t)
       clearInterval(iv)
+      html.style.overscrollBehaviorY = prev.obH
+      document.body.style.overscrollBehaviorY = prev.obB
+      html.style.backgroundColor = prev.bgH
+      document.body.style.backgroundColor = prev.bgB
     }
   }, [])
 
@@ -94,7 +251,11 @@ export const MyHybreedClient = () => {
 
   return (
     <div
-      className="md:max-w-[600px] md:mx-auto md:flex md:flex-col md:gap-3"
+      className="md:max-w-[1100px] md:mx-auto md:flex md:flex-col md:gap-4"
+      onTouchStart={onPullStart}
+      onTouchMove={onPullMove}
+      onTouchEnd={onPullEnd}
+      onTouchCancel={onPullEnd}
       style={
         {
           "--page-bg": "#F5F5F7",
@@ -111,14 +272,11 @@ export const MyHybreedClient = () => {
       }
     >
       {/* ===== 1) HERO ===== */}
+      {/* sticky header — matches hero's top colour so it blends seamlessly */}
       <div
-        className="rounded-b-[44px] md:rounded-[28px] overflow-hidden"
-        style={{
-          background: "linear-gradient(160deg,#BFDBFE 0%,#DBEAFE 55%,#EFF6FF 100%)",
-          paddingTop: "env(safe-area-inset-top, 0px)",
-        }}
+        className="sticky top-0 z-40 bg-[#BFDBFE] md:hidden"
+        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
-        {/* header row */}
         <div className="h-11 px-3.5 flex items-center">
           <button
             aria-label="Back"
@@ -127,14 +285,59 @@ export const MyHybreedClient = () => {
           >
             <BackIcon />
           </button>
-          <div className="mx-auto flex items-center gap-2">
-            <span className="text-xl font-semibold" style={{ color: "var(--text)" }}>my</span>
-            <span className="h-[26px] px-2.5 rounded-[13px] bg-[#2563EB] text-white text-[15px] font-semibold flex items-center">HB</span>
+          <div className="mx-auto flex items-center gap-1">
+            <span
+              className="leading-none"
+              style={{
+                fontFamily: '"Funnel Display", sans-serif',
+                fontSize: "24px",
+                fontWeight: 700,
+                color: "var(--text)",
+              }}
+            >
+              my
+            </span>
+            <HbMark h={24} />
           </div>
           <button aria-label="Support chat" className="w-11 h-11 -mr-2 flex items-center justify-center" style={{ color: "var(--text)" }}>
             <ChatIcon />
           </button>
         </div>
+      </div>
+      {/* pull-to-refresh loader — stretches in-flow between header and hero */}
+      <div
+        className="bg-[#BFDBFE] flex items-center justify-center overflow-hidden"
+        style={{
+          height:
+            pullEdge === "top" ? (refreshing ? 44 : pullY) : 0,
+          transition:
+            pullY === 0 || refreshing ? "height .3s cubic-bezier(.2,.8,.3,1)" : "none",
+        }}
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden
+          className={refreshing ? "animate-spin" : ""}
+          style={{
+            opacity: refreshing ? 1 : Math.min(pullY / 56, 1),
+            transform: refreshing ? undefined : `rotate(${pullY * 4}deg)`,
+          }}
+        >
+          <circle cx="12" cy="12" r="9" stroke="#2563EB" strokeOpacity="0.25" strokeWidth="3" />
+          <path d="M21 12a9 9 0 0 0-9-9" stroke="#2563EB" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+      </div>
+      {/* desktop: hero left, feature tiles stacked right */}
+      <div className="md:grid md:grid-cols-[1.5fr_1fr] md:gap-4">
+      <div
+        className="rounded-b-[44px] md:rounded-[28px] overflow-hidden"
+        style={{
+          background: "linear-gradient(#BFDBFE 0%,#DBEAFE 55%,#EFF6FF 100%)",
+        }}
+      >
 
         {/* level text */}
         <div className="text-center mt-3">
@@ -147,25 +350,29 @@ export const MyHybreedClient = () => {
         </div>
 
         {/* body row */}
-        <div className="mt-4 px-3.5 md:px-0 pb-5 flex gap-3 md:gap-6 md:justify-center items-start">
-          <div className="w-[165px] h-[125px] md:w-[175px] md:h-[145px] shrink-0 -ml-2 md:ml-0 self-center">
+        <div className="mt-4 px-3.5 md:px-0 pb-5 flex gap-3 md:gap-20 md:justify-center items-start">
+          <div className="w-[150px] h-[100px] min-[420px]:w-[165px] min-[420px]:h-[125px] md:w-[175px] md:h-[145px] shrink-0 -ml-2 md:ml-6 self-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/myhb-hero.png"
+              src={LEVEL.n === 1 ? "/images/myhb-hero-l1.png" : "/images/myhb-hero.png"}
               alt=""
               aria-hidden
-              className="h-full w-auto max-w-none object-contain ml-1 md:ml-0"
-              style={{ transform: "scale(1.25)", transformOrigin: "left center" }}
+              className="h-full w-auto max-w-none object-contain ml-1 md:ml-0 scale-[1.5] md:scale-125 origin-left"
             />
           </div>
-          <div className="w-[170px] md:w-[180px] flex flex-col ml-auto">
+          <div className="w-[160px] min-[420px]:w-[170px] md:w-[180px] flex flex-col ml-auto md:ml-0 md:mr-6">
             <LocalizedClientLink href="/user" className={`${tile} px-3.5 py-2.5 flex flex-col gap-1`} style={{ background: "rgba(255,255,255,0.7)" }}>
               <span className="flex items-center justify-between text-[15px]" style={{ color: "var(--muted)" }}>
                 Benefits <Chevron />
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="text-[20px] font-medium leading-none" style={{ color: "var(--text)" }}>1 600</span>
-                <span className="flex -space-x-2"><span className="h-6 px-1.5 rounded-full bg-[#2563EB] text-white text-[13px] font-semibold flex items-center">HB</span><span className="h-6 px-1.5 rounded-full bg-[#1D4ED8] text-white text-[13px] font-semibold flex items-center">Wow</span></span>
+                <span className="text-[20px] font-medium leading-none" style={{ color: "var(--text)" }}>{POINTS.toLocaleString("fr-FR")}</span>
+                <span className="flex -space-x-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/images/pill-1.png" alt="" className="h-[22px] w-auto object-contain" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/images/pill-2.png" alt="" className="h-[22px] w-auto object-contain" />
+                </span>
               </span>
             </LocalizedClientLink>
 
@@ -203,17 +410,19 @@ export const MyHybreedClient = () => {
       </div>
 
       {/* ===== 2) FEATURE TILES ===== */}
-      <div className="grid grid-cols-[0.82fr_1fr] md:grid-cols-2 gap-1.5 md:gap-2.5 px-2.5 md:px-0 mt-2 md:mt-0">
+      <div className="grid grid-cols-[0.82fr_1fr] md:flex md:flex-col gap-1.5 md:gap-2.5 px-2.5 md:px-0 mt-2 md:mt-0">
         {/* Hybreed Wow */}
-        <button className={`${tile} h-[67px] px-3.5 py-2.5 flex flex-col justify-between text-left`}>
+        <button className={`${tile} h-[67px] md:h-auto md:flex-1 px-3.5 py-2.5 md:px-5 md:py-4 flex flex-col justify-between text-left`}>
           <div className="flex items-center gap-1.5">
             <span className="h-[22px] md:h-[26px] px-2 md:px-2.5 rounded-full bg-[#2563EB] text-white text-[13px] md:text-base font-semibold flex items-center">Wow</span>
             <span className="text-[14px] md:text-lg font-medium truncate" style={{ color: "var(--text)" }}>Hybreed Wow</span>
           </div>
-          <div className="flex items-center -space-x-1.5">
-            {["#2563EB", "#3B82F6", "#93C5FD"].map((c, i) => (
-              <span key={i} className="w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-white" style={{ background: c }} />
-            ))}
+          <div className="flex items-center">
+            <span className="flex -space-x-1.5">
+              {["#2563EB", "#3B82F6", "#93C5FD"].map((c, i) => (
+                <span key={i} className="w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-white" style={{ background: c }} />
+              ))}
+            </span>
             <span className="ml-auto flex items-center gap-0.5 text-[14px] md:text-lg shrink-0" style={{ color: "var(--muted)" }}>
               3 <Chevron />
             </span>
@@ -221,7 +430,7 @@ export const MyHybreedClient = () => {
         </button>
 
         {/* Daily XP */}
-        <button className={`${tile} h-[67px] px-3.5 py-2.5 flex flex-col justify-between text-left`}>
+        <button onClick={() => setDailyOpen(true)} className={`${tile} h-[67px] md:h-auto md:flex-1 px-3.5 py-2.5 md:px-5 md:py-4 flex flex-col justify-between text-left`}>
           <div className="flex items-center gap-2">
             <span className="h-[22px] md:h-[26px] px-2 md:px-2.5 rounded-full bg-[#F97316] text-white text-[13px] md:text-base font-semibold flex items-center">XP</span>
             <span className="text-[15px] md:text-lg font-medium" style={{ color: "var(--text)" }}>Daily XP!</span>
@@ -233,9 +442,9 @@ export const MyHybreedClient = () => {
                 key={d}
                 className="w-[20px] h-[20px] md:w-7 md:h-7 rounded-full flex items-center justify-center text-[9px] md:text-[13px] font-semibold"
                 style={{
-                  background: i < STREAK_DONE ? "var(--xp)" : "var(--chip)",
-                  color: i < STREAK_DONE ? "#fff" : "var(--muted)",
-                  outline: i === STREAK_DONE ? "2px solid var(--xp)" : "none",
+                  background: i < streakDone ? "var(--xp)" : "var(--chip)",
+                  color: i < streakDone ? "#fff" : "var(--muted)",
+                  outline: i === todayIdx ? "2px solid var(--xp)" : "none",
                   outlineOffset: -2,
                 }}
               >
@@ -246,15 +455,16 @@ export const MyHybreedClient = () => {
         </button>
       </div>
 
+      </div>
       {/* ===== 3) TASKS ===== */}
-      <div className="bg-white rounded-t-[36px] md:rounded-[28px] mt-2 md:mt-0 pt-5 pb-[calc(72px+env(safe-area-inset-bottom,0px))] md:pb-6">
-        <LocalizedClientLink href="/user" className="px-4 flex items-center gap-1.5">
+      <div className="bg-white rounded-t-[36px] md:rounded-[28px] mt-2 md:mt-0 pt-5 pb-[calc(72px+env(safe-area-inset-bottom,0px))] md:pb-6 px-2.5 md:px-6">
+        <LocalizedClientLink href="/user" className="pl-1.5 md:pl-0 flex items-center gap-1.5">
           <span className="text-[26px] font-semibold" style={{ color: "var(--text)" }}>Tasks</span>
           <Chevron s={22} />
         </LocalizedClientLink>
 
         {/* filter chips */}
-        <div className="mt-4 flex gap-[5px] overflow-x-auto px-2.5 scrollbar-hide" style={{ scrollSnapType: "x proximity" }}>
+        <div className="mt-4 -mx-2.5 pl-5 pr-2.5 md:mx-0 md:px-0 flex gap-[5px] overflow-x-auto scrollbar-hide" style={{ scrollSnapType: "x proximity" }}>
           {TASK_CATS.map((c) => (
             <button
               key={c}
@@ -273,15 +483,16 @@ export const MyHybreedClient = () => {
         </div>
 
         {/* task cards */}
-        <div className="mt-3 px-2.5 flex flex-col gap-[5px]">
+        <div className="mt-3 flex flex-col gap-[5px] md:grid md:grid-cols-2 md:gap-2.5">
           {tasks.map((t) => {
             const left = t.ends - nowMs
-            const expired = !t.done && left <= 0
+            const done = taskDone(t)
+            const expired = !done && left <= 0
             return (
               <button
                 key={t.id}
                 className="min-h-[105px] rounded-[28px] px-3.5 py-3 flex gap-3 text-left transition-all duration-100 active:scale-[0.98]"
-                style={{ background: "#F7F7FA", opacity: t.done ? 0.6 : 1 }}
+                style={{ background: "#F7F7FA", opacity: done ? 0.6 : 1 }}
               >
                 <span className="w-11 h-11 rounded-[14px] bg-white flex items-center justify-center shrink-0">
                   <MonitorIcon />
@@ -295,10 +506,10 @@ export const MyHybreedClient = () => {
                   </span>
                   <span className="flex items-center gap-1.5 mt-1.5 text-[17px] font-medium" style={{ color: "var(--muted)" }}>
                     <ClockIcon />
-                    {t.done ? "Completed" : expired ? "Expired" : fmtLeft(left)}
+                    {done ? "Completed" : expired ? "Expired" : fmtLeft(left)}
                   </span>
                 </span>
-                {t.done ? (
+                {done ? (
                   <span className="h-[30px] w-[30px] rounded-full bg-[#16A34A] text-white flex items-center justify-center shrink-0 self-start">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                   </span>
@@ -312,6 +523,96 @@ export const MyHybreedClient = () => {
             )
           })}
         </div>
+      </div>
+
+      {/* ===== DAILY XP SHEET ===== */}
+      {dailyOpen && (
+        <>
+          <style>{`@keyframes xpUp{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes xpFade{from{opacity:0}to{opacity:1}}`}</style>
+          <div
+            className="fixed inset-0 z-[60] bg-black/45"
+            style={{ animation: "xpFade .2s ease" }}
+            onClick={() => setDailyOpen(false)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Daily XP"
+            className="fixed bottom-0 left-0 right-0 z-[61] md:w-[560px] md:mx-auto bg-[#F5F5F7] rounded-t-[28px] overflow-hidden"
+            style={{
+              animation: "xpUp .28s cubic-bezier(.2,.8,.3,1)",
+              paddingBottom: "calc(20px + env(safe-area-inset-bottom,0px))",
+            }}
+          >
+            {/* close */}
+            <button
+              aria-label="Close"
+              onClick={() => setDailyOpen(false)}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/[0.06] flex items-center justify-center text-[#8A8A96]"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
+            </button>
+
+            {/* day tiles */}
+            <div className="px-4 pt-12 flex flex-col gap-2.5">
+              <div className="flex gap-2.5 justify-center">
+                {STREAK_DAYS.slice(0, 3).map((d, i) => (
+                  <DayTile key={d} day={i + 1} xp={d} claimed={i < streakDone} today={i === todayIdx} quarter />
+                ))}
+              </div>
+              <div className="flex gap-2.5">
+                {STREAK_DAYS.slice(3).map((d, i) => (
+                  <DayTile key={d} day={i + 4} xp={d} claimed={i + 3 < streakDone} today={i + 3 === todayIdx} />
+                ))}
+              </div>
+            </div>
+
+            {/* copy */}
+            <div className="px-5 mt-6">
+              <h2 className="text-[26px] leading-[30px] font-bold" style={{ color: "var(--text)" }}>
+                Free XP every day
+              </h2>
+              <p className="mt-2 text-[16px] leading-[21px]" style={{ color: "var(--muted)" }}>
+                Just open My Hybreed each day — we add more XP every day. After 7 days the streak starts over.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setDailyOpen(false)}
+              className="mx-5 mt-6 w-[calc(100%-40px)] h-[54px] rounded-[18px] bg-[#2563EB] text-white text-[17px] font-semibold active:scale-[0.98] transition-transform"
+            >
+              Sounds great
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* bottom pull loader — stretches in-flow at the end of the page */}
+      <div
+        className="flex items-center justify-center overflow-hidden"
+        style={{
+          background: "var(--page-bg)",
+          height:
+            pullEdge === "bottom" ? (refreshing ? 44 : pullY) : 0,
+          transition:
+            pullY === 0 || refreshing ? "height .3s cubic-bezier(.2,.8,.3,1)" : "none",
+        }}
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden
+          className={refreshing ? "animate-spin" : ""}
+          style={{
+            opacity: refreshing ? 1 : Math.min(pullY / 56, 1),
+            transform: refreshing ? undefined : `rotate(${pullY * 4}deg)`,
+          }}
+        >
+          <circle cx="12" cy="12" r="9" stroke="#2563EB" strokeOpacity="0.25" strokeWidth="3" />
+          <path d="M21 12a9 9 0 0 0-9-9" stroke="#2563EB" strokeWidth="3" strokeLinecap="round" />
+        </svg>
       </div>
     </div>
   )

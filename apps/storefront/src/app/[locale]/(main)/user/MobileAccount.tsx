@@ -1,7 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { useTopUpSheet } from "@/components/cells/TopUpSheet/TopUpSheet"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
+import { HbMark } from "@/components/atoms"
 
 /* ---------- icons ---------- */
 const Chevron = ({ size = 16, cls = "text-[#8A8A96]" }) => (
@@ -28,6 +30,7 @@ const paths = {
   back: "M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3",
   card: "M2 8.5A2.5 2.5 0 0 1 4.5 6h15A2.5 2.5 0 0 1 22 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 17.5zM2 10h20M6 15h4",
   user: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z",
+  shop: "M4.5 9.5a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0M4 8.5L6 3.5h12l2 5M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5M9.5 21v-5.5h5V21",
 }
 
 const drawerGroups = [
@@ -44,9 +47,10 @@ const drawerGroups = [
     { label: "Returns", href: "/user/returns", icon: paths.back },
     { label: "Chats", href: "/user/messages", icon: paths.card },
     { label: "About Hybreed Market", href: "/about", icon: paths.user },
+    { label: "Push test", href: "/user/push-test", icon: paths.star },
   ],
   [
-    { label: "Shop as a business", href: "/categories", icon: paths.cart },
+    { label: "Shop as a business", href: "/business", icon: paths.cart },
     { label: "Open a pickup point", href: "/categories", icon: paths.home },
     { label: "Open fulfillment center", href: "/categories", icon: paths.orders },
     { label: "Jobs at Hybreed", href: "/categories", icon: paths.user },
@@ -54,11 +58,11 @@ const drawerGroups = [
 ]
 
 const services = [
+  { label: "Sell on Hybreed", href: "/partners", bg: "#1D4ED8", icon: paths.shop },
   { label: "Secondhand", href: "/categories", bg: "#14B8A6", icon: paths.back },
   { label: "Auctions", href: "/categories", bg: "#F59E0B", icon: paths.orders },
   { label: "Wanted", href: "/categories", bg: "#2563EB", icon: paths.star },
   { label: "Deals", href: "/categories", bg: "#EF4444", icon: paths.cart },
-  { label: "Sell on Hybreed", href: "http://localhost:9000/seller/register", bg: "#1D4ED8", icon: paths.user },
   { label: "Track order", href: "/user/orders", bg: "#0EA5E9", icon: paths.home },
 ]
 
@@ -66,7 +70,42 @@ const card =
   "bg-white rounded-[24px] transition-transform duration-100 active:scale-[0.98]"
 
 export const MobileAccount = ({ name }: { name: string }) => {
+  const topUp = useTopUpSheet()
   const [open, setOpen] = useState(false)
+  const [closing, setClosing] = useState(false)
+  const [dragY, setDragY] = useState(0)
+  const dragStart = useRef<number | null>(null)
+
+  const close = () => {
+    if (closing) return
+    setDragY(0)
+    setClosing(true)
+    setTimeout(() => {
+      setOpen(false)
+      setClosing(false)
+    }, 260)
+  }
+
+  useEffect(() => {
+    if (!open) return
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [open])
+
+  const onDragStart = (e: React.TouchEvent) => {
+    dragStart.current = e.touches[0].clientY
+  }
+  const onDragMove = (e: React.TouchEvent) => {
+    if (dragStart.current == null) return
+    setDragY(Math.max(0, e.touches[0].clientY - dragStart.current))
+  }
+  const onDragEnd = () => {
+    if (dragY > 80) close()
+    else setDragY(0)
+    dragStart.current = null
+  }
 
   return (
     <div
@@ -84,7 +123,7 @@ export const MobileAccount = ({ name }: { name: string }) => {
       {/* 1) TOP BAR */}
       <div className="bg-white rounded-b-[24px] h-16 flex items-center gap-3 px-3 -mx-2">
         <LocalizedClientLink
-          href="/user/settings"
+          href="/user/account"
           className="flex items-center gap-1 min-w-0 shrink"
         >
           <span
@@ -122,24 +161,54 @@ export const MobileAccount = ({ name }: { name: string }) => {
       {/* bottom-sheet menu */}
       {open && (
         <>
+          <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes fadeOut{from{opacity:1}to{opacity:0}}`}</style>
           <div
             className="fixed inset-0 bg-black/40 z-40"
-            onClick={() => setOpen(false)}
+            style={{
+              touchAction: "none",
+              animation: closing
+                ? "fadeOut .26s ease forwards"
+                : "fadeIn .26s ease",
+            }}
+            onClick={close}
           />
           <aside
-            className="fixed bottom-0 left-0 right-0 bg-[#F5F5F7] z-50 rounded-t-[24px] pt-4 px-2 pb-8 max-h-[85vh] overflow-y-auto"
-            style={{ animation: "sheetUp .28s ease-out" }}
+            className="fixed bottom-0 left-0 right-0 bg-[#F5F5F7] z-50 rounded-t-[24px] pt-1 px-2 pb-8 max-h-[85vh] overflow-y-auto overscroll-contain"
+            style={{
+              animation: closing ? undefined : "sheetUp .28s ease-out",
+              transform: closing
+                ? "translateY(100%)"
+                : dragY
+                  ? `translateY(${dragY}px)`
+                  : undefined,
+              transition: closing
+                ? "transform .26s ease-in"
+                : dragStart.current == null
+                  ? "transform .2s ease-out"
+                  : undefined,
+            }}
           >
-            <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="text-xl font-extrabold text-[#1F1F23] pl-[18px]">Menu</h2>
-              <button
-                aria-label="Close menu"
-                onClick={() => setOpen(false)}
-                className="w-10 h-10 flex items-center justify-center text-[#6B6B76]"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
-              </button>
+            <div
+              className="pt-2"
+              style={{ touchAction: "none" }}
+              onTouchStart={onDragStart}
+              onTouchMove={onDragMove}
+              onTouchEnd={onDragEnd}
+              onTouchCancel={onDragEnd}
+            >
+              <div className="flex justify-center pb-2">
+                <span className="w-10 h-1.5 rounded-full bg-[#D4D4DC]" />
+              </div>
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-xl font-extrabold text-[#1F1F23] pl-[18px]">Menu</h2>
+                <button
+                  aria-label="Close menu"
+                  onClick={close}
+                  className="w-10 h-10 flex items-center justify-center text-[#6B6B76]"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+                </button>
+              </div>
             </div>
             <div className="space-y-2">
               {drawerGroups.map((group, gi) => (
@@ -149,7 +218,7 @@ export const MobileAccount = ({ name }: { name: string }) => {
                       <LocalizedClientLink
                         href={i.href}
                         className="flex items-center gap-3.5 h-12 px-3.5 text-[15px] font-semibold text-[#1F1F23]"
-                        onClick={() => setOpen(false)}
+                        onClick={close}
                       >
                         <span className="text-[#6B6B76]">
                           <OutlineIcon path={i.icon} />
@@ -170,22 +239,22 @@ export const MobileAccount = ({ name }: { name: string }) => {
         <div className="grid grid-cols-2 gap-2">
           <div className={`${card} h-[130px] p-4 flex flex-col`}>
             <LocalizedClientLink href="/user/wallet" className="flex items-start justify-between">
-              <p className="text-xl font-extrabold text-[#1F1F23] leading-none">0 XAF</p>
+              <p className="text-[18px] font-medium text-[#1F1F23] leading-none">0 XAF</p>
               <Chevron />
             </LocalizedClientLink>
             <p className="text-[15px] -mt-0.5" style={{ color: "var(--muted)" }}>
               Hybreed Wallet
             </p>
-            <button className="mt-auto h-12 w-full rounded-2xl bg-[#2563EB] text-white text-lg font-semibold">
+            <button onClick={() => topUp.open()} className="mt-auto h-12 w-full rounded-2xl bg-[#2563EB] text-white text-[20px] font-normal">
               Top up
             </button>
           </div>
           <LocalizedClientLink
-            href="/user/my-hybreed"
+            href="/user/wallet"
             className={`${card} h-[130px] p-4 flex flex-col`}
           >
             <div className="flex items-start justify-between">
-              <p className="text-xl font-extrabold text-[#1F1F23] leading-none">
+              <p className="text-[18px] font-medium text-[#1F1F23] leading-none">
                 100 000
               </p>
               <Chevron />
@@ -198,29 +267,38 @@ export const MobileAccount = ({ name }: { name: string }) => {
         </div>
 
         {/* 3) CASHBACK BANNER */}
-        <div
-          className={`${card} relative overflow-hidden h-[140px] p-4`}
+        <LocalizedClientLink
+          href="/user/my-hybreed"
+          className={`${card} relative overflow-hidden h-[140px] p-4 block`}
           style={{ background: "linear-gradient(135deg,#DBEAFE,#BFDBFE)" }}
         >
-          <div className="absolute top-3 right-3 flex items-center gap-1.5">
-            <span className="font-bold text-[#1F1F23]">my</span>
-            <span className="bg-[#2563EB] text-white text-[13px] font-bold px-2 py-0.5 rounded-full">HB</span>
+          <div className="absolute top-3 right-3 flex items-center gap-1">
+            <span
+              className="text-[#1F1F23] leading-none"
+              style={{ fontFamily: '"Funnel Display", sans-serif', fontSize: "20px", fontWeight: 700 }}
+            >
+              my
+            </span>
+            <HbMark h={20} />
           </div>
-          <div className="flex flex-col justify-center h-full w-[55%]">
-            <span className="bg-white rounded-full px-3 py-1 self-start flex items-center gap-1.5">
-              <span className="text-xl leading-none font-semibold text-[#1F1F23]">1 600</span>
-              <span className="text-[10px] font-semibold text-[#2563EB] bg-[#DBEAFE] px-1.5 py-0.5 rounded-md leading-none">
-                HB points
+          <div className="flex flex-col justify-center h-full w-[62%]">
+            <span className="bg-white rounded-full px-3 py-1 self-start inline-flex items-center gap-1.5 whitespace-nowrap">
+              <span className="text-[18px] leading-none font-medium text-[#1F1F23]">1 600</span>
+              <span className="flex -space-x-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/pill-1.png" alt="" className="h-[22px] w-auto object-contain" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/pill-2.png" alt="" className="h-[22px] w-auto object-contain" />
               </span>
             </span>
-            <p className="text-sm text-[#1F1F23]/80 mt-2 leading-snug">
+            <p className="text-[14px] text-[#1F1F23]/80 mt-2 leading-snug font-[350]">
               Cashback points and
               <br />
               other perks
             </p>
-            <button className="mt-2 h-9 w-fit px-4 rounded-[14px] bg-white text-[#2563EB] text-sm font-semibold">
+            <span className="mt-2 h-9 w-24 rounded-[14px] bg-white text-[#2563EB] text-[14px] font-semibold inline-flex items-center justify-center">
               View
-            </button>
+            </span>
           </div>
           {/* cashback mascot image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -230,33 +308,38 @@ export const MobileAccount = ({ name }: { name: string }) => {
             aria-hidden
             className="absolute bottom-0 right-3 h-[120px] object-contain" style={{transform:"scaleX(-1)"}}
           />
-        </div>
+        </LocalizedClientLink>
 
         {/* 4) GIVEAWAY */}
-        <div className={`${card} p-4`}>
-          <LocalizedClientLink href="/categories" className="flex items-center gap-1 text-[22px] font-bold text-[#1F1F23]">
-            Big giveaway <Chevron size={18} />
+        <div className={`${card} px-4 py-3`}>
+          <LocalizedClientLink href="/categories" className="flex items-center gap-1 text-[18px] font-bold text-[#1F1F23]">
+            Big giveaway <Chevron size={16} />
           </LocalizedClientLink>
-          <div className="flex items-center gap-3 mt-3">
-            <span className="bg-[#F0F0F3] rounded-[14px] px-3.5 py-2.5 flex items-center gap-2 shrink-0">
-              <span className="text-[22px] font-semibold text-[#1F1F23]">0</span>
+          <div className="flex items-center gap-3 mt-2">
+            <span className="bg-[#F0F0F3] rounded-[14px] px-3 py-1.5 flex items-center gap-1.5 shrink-0">
+              <span className="text-[18px] font-semibold text-[#1F1F23]">0</span>
               <span className="text-[#2563EB]"><TicketIcon /></span>
             </span>
-            <p className="text-[15px] text-[#1F1F23] leading-snug flex-1">
+            <p className="text-[14px] text-[#1F1F23] leading-tight flex-1">
               Draw ended, results coming soon
             </p>
-            <button className="h-[52px] px-5 rounded-2xl font-semibold text-[#2563EB] shrink-0" style={{ background: "var(--brand-tint)" }}>
+            <button className="h-9 px-5 rounded-2xl font-semibold text-[#2563EB] shrink-0" style={{ background: "var(--brand-tint)" }}>
               View
             </button>
           </div>
         </div>
 
         {/* 5) SERVICES */}
-        <div className={`${card} p-4 pr-0`}>
+        <div className="bg-white rounded-[24px] p-4 pr-0">
           <h3 className="text-[22px] font-bold text-[#1F1F23]">Services</h3>
           <div
-            className="flex gap-3 overflow-x-auto mt-3 pb-1 scrollbar-hide pr-4"
-            style={{ scrollSnapType: "x proximity" }}
+            className="flex gap-3 overflow-x-auto overscroll-x-contain mt-3 pb-1 pr-4"
+            style={{
+              scrollSnapType: "x proximity",
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+              touchAction: "pan-x pan-y",
+            }}
           >
             {services.map((s) => (
               <LocalizedClientLink

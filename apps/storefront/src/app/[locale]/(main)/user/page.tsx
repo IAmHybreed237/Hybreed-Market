@@ -1,5 +1,7 @@
 import { retrieveCustomer } from "@/lib/data/customer"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
+import { TopUpButton } from "@/components/cells/TopUpSheet/TopUpSheet"
+import { HbMark } from "@/components/atoms"
 import { redirect } from "next/navigation"
 import {
   OrderIcon,
@@ -65,8 +67,17 @@ const navExtras: { label: string; href: string; Icon: any }[] = [
   { label: "Addresses", href: "/user/addresses", Icon: LocationIcon },
   { label: "Support", href: "/user", Icon: InfoIcon },
   { label: "Settings", href: "/user/settings", Icon: SettingsIcon },
-  { label: "Sell on Hybreed", href: "http://localhost:9000/seller/register", Icon: DashboardIcon },
+  { label: "Sell on Hybreed", href: "/partners", Icon: DashboardIcon },
 ]
+
+const cardTitleStyle: React.CSSProperties = {
+  fontFamily:
+    '"Google Sans", "WB Currency", "Segoe UI", -apple-system, Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+  fontSize: "19px",
+  fontWeight: 600,
+  lineHeight: "26px",
+  color: "#1F1F23",
+}
 
 const cardCls =
   "rounded-[20px] bg-white transition-all duration-150 hover:bg-[#FAFAFB] active:scale-[0.99] cursor-pointer"
@@ -214,13 +225,11 @@ export default async function UserPage({
                 <WalletIcon />
                 <p className="text-[22px] font-semibold text-[#1F1F23]">0 XAF</p>
               </div>
-              <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
+              <p className="text-[17px] font-[350] mt-1" style={{ color: "var(--muted)" }}>
                 Hybreed Wallet
               </p>
             </div>
-            <button className="h-11 px-7 rounded-[14px] bg-[#2563EB] text-white text-base font-semibold hover:bg-[#1D4ED8] transition-colors">
-              Top up
-            </button>
+            <TopUpButton className="h-11 px-7 rounded-[14px] bg-[#2563EB] text-white text-base font-semibold hover:bg-[#1D4ED8] transition-colors" />
           </div>
 
           {/* installments card */}
@@ -229,12 +238,11 @@ export default async function UserPage({
             className={`${cardCls} p-5 h-[96px] flex items-center justify-between`}
           >
             <div className="flex items-center gap-3">
-              <span className="text-[#2563EB]"><CloverIcon /></span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/installments.png" alt="" className="w-8 h-8 object-contain" />
               <div>
-                <p className="text-lg font-semibold text-[#1F1F23]">
-                  Installments
-                </p>
-                <p className="text-sm" style={{ color: "var(--muted)" }}>
+                <p style={cardTitleStyle}>Installments</p>
+                <p className="text-[17px] font-[350]" style={{ color: "var(--muted)" }}>
                   Nothing here yet
                 </p>
               </div>
@@ -252,17 +260,18 @@ export default async function UserPage({
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-[22px] font-bold text-[#1F1F23]">my</span>
-                <span className="bg-[#2563EB] text-white text-[15px] font-bold px-2.5 py-0.5 rounded-full">
-                  HB
-                </span>
-                <span className="bg-white text-[#1F1F23] font-bold px-3 py-1 rounded-full text-[15px]">
+                <HbMark h={22} />
+                <span className="bg-white text-[#1F1F23] font-bold px-3 py-1 rounded-full text-[15px] inline-flex items-center whitespace-nowrap">
                   1 600
-                  <span className="text-[11px] font-semibold text-[#8A8A96] ml-1">
-                    HB points
+                  <span className="flex -space-x-2 ml-1">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/images/pill-1.png" alt="" className="h-[20px] w-auto object-contain" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/images/pill-2.png" alt="" className="h-[20px] w-auto object-contain" />
                   </span>
                 </span>
               </div>
-              <p className="text-sm text-[#1F1F23]/70 mt-1.5">
+              <p className="text-[17px] text-[#1F1F23]/70 mt-1.5 font-[350]">
                 Cashback points and other perks
               </p>
             </div>
@@ -296,8 +305,8 @@ export default async function UserPage({
                 <div className="flex items-center gap-3">
                   <span className="text-[#2563EB]"><Icon size={24} /></span>
                   <div>
-                    <p className="text-base font-semibold text-[#1F1F23]">{label}</p>
-                    <p className="text-sm" style={{ color: "var(--muted)" }}>{count}</p>
+                    <p style={cardTitleStyle}>{label}</p>
+                    <p className="text-[17px] font-[350]" style={{ color: "var(--muted)" }}>{count}</p>
                   </div>
                 </div>
                 <Chevron size={20} />
@@ -313,8 +322,8 @@ export default async function UserPage({
             <div className="flex items-center gap-3">
               <span className="text-[#2563EB]"><ReviewIcon size={24} /></span>
               <div>
-                <p className="text-base font-semibold text-[#1F1F23]">Awaiting review</p>
-                <p className="text-sm" style={{ color: "var(--muted)" }}>3 items</p>
+                <p style={cardTitleStyle}>Awaiting review</p>
+                <p className="text-[17px] font-[350]" style={{ color: "var(--muted)" }}>3 items</p>
               </div>
             </div>
             <Chevron size={20} />

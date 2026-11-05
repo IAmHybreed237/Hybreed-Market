@@ -19,8 +19,43 @@ export default async function MyHybreedPage() {
   const user = await retrieveCustomer().catch(() => null)
   if (!user) redirect("/login")
 
+  // loyalty state stored in customer metadata
+  const loyalty = {
+    xp: 0,
+    points: 0,
+    streakDay: 0,
+    lastClaim: "",
+    ...(((user.metadata as any)?.loyalty as any) || {}),
+  }
+  const today = new Date().toISOString().slice(0, 10)
+  const yest = new Date(Date.now() - 86400e3).toISOString().slice(0, 10)
+  const claimedToday = loyalty.lastClaim === today
+  const streakDone = claimedToday
+    ? loyalty.streakDay
+    : loyalty.lastClaim === yest
+      ? loyalty.streakDay
+      : 0
+
+  // real spend total from orders
+  const orders = (user.orders as any[]) || []
+  const spend = orders
+    .filter((o) => o.status !== "canceled" && !o.canceled_at)
+    .reduce((s, o) => s + (Number(o.total) || 0), 0)
+
+  const data = {
+    xpTotal: loyalty.xp,
+    spendCur: spend,
+    spendMax: 5000,
+    points: loyalty.points || loyalty.xp,
+    streakDone,
+    claimedToday,
+    hasAddress: !!(user.addresses as any)?.length,
+    hasPhone: !!user.phone,
+    hasOrders: orders.length > 0,
+  }
+
   return (
-    <main className="w-full max-w-[1400px] mx-auto px-[5px]">
+    <main className="w-full max-w-[1400px] mx-auto px-0 md:px-[5px]">
       {/* desktop tab nav — My Hybreed active */}
       <nav className="hidden md:flex items-center justify-between h-16 mb-1" aria-label="Account sections">
         {tabs.map((t) => (
@@ -37,7 +72,7 @@ export default async function MyHybreedPage() {
         ))}
       </nav>
 
-      <MyHybreedClient />
+      <MyHybreedClient data={data} />
     </main>
   )
 }

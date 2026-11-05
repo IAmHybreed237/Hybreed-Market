@@ -17,22 +17,22 @@ export function CategoryCard({
   return (
     <LocalizedClientLink
       href={`/categories/${category.handle}`}
-      className="relative flex flex-col items-center border rounded-sm bg-component transition-all hover:rounded-full w-[233px] aspect-square shrink-0"
+      className="relative flex flex-col items-center border rounded-sm bg-component transition-all hover:rounded-full w-full aspect-square shrink-0 lg:border-0 lg:bg-transparent lg:rounded-none lg:hover:rounded-none"
     >
-      <div className="flex relative aspect-square overflow-hidden w-[200px]">
+      <div className="flex relative aspect-square overflow-hidden w-[85%]">
         {category.image ? (
           <Image
             loading="lazy"
-            src={`/images/categories/${category.image}.png`}
+            src={category.image.startsWith("/") ? category.image : `/images/categories/${category.image}.png`}
             alt={`category - ${category.name}`}
             width={200}
             height={200}
             sizes="(min-width: 1024px) 200px, 40vw"
-            className="object-contain scale-90 rounded-full"
+            className="object-contain scale-90 rounded-full lg:rounded-xl"
           />
         ) : (
           <div
-            className="w-full h-full rounded-full flex items-center justify-center scale-90"
+            className="w-full h-full rounded-full flex items-center justify-center scale-90 lg:rounded-xl"
             style={{ backgroundColor: tileColor }}
           >
             <span className="text-white text-5xl font-bold">

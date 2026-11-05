@@ -33,7 +33,8 @@ export const blogPosts: BlogPost[] = [
 
 export function BlogSection() {
   return (
-    <section className='bg-tertiary container'>
+    <section className='bg-tertiary'>
+      <div className='container max-w-[1400px] mx-auto'>
       <div className='flex items-center justify-between mb-12'>
         <h2 className='heading-lg text-tertiary'>
           STAY UP TO DATE
@@ -47,6 +48,7 @@ export function BlogSection() {
             post={post}
           />
         ))}
+      </div>
       </div>
     </section>
   );

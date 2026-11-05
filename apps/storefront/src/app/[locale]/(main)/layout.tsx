@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation';
 
 import { Footer, Header } from '@/components/organisms';
+import { ConditionalFooter } from '@/components/cells/ConditionalFooter/ConditionalFooter';
 import { MobileBottomNav } from '@/components/organisms/MobileBottomNav/MobileBottomNav';
+import { TopUpSheetProvider } from '@/components/cells/TopUpSheet/TopUpSheet';
 import { TalkJsProvider } from '@/components/providers';
 import { retrieveCustomer } from '@/lib/data/customer';
 import { checkRegion } from '@/lib/helpers/check-region';
@@ -27,8 +29,8 @@ export default async function RootLayout({
     return (
       <>
         <Header locale={locale} />
-        {children}
-        <Footer />
+        <TopUpSheetProvider>{children}</TopUpSheetProvider>
+        <ConditionalFooter><Footer /></ConditionalFooter>
         <a
           href="https://wa.me/"
           aria-label="Chat with us"
@@ -53,8 +55,8 @@ export default async function RootLayout({
       userEmail={user.email}
     >
       <Header locale={locale} />
-      {children}
-      <Footer />
+      <TopUpSheetProvider>{children}</TopUpSheetProvider>
+      <ConditionalFooter><Footer /></ConditionalFooter>
       <a
         href="https://wa.me/"
         aria-label="Chat with us"

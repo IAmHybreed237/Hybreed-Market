@@ -24,7 +24,7 @@ export const MobileCategories = () => {
               {c.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={`/images/categories/${c.image}.png`}
+                  src={c.image.startsWith("/") ? c.image : `/images/categories/${c.image}.png`}
                   alt={c.name}
                   className="w-full h-full object-cover"
                   loading="lazy"

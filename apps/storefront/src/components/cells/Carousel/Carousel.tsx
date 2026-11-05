@@ -12,10 +12,12 @@ export const CustomCarousel = ({
   variant = "light",
   items,
   align = "start",
+  arrowsOnDesktop = false,
 }: {
   variant?: "light" | "dark"
   items: React.ReactNode[]
   align?: "center" | "start" | "end"
+  arrowsOnDesktop?: boolean
 }) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -63,8 +65,8 @@ export const CustomCarousel = ({
           {items.map((slide) => slide)}
         </div>
 
-        <div className="flex justify-between items-center mt-4 sm:hidden">
-          <div className="w-1/2">
+        <div className={`flex justify-between items-center mt-4 ${arrowsOnDesktop ? "" : "sm:hidden"}`}>
+          <div className={`w-1/2 ${arrowsOnDesktop ? "lg:hidden" : ""}`}>
             <Indicator
               variant={variant}
               maxStep={maxStep}

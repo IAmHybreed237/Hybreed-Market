@@ -1,5 +1,6 @@
 import { retrieveCustomer } from "@/lib/data/customer"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
+import { TopUpButton } from "@/components/cells/TopUpSheet/TopUpSheet"
 import { redirect } from "next/navigation"
 import { WalletBalance } from "./WalletBalance"
 import { WalletMobile } from "./WalletMobile"
@@ -175,10 +176,10 @@ export default async function WalletPage() {
                 </span>
               </div>
               {/* top up button */}
-              <button className="mt-auto w-full h-[75px] bg-white rounded-2xl flex flex-col items-center justify-center gap-1 text-[#2563EB] hover:bg-[#F8FAFF] transition-all active:scale-[0.99]">
+              <TopUpButton className="mt-auto w-full h-[75px] bg-white rounded-2xl flex flex-col items-center justify-center gap-1 text-[#2563EB] hover:bg-[#F8FAFF] transition-all active:scale-[0.99]">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                 <span className="text-base font-semibold">Top up</span>
-              </button>
+              </TopUpButton>
             </div>
 
             {/* 4b. upgrade card */}

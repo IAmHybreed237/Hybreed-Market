@@ -33,7 +33,8 @@ export const styles: Style[] = [
 
 export function ShopByStyleSection() {
   return (
-    <section className="bg-primary container">
+    <section className="bg-primary">
+      <div className="container max-w-[1400px] mx-auto">
       <h2 className="heading-lg text-primary mb-12">SHOP BY STYLE</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
         <div className="py-[52px] px-[58px] h-full border rounded-sm">
@@ -59,6 +60,7 @@ export function ShopByStyleSection() {
             className="object-cover rounded-sm w-full h-auto"
           />
         </div>
+      </div>
       </div>
     </section>
   )

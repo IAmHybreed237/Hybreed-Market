@@ -39,7 +39,7 @@ const StarIcon = () => (
   </svg>
 )
 const VerifiedIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
+  <svg width="16" height="16" viewBox="0 0 24 24" className="shrink-0" aria-hidden>
     <circle cx="12" cy="12" r="10" fill="#2563EB" />
     <path d="M8 12.5l2.5 2.5L16.5 9" stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
   </svg>

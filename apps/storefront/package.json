@@ -39,6 +39,7 @@
     "tailwind-merge": "^2.6.0",
     "talkjs": "^0.37.0",
     "uuid": "^11.0.5",
+    "web-push": "^3.6.7",
     "zod": "4.6.5"
   },
   "devDependencies": {

@@ -1,4 +1,6 @@
-import { ProductDetails, ProductGallery } from "@/components/organisms"
+import { WbProductTop } from "./WbProductTop"
+import { WbProductReviews } from "./WbProductReviews"
+import { WbProductMobile } from "./WbProductMobile"
 import { listProducts } from "@/lib/data/products"
 import { listOffers } from "@/lib/data/offers"
 import { StoreOffer } from "@/lib/helpers/buybox"
@@ -35,19 +37,25 @@ export const ProductDetailsPage = async ({
         productId={prod.id}
         categoryIds={(prod as any).categories?.map((c: any) => c.id) || []}
       />
-      <div className="flex flex-col md:flex-row lg:gap-12" data-testid="product-details-page">
-        <div className="md:w-1/2 md:px-2" data-testid="product-gallery-container">
-          <ProductGallery images={prod?.images || []} />
-        </div>
-        <div className="md:w-1/2 md:px-2" data-testid="product-details-container">
-          <ProductDetails
-            product={prod}
-            locale={locale}
-            offers={offers as StoreOffer[]}
-          />
-        </div>
+      <div data-testid="product-details-page" className="hidden md:block">
+        <WbProductTop
+          product={prod}
+          offers={offers as StoreOffer[]}
+          locale={locale}
+        />
       </div>
-      <div className="my-8">
+      <WbProductMobile
+        product={prod}
+        offers={offers as StoreOffer[]}
+        similar={(prod as any).seller?.products || []}
+        locale={locale}
+      />
+      <div className="hidden md:block">
+        <WbProductReviews
+          images={(prod?.images || []).map((i: any) => i.url || i)}
+        />
+      </div>
+      <div className="my-8 hidden md:block">
         <HomeProductSection
           heading="Similar items"
           products={prod.seller?.products}

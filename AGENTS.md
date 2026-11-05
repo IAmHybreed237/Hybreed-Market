@@ -45,3 +45,13 @@ This starts:
 - Backend API at `http://localhost:9000`
 - Admin Panel at `http://localhost:9000/seller`
 - Vendor Panel at `http://localhost:9000/dashboard`
+
+## Local dev database (PostgreSQL on 5434)
+
+The app DB is a manual cluster at `../.devdata/pg` (workspace root, outside the repo). Its `postgresql.conf` says port 5433, but the ASCON KOMPAS-3D service already occupies 5433 — so it MUST be started with an explicit port override:
+
+```
+"C:/Program Files/PostgreSQL/17/bin/pg_ctl.exe" -D "C:/Users/CSA/Documents/HYBREED-Market/.devdata/pg" -l "C:/Users/CSA/Documents/HYBREED-Market/pg-startup.log" -o "-p 5434" start
+```
+
+`DATABASE_URL` points at `localhost:5434/hybreed`. Start this cluster BEFORE `medusa develop` or the API crashes on ECONNREFUSED. Other postgres instances on this machine (ASCON service on 5433, `postgresql-x64-17` on 5432) are unrelated — do not stop them.

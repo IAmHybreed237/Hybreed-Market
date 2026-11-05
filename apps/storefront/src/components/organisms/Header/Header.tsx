@@ -17,6 +17,24 @@ const CMFlag = () => (
   </svg>
 )
 
+const WalletIcon = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden
+  >
+    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+  </svg>
+)
+
 import { CartDropdown } from "@/components/cells"
 import { UserDropdown } from "@/components/cells/UserDropdown/UserDropdown"
 import { CatalogDropdown } from "@/components/molecules/CatalogDropdown/CatalogDropdown"
@@ -24,6 +42,7 @@ import { NavbarSearch } from "@/components/molecules/NavbarSearch/NavbarSearch"
 import { LocationSelector } from "@/components/molecules/LocationSelector/LocationSelector"
 import { MobileHeader } from "@/components/organisms/Header/MobileHeader"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
+import { HbMark } from "@/components/atoms"
 import {
   LocationIcon,
   OrderIcon,
@@ -86,8 +105,9 @@ export const Header = async ({ locale }: { locale: string }) => {
     <header
       className="header-gradient fixed lg:sticky top-0 left-0 right-0 z-40 rounded-b-[28px] lg:rounded-none"
       data-testid="header"
+      data-status-color="#2563EB"
     >
-      <div className="max-w-[1400px] mx-auto px-[5px] pt-3 pb-6">
+      <div className="max-w-[1400px] mx-auto px-[5px] lg:px-10 pt-3 pb-6">
         {/* Row 1 — utility strip (desktop only) */}
         <div className="hidden lg:flex items-center justify-between mb-5 relative">
           <LocationSelector
@@ -124,15 +144,21 @@ export const Header = async ({ locale }: { locale: string }) => {
               <ArrowDownIcon size={12} />
             </button>
           </nav>
-          <div className="flex items-center gap-3 ml-auto">
+          <div className="flex items-center gap-2 ml-auto">
             <LocalizedClientLink
               href="/user"
-              className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[13px] font-medium text-white hover:bg-white/30 transition-colors"
+              className="flex items-center gap-1 rounded-full bg-white/20 px-2.5 h-[24px] text-[12px] font-medium text-white hover:bg-white/30 transition-colors"
               data-testid="header-wallet"
             >
-              <span className="font-bold">HB</span> 0 XAF
+              <WalletIcon /> 0 XAF
             </LocalizedClientLink>
-            <span className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[13px] font-medium text-white">
+            <LocalizedClientLink
+              href="/user"
+              className="flex items-center gap-1 rounded-full bg-white/20 px-2.5 h-[24px] text-[12px] font-medium text-white hover:bg-white/30 transition-colors"
+            >
+              <HbMark h={13} /> 0 pts
+            </LocalizedClientLink>
+            <span className="flex items-center gap-1.5 rounded-full bg-white/20 px-2.5 h-[24px] text-[12px] font-medium text-white">
               <CMFlag />
               CM · XAF
             </span>
@@ -151,14 +177,20 @@ export const Header = async ({ locale }: { locale: string }) => {
             aria-label="Hybreed home"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo.png" alt="Hybreed" className="h-11 w-auto object-contain" />
+            <img
+              src="/images/logo.png"
+              alt="Hybreed"
+              width={523}
+              height={133}
+              className="w-[clamp(173px,calc(44vw-401px),213px)] h-auto max-w-none"
+            />
           </LocalizedClientLink>
           <div className="absolute left-[44%] -translate-x-1/2 flex items-center gap-2 w-full max-w-[700px]">
             <CatalogDropdown
               categories={categories}
               parentCategories={parentCategories}
             />
-            <NavbarSearch />
+            <NavbarSearch placeholder="Search Hybreed" />
           </div>
           <div
             className="absolute right-[calc((56%-350px)*0.04)] top-1/2 -translate-y-1/2 w-[calc((56%-350px)*0.92)] h-[65px] flex items-center justify-between"

@@ -5,7 +5,7 @@ import Image from "next/image"
 export const BannerSection = () => {
   return (
     <section className="container">
-      <div className="grid grid-cols-1 lg:grid-cols-2 items-center rounded-2xl overflow-hidden">
+      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 items-center rounded-2xl overflow-hidden">
         <div className="py-6 px-6 flex flex-col h-full justify-between bg-action-secondary">
           <div className="mb-8 lg:mb-48">
             <span className="text-sm inline-block px-4 py-1 border border-action/30 text-action rounded-full font-semibold">

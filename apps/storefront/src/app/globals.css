@@ -18,6 +18,28 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+@font-face {
+  font-family: "Onest";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("./fonts/onest-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Onest";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("./fonts/onest-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* WB-style brand display font — free alternative to WB_0.2 */
+.font-onest {
+  font-family: "Onest", "Google Sans", "Segoe UI", -apple-system, Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -202,6 +224,58 @@ button:disabled svg path {
   background-image:
     linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05)),
     linear-gradient(97.26deg, #2563eb 0%, #1d4ed8 35%, #6d28d9 75%, #8b33ef 100%);
+}
+
+/* Hybreed launch splash — only shown in standalone (home-screen) mode */
+.hybreed-splash {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+}
+.hybreed-splash-on {
+  display: flex !important;
+}
+.hybreed-splash-mark {
+  height: 96px;
+  width: auto;
+  animation: splashIn 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+.hybreed-splash-logo {
+  position: absolute;
+  bottom: max(40px, env(safe-area-inset-bottom, 0px) + 40px);
+  left: 50%;
+  transform: translateX(-50%);
+  height: 30px;
+  width: auto;
+  max-width: 60vw;
+  object-fit: contain;
+}
+@keyframes splashIn {
+  from {
+    transform: scale(0.82);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .hybreed-splash {
+    display: flex;
+  }
+}
+
+/* Phones: no pinch or double-tap zoom, so the page can't be dragged around like a web page */
+@media (max-width: 1023.98px) {
+  html,
+  body {
+    touch-action: pan-x pan-y;
+    overscroll-behavior-x: none;
+  }
 }
 
 /* Prevent horizontal wiggle on mobile — clamp any overshoot */

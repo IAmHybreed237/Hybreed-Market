@@ -3,35 +3,33 @@
 import { useSearchParams } from "next/navigation"
 import { trackSearch } from "@/lib/behavior"
 import { SearchIcon } from "@/icons"
+import { ImageSearchModal } from "./ImageSearchModal"
 import { useState } from "react"
 import { redirect } from "next/navigation"
 import clsx from "clsx"
 
+const imageSearchEnabled = process.env.NEXT_PUBLIC_IMAGE_SEARCH_ENABLED === "true"
+
 const CameraIcon = () => (
-  <svg
-    width="22"
-    height="22"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
+  // eslint-disable-next-line @next/next/no-img-element
+  <img
+    src="/images/icons/camera-search.png"
+    alt=""
     aria-hidden
-  >
-    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-    <circle cx="12" cy="13" r="4" />
-    <path d="M18.5 2l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1z" fill="currentColor" stroke="none" />
-  </svg>
+    draggable={false}
+    className="h-[24px] lg:h-[28px] w-auto object-contain select-none"
+  />
 )
 
 interface Props {
   className?: string
+  placeholder?: string
 }
 
-export const NavbarSearch = ({ className }: Props) => {
+export const NavbarSearch = ({ className, placeholder = "Search" }: Props) => {
   const searchParams = useSearchParams()
   const [search, setSearch] = useState(searchParams.get("query") || "")
+  const [showImageSearch, setShowImageSearch] = useState(false)
 
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -51,19 +49,23 @@ export const NavbarSearch = ({ className }: Props) => {
       />
       <input
         type="search"
-        placeholder="Search"
+        placeholder={placeholder}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full h-[48px] lg:h-[65px] rounded-[14px] bg-white pl-12 pr-12 text-base text-primary placeholder:font-bold placeholder:text-[#9ab8f2] outline-none"
+        className="w-full h-[48px] lg:h-[65px] rounded-[14px] bg-white pl-12 pr-14 lg:pr-[68px] text-base text-primary placeholder:font-bold placeholder:text-[#9ab8f2] outline-none"
       />
       <button
         type="button"
-        aria-label="Search by image"
-        className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-action-secondary text-action flex items-center justify-center"
+        disabled={!imageSearchEnabled}
+        onClick={() => setShowImageSearch(true)}
+        aria-label={imageSearchEnabled ? "Search by image" : "Image search coming soon"}
+        title={imageSearchEnabled ? "Search by image" : "Image search coming soon"}
+        className="absolute right-2 lg:right-3 top-1/2 -translate-y-1/2 h-9 lg:h-11 px-1.5 rounded-lg flex items-center justify-center transition-transform enabled:hover:scale-105 enabled:active:scale-95 disabled:cursor-default"
       >
         <CameraIcon />
       </button>
       <input type="submit" className="hidden" />
+      {imageSearchEnabled && showImageSearch && <ImageSearchModal onClose={() => setShowImageSearch(false)} />}
     </form>
   )
 }

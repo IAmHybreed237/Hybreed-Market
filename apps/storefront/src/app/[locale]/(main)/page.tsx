@@ -155,7 +155,7 @@ export default async function Home({
       <SlimBanner />
       <HeroCarousel />
       <MobileCategories />
-      <div className="px-[5px] w-full">
+      <div className="px-[5px] lg:px-10 w-full">
         <HomeCategories heading="Shop by category" />
       </div>
       <ProductShelf locale={locale} withLocation />
