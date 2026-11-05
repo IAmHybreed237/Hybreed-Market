@@ -47,6 +47,33 @@ module.exports = withMercur({
       }
     },
     {
+      resolve: '@medusajs/medusa/payment',
+      options: {
+        providers: [
+          // Only register when credentials exist — an empty key would fail
+          // provider validation and take down API startup.
+          ...(process.env.NOTCHPAY_PUBLIC_KEY
+            ? [
+                {
+                  resolve: './src/providers/notchpay',
+                  id: 'notchpay',
+                  options: {
+                    publicKey: process.env.NOTCHPAY_PUBLIC_KEY,
+                    privateKey: process.env.NOTCHPAY_PRIVATE_KEY,
+                    webhookHash: process.env.NOTCHPAY_WEBHOOK_HASH,
+                    apiUrl: process.env.NOTCHPAY_API_URL,
+                    callbackUrl: process.env.NOTCHPAY_CALLBACK_URL,
+                    lockedChannel: process.env.NOTCHPAY_LOCKED_CHANNEL,
+                    lockedCountry:
+                      process.env.NOTCHPAY_LOCKED_COUNTRY ?? 'CM',
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
+    },
+    {
       resolve: '@medusajs/medusa/file',
       options: {
         providers: [

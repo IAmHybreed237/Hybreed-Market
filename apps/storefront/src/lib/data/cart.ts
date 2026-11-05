@@ -247,6 +247,7 @@ export async function initiatePaymentSession(
   data: {
     provider_id: string;
     context?: Record<string, unknown>;
+    data?: Record<string, unknown>;
   }
 ) {
   const headers = {
@@ -268,6 +269,7 @@ export async function initiatePaymentSession(
       $id: paymentCollection.id,
       provider_id: data.provider_id,
       ...(data.context ? { context: data.context } : {}),
+      ...(data.data ? { data: data.data } : {}),
       fetchOptions: { headers }
     });
 
@@ -396,7 +398,10 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
   }
 }
 
-export async function placeOrder(cartId?: string) {
+export async function placeOrder(
+  cartId?: string,
+  opts?: { skipRedirect?: boolean }
+) {
   const id = cartId || (await getCartId());
 
   if (!id) {
@@ -423,7 +428,9 @@ export async function placeOrder(cartId?: string) {
     // Send the shopper to the order-group detail page, which renders every
     // child order + aggregated totals. `order_group.id` is always present;
     // `orders[0].id` is not (the complete route omits `orders` from its fields).
-    redirect(`/user/orders/${res.data.order_group.id}`);
+    if (!opts?.skipRedirect) {
+      redirect(`/user/orders/${res.data.order_group.id}`);
+    }
   }
 
   return res;

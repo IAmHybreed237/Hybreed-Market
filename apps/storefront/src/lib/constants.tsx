@@ -25,6 +25,10 @@ export const paymentInfoMap: Record<
     title: "Manual Payment",
     icon: <Cash />,
   },
+  pp_notchpay_notchpay: {
+    title: "Mobile Money",
+    icon: <Cash />,
+  },
 }
 
 // This only checks if it is native stripe for card payments, it ignores the other stripe-based providers
@@ -36,6 +40,9 @@ export const isPaypal = (providerId?: string) => {
 }
 export const isManual = (providerId?: string) => {
   return providerId?.startsWith("pp_system_default")
+}
+export const isNotchPay = (providerId?: string) => {
+  return providerId?.startsWith("pp_notchpay")
 }
 
 // Add currencies that don't need to be divided by 100

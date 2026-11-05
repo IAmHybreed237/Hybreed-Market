@@ -1,7 +1,7 @@
 "use client"
 
 import ErrorMessage from "@/components/molecules/ErrorMessage/ErrorMessage"
-import { isManual, isStripe } from "../../../lib/constants"
+import { isManual, isNotchPay, isStripe } from "../../../lib/constants"
 import { placeOrder } from "@/lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
@@ -40,6 +40,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     case isManual(paymentSession?.provider_id):
       return (
         <ManualTestPaymentButton notReady={notReady} data-testid={dataTestId} />
+      )
+    case isNotchPay(paymentSession?.provider_id):
+      return (
+        <NotchPayPaymentButton
+          cart={cart}
+          notReady={notReady}
+          data-testid={dataTestId}
+        />
       )
     default:
       return (
@@ -205,6 +213,80 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
       <ErrorMessage
         error={errorMessage}
         data-testid="manual-payment-error-message"
+      />
+    </>
+  )
+}
+
+const NotchPayPaymentButton = ({
+  cart,
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  cart: HttpTypes.StoreCart
+  notReady: boolean
+  "data-testid"?: string
+}) => {
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const session = cart.payment_collection?.payment_sessions?.find(
+    (s) => s.status === "pending" || s.status === "pending_authorization"
+  )
+  const authorizationUrl = session?.data?.authorization_url as
+    | string
+    | undefined
+
+  const handlePayment = async () => {
+    setSubmitting(true)
+    try {
+      // Complete the cart first so the order exists while the customer
+      // pays on the Notch Pay hosted page. The payment session stays in
+      // pending_authorization until the payment.complete webhook lands.
+      const res = await placeOrder(undefined, { skipRedirect: true })
+      if (!res.ok) {
+        setErrorMessage(res.error?.message)
+        return
+      }
+
+      const orderGroupId = res.data?.order_group?.id as string | undefined
+      if (orderGroupId && typeof window !== "undefined") {
+        sessionStorage.setItem("hybreed_pending_order_group", orderGroupId)
+      }
+
+      if (authorizationUrl) {
+        window.location.href = authorizationUrl
+        return
+      }
+
+      if (orderGroupId && typeof window !== "undefined") {
+        window.location.href = `/user/orders/${orderGroupId}`
+      }
+    } catch (error: any) {
+      if (error?.message !== "NEXT_REDIRECT") {
+        setErrorMessage(
+          error?.message?.replace("Error setting up the request: ", "")
+        )
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <>
+      <Button
+        disabled={notReady || !authorizationUrl}
+        onClick={handlePayment}
+        className="w-full"
+        loading={submitting}
+        data-testid={dataTestId}
+      >
+        Pay with Mobile Money
+      </Button>
+      <ErrorMessage
+        error={errorMessage}
+        data-testid="notchpay-payment-error-message"
       />
     </>
   )

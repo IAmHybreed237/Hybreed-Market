@@ -11,7 +11,7 @@ import { Button } from '@/components/atoms';
 import ErrorMessage from '@/components/molecules/ErrorMessage/ErrorMessage';
 import { initiatePaymentSession } from '@/lib/data/cart';
 
-import { isStripe as isStripeFunc, paymentInfoMap } from '../../../lib/constants';
+import { isNotchPay, isStripe as isStripeFunc, paymentInfoMap } from '../../../lib/constants';
 import PaymentContainer, {
   StripeCardContainer
 } from '../../organisms/PaymentContainer/PaymentContainer';
@@ -50,6 +50,22 @@ const CartPaymentSection = ({
   const isOpen = searchParams.get('step') === 'payment';
 
   const isStripe = isStripeFunc(selectedPaymentMethod);
+  const isNotchPaySelected = isNotchPay(selectedPaymentMethod);
+
+  // Guest carts have no Medusa customer record, so providers that need a
+  // customer email/phone (e.g. Notch Pay) receive them via session data.
+  const customerSessionData = isNotchPaySelected
+    ? {
+        customer_email: cart?.email,
+        customer_phone: cart?.shipping_address?.phone,
+        customer_name: [
+          cart?.shipping_address?.first_name,
+          cart?.shipping_address?.last_name
+        ]
+          .filter(Boolean)
+          .join(' ')
+      }
+    : undefined;
 
   const setPaymentMethod = async (method: string) => {
     setError(null);
@@ -90,7 +106,8 @@ const CartPaymentSection = ({
 
       if (!checkActiveSession) {
         await initiatePaymentSession(cart, {
-          provider_id: selectedPaymentMethod
+          provider_id: selectedPaymentMethod,
+          ...(customerSessionData ? { data: customerSessionData } : {})
         });
       }
 
