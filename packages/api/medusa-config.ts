@@ -74,6 +74,9 @@ module.exports = withMercur({
       },
     },
     {
+      resolve: './src/modules/auction',
+    },
+    {
       resolve: '@medusajs/medusa/file',
       options: {
         providers: [

@@ -1,5 +1,12 @@
-import { defineMiddlewares } from "@medusajs/medusa";
+import { authenticate } from "@medusajs/framework/http"
+import { defineMiddlewares } from "@medusajs/medusa"
 
 export default defineMiddlewares({
-    routes: [],
-});
+  routes: [
+    {
+      matcher: "/store/auctions/*/bids",
+      method: ["POST"],
+      middlewares: [authenticate("customer", ["session", "bearer"])],
+    },
+  ],
+})

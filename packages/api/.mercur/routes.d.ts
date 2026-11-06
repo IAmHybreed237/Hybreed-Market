@@ -509,6 +509,7 @@ export type Routes = {
                 subscribe: typeof import("@medusajs/medusa/api/admin/workflows-executions/[workflow_id]/subscribe/route");
             };
         };
+        auctions: typeof import("../src/api/admin/auctions/route");
         custom: typeof import("../src/api/admin/custom/route");
     };
     auth: {
@@ -636,6 +637,11 @@ export type Routes = {
         shippingOptions: typeof import("@mercurjs/core/api/store/shipping-options/route") & {
             $id: {
                 calculate: typeof import("@medusajs/medusa/api/store/shipping-options/[id]/calculate/route");
+            };
+        };
+        auctions: typeof import("../src/api/store/auctions/route") & {
+            $id: typeof import("../src/api/store/auctions/[id]/route") & {
+                bids: typeof import("../src/api/store/auctions/[id]/bids/route");
             };
         };
         custom: typeof import("../src/api/store/custom/route");
