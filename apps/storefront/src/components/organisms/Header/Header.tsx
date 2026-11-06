@@ -127,7 +127,7 @@ export const Header = async ({ locale }: { locale: string }) => {
             <LocalizedClientLink href="/categories" className={stripLink}>
               Deals
             </LocalizedClientLink>
-            <LocalizedClientLink href="/categories" className={stripLink}>
+            <LocalizedClientLink href="/auctions" className={stripLink}>
               Auctions
             </LocalizedClientLink>
             <LocalizedClientLink href="/categories" className={stripLink}>
