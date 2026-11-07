@@ -58,7 +58,7 @@ export const MobileHeader = ({
     )
     const sync = () => {
       if (el && spacer && !onUserPage)
-        spacer.style.height = `${el.offsetHeight}px`
+        spacer.style.height = `${el.offsetHeight + 12}px`
     }
     el?.classList.toggle("hidden", Boolean(onUserPage))
     el?.classList.toggle("lg:block", Boolean(onUserPage))
