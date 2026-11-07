@@ -811,7 +811,7 @@ export const WbProductMobile = ({
                           "conic-gradient(transparent 0%, transparent 65%, rgba(37,99,235,0.95) 80%, transparent 100%)",
                       }}
                     />
-                    <div className="relative bg-white rounded-[19px] px-3 py-2 h-full">
+                    <div className="relative bg-[#F4F8FF] rounded-[19px] px-3 py-2 h-full">
                       <p className="text-[17px] font-semibold text-[#1F1F23] leading-tight">
                         {walletAmount != null ? `${num(walletAmount)} XAF` : "-"}
                       </p>
