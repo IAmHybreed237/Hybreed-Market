@@ -6,7 +6,7 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 PGDATA="$HOME/pgdata"
 if [ -d "$PGDATA" ] && ! pg_ctl -D "$PGDATA" status >/dev/null 2>&1; then
-  pg_ctl -D "$PGDATA" -o "-p 5433 -c listen_addresses=localhost" -l "$HOME/pg.log" -w start >/dev/null 2>&1 || true
+  pg_ctl -D "$PGDATA" -o "-p 5433 -c listen_addresses=localhost -k /tmp" -l "$HOME/pg.log" -w start >/dev/null 2>&1 || true
 fi
 
 LOGS="$HOME/hybreed-logs"

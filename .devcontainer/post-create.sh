@@ -11,7 +11,7 @@ if [ ! -d "$PGDATA" ]; then
   initdb -D "$PGDATA" -U hybreed --auth=trust -E UTF8 >/dev/null
 fi
 if ! pg_ctl -D "$PGDATA" status >/dev/null 2>&1; then
-  pg_ctl -D "$PGDATA" -o "-p $PGPORT -c listen_addresses=localhost" -l "$HOME/pg.log" -w start
+  pg_ctl -D "$PGDATA" -o "-p $PGPORT -c listen_addresses=localhost -k /tmp" -l "$HOME/pg.log" -w start
 fi
 
 echo "==> Creating database..."
