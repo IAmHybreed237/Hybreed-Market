@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { PUSH_MODULE } from "../../../modules/push-notifications/service"
+import { PUSH_MODULE } from "../../../../modules/push-notifications/service"
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const body = (req.body ?? {}) as {

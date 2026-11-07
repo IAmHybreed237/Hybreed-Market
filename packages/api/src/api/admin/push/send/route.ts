@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { sendPush } from "../../../lib/push"
+import { sendPush } from "../../../../lib/push"
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const { title, body, url, customer_id } = (req.body ?? {}) as {
