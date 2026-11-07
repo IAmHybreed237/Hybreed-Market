@@ -8,6 +8,7 @@ import Head from 'next/head';
 import { HtmlLangSetter } from '@/components/atoms/HtmlLangSetter/HtmlLangSetter';
 import { ServiceWorkerRegister } from '@/components/atoms/ServiceWorkerRegister/ServiceWorkerRegister';
 import { SplashScreen } from '@/components/atoms/SplashScreen/SplashScreen';
+import { PushPermissionPrompt } from '@/components/molecules/PushPermissionPrompt/PushPermissionPrompt';
 import { StatusBarColor } from '@/components/atoms/StatusBarColor/StatusBarColor';
 import { retrieveCart } from '@/lib/data/cart';
 
@@ -126,6 +127,7 @@ export default async function RootLayout({
         <ServiceWorkerRegister />
         <SplashScreen />
         <Providers cart={cart}>{children}</Providers>
+        <PushPermissionPrompt />
         <Toaster position="top-right" />
       </body>
     </html>
