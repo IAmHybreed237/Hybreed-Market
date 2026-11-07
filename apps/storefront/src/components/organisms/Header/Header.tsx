@@ -107,7 +107,7 @@ export const Header = async ({ locale }: { locale: string }) => {
       data-testid="header"
       data-status-color="#2563EB"
     >
-      <div className="max-w-[1400px] mx-auto px-[5px] lg:px-10 pt-3 pb-6">
+      <div className="max-w-[1400px] mx-auto px-[5px] lg:px-10 pt-3 pb-2 lg:pb-6">
         {/* Row 1 - utility strip (desktop only) */}
         <div className="hidden lg:flex items-center justify-between mb-5 relative">
           <LocationSelector

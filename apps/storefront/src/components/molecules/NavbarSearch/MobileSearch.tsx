@@ -16,7 +16,7 @@ import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 import { ImageSearchModal } from "./ImageSearchModal"
 
 const imageSearchEnabled = process.env.NEXT_PUBLIC_IMAGE_SEARCH_ENABLED === "true"
-const RETRACT_MS = 200
+const RETRACT_MS = 160
 
 const CameraIcon = () => (
   // eslint-disable-next-line @next/next/no-img-element
@@ -167,10 +167,10 @@ export const MobileSearch = ({
       {open && (
         <div
           className="fixed inset-0 z-[90] bg-white flex flex-col"
-          style={{ animation: "searchOverlayIn .22s ease-out" }}
+          style={{ animation: "searchOverlayIn .18s ease-out" }}
         >
           <style>{`
-            @keyframes searchOverlayIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+            @keyframes searchOverlayIn{from{opacity:0}to{opacity:1}}
             @keyframes searchFieldIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
             @keyframes searchCancelIn{from{opacity:0;transform:translateX(52px)}to{opacity:1;transform:none}}
           `}</style>
@@ -180,7 +180,7 @@ export const MobileSearch = ({
           >
             <form
               className="relative flex-1"
-              style={{ animation: "searchFieldIn .3s cubic-bezier(.2,.8,.2,1) both" }}
+              style={{ animation: "searchFieldIn .34s cubic-bezier(.2,.8,.2,1) both" }}
               onSubmit={(e) => {
                 e.preventDefault()
                 go()
@@ -213,7 +213,7 @@ export const MobileSearch = ({
               type="button"
               onClick={close}
               className="shrink-0 text-[15px] font-semibold text-[#2563EB] px-1"
-              style={{ animation: "searchCancelIn .3s cubic-bezier(.2,.8,.2,1) .07s both" }}
+              style={{ animation: "searchCancelIn .32s cubic-bezier(.2,.8,.2,1) .1s both" }}
             >
               Cancel
             </button>
@@ -221,7 +221,7 @@ export const MobileSearch = ({
 
           <div
             className="flex-1 overflow-y-auto overscroll-contain px-4 pb-8"
-            style={{ animation: "searchOverlayIn .25s ease-out .08s both" }}
+            style={{ animation: "searchOverlayIn .22s ease-out .14s both" }}
           >
             {searching ? (
               <div>
