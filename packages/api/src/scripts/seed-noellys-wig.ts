@@ -10,7 +10,7 @@ import { AttributeType } from "@mercurjs/types"
 import { createProductCategoriesWorkflow } from "@medusajs/medusa/core-flows"
 
 const SELLER_EMAIL = "noellys@hybreed.dev"
-const BASE = process.env.STOREFRONT_URL || "http://192.168.31.130:3000"
+
 
 const DESCRIPTION = `Elevate your everyday look effortlessly with the "Coup Waterwaves" Curly Fringe Wig. Designed for ultimate convenience and style, this glueless, machine-made wig features rich, voluminous waterwave curls paired with a trendy, face-framing fringe bang.
 
@@ -168,7 +168,7 @@ export default async function seedNoellysWig({ container }: ExecArgs) {
   }
 
   const images = [1, 2, 3].map(
-    (i) => `${BASE}/images/noellys-wig/wig-${i}.jpg`
+    (i) => `/images/noellys-wig/wig-${i}.jpg`
   )
 
   const { result: products } = await createProductsWorkflow(container).run({

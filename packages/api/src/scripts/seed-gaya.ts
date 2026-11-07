@@ -19,7 +19,7 @@ import {
 
 const SELLER_EMAIL = "gaya@hybreed.dev"
 const SELLER_PASSWORD = "supersecret"
-const BASE = process.env.STOREFRONT_URL || "http://192.168.31.130:3000"
+
 
 const DESCRIPTION = `Minimalist low-top sneakers in premium Veau Velours calf suede - rich, matte-black depth with tonal hand-placed matte black spikes across the reinforced toe box. All-black rubber midsole over the signature red lacquered rubber outsole. Made in Italy.
 
@@ -463,7 +463,7 @@ export default async function seedGaya({ container }: ExecArgs) {
 
     const images = Array.from(
       { length: def.imageCount || 4 },
-      (_, i) => `${BASE}/images/${def.imageDir}/${def.imagePrefix}-${i + 1}.jpg`
+      (_, i) => `/images/${def.imageDir}/${def.imagePrefix}-${i + 1}.jpg`
     )
 
     const { result: products } = await createProductsWorkflow(container).run({

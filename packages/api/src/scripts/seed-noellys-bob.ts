@@ -8,7 +8,7 @@ import {
 import { createProductCategoriesWorkflow } from "@medusajs/medusa/core-flows"
 
 const SELLER_EMAIL = "noellys@hybreed.dev"
-const BASE = process.env.STOREFRONT_URL || "http://192.168.31.130:3000"
+
 
 const DESCRIPTION = `Step out in confidence with this ultra-modern 10-Inch Silver-Grey 13x4 Lace Frontal Bob. Designed for the bold and fashion-forward, this wig features a striking, uniform platinum-grey shade that beautifully complements deep skin tones. The silky, bone-straight texture falls into a crisp, blunt-cut finish right around the jawline, perfectly framing the neck and face.
 
@@ -120,7 +120,7 @@ export default async function seedNoellysBob({ container }: ExecArgs) {
     return
   }
 
-  const images = [1, 2].map((i) => `${BASE}/images/noellys-bob/bob-${i}.jpg`)
+  const images = [1, 2].map((i) => `/images/noellys-bob/bob-${i}.jpg`)
 
   const { result: products } = await createProductsWorkflow(container).run({
     input: {

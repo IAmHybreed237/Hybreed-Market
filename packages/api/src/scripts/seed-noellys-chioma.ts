@@ -8,7 +8,7 @@ import {
 import { createProductCategoriesWorkflow } from "@medusajs/medusa/core-flows"
 
 const SELLER_EMAIL = "noellys@hybreed.dev"
-const BASE = process.env.STOREFRONT_URL || "http://192.168.31.130:3000"
+
 
 const DESCRIPTION = `Get an instant, effortlessly glamorous look on a budget with the "Skull Cap Chioma" Pixie Cut Wig! This ultra-affordable, classic short wig features perfectly sculpted, vintage-style finger waves and tight roll curls that hold their shape permanently.
 
@@ -131,7 +131,7 @@ export default async function seedNoellysChioma({ container }: ExecArgs) {
   }
 
   const images = [1, 2, 3].map(
-    (i) => `${BASE}/images/noellys-chioma/chioma-${i}.jpg`
+    (i) => `/images/noellys-chioma/chioma-${i}.jpg`
   )
 
   const { result: products } = await createProductsWorkflow(container).run({
@@ -201,9 +201,9 @@ export default async function seedNoellysChioma({ container }: ExecArgs) {
             length: "Short crop (pixie cut)",
             weight: "Light-weight, flat-fitting",
             color_images: {
-              Black: `${BASE}/images/noellys-chioma/chioma-2.jpg`,
-              Brown: `${BASE}/images/noellys-chioma/chioma-1.jpg`,
-              Burgundy: `${BASE}/images/noellys-chioma/chioma-3.jpg`,
+              Black: `/images/noellys-chioma/chioma-2.jpg`,
+              Brown: `/images/noellys-chioma/chioma-1.jpg`,
+              Burgundy: `/images/noellys-chioma/chioma-3.jpg`,
             },
             country_of_origin: "Imported",
           },

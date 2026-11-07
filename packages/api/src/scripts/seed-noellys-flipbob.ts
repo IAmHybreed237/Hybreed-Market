@@ -8,7 +8,7 @@ import {
 import { createProductCategoriesWorkflow } from "@medusajs/medusa/core-flows"
 
 const SELLER_EMAIL = "noellys@hybreed.dev"
-const BASE = process.env.STOREFRONT_URL || "http://192.168.31.130:3000"
+
 
 const DESCRIPTION = `Turn heads with the timeless elegance of the 14-Inch Fringe Flip Bounce Bob. This wig is the ultimate solution for effortless, high-glamour styling. Featuring a beautifully structured silhouette, it combines a sleek, full-coverage fringe bang with layered, voluminous sides that curve beautifully inward - creating that iconic, retro-modern "flipped bounce" that perfectly contours the jawline and shoulders.
 
@@ -30,12 +30,12 @@ const COLORS = ["Black", "Brown", "Burgundy"]
 
 // gallery order: black pair, brown pair, burgundy pair
 const IMAGES = [
-  `${BASE}/images/noellys-flipbob/flip-2.jpg`,
-  `${BASE}/images/noellys-flipbob/flip-3.jpg`,
-  `${BASE}/images/noellys-flipbob/flip-4.jpg`,
-  `${BASE}/images/noellys-flipbob/flip-5.jpg`,
-  `${BASE}/images/noellys-flipbob/flip-6.jpg`,
-  `${BASE}/images/noellys-flipbob/flip-1.jpg`,
+  `/images/noellys-flipbob/flip-2.jpg`,
+  `/images/noellys-flipbob/flip-3.jpg`,
+  `/images/noellys-flipbob/flip-4.jpg`,
+  `/images/noellys-flipbob/flip-5.jpg`,
+  `/images/noellys-flipbob/flip-6.jpg`,
+  `/images/noellys-flipbob/flip-1.jpg`,
 ]
 
 export default async function seedNoellysFlipBob({ container }: ExecArgs) {
@@ -196,9 +196,9 @@ export default async function seedNoellysFlipBob({ container }: ExecArgs) {
             color_options:
               "Natural Black / Darkest Brown, Rich Chocolate Brown, Deep Burgundy / Plum Wine",
             color_images: {
-              Black: `${BASE}/images/noellys-flipbob/flip-2.jpg`,
-              Brown: `${BASE}/images/noellys-flipbob/flip-4.jpg`,
-              Burgundy: `${BASE}/images/noellys-flipbob/flip-6.jpg`,
+              Black: `/images/noellys-flipbob/flip-2.jpg`,
+              Brown: `/images/noellys-flipbob/flip-4.jpg`,
+              Burgundy: `/images/noellys-flipbob/flip-6.jpg`,
             },
             country_of_origin: "Imported",
           },
