@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { getOrSetCart } from "@/lib/data/cart"
+import { retrieveCart } from "@/lib/data/cart"
 import { retrieveCustomer } from "@/lib/data/customer"
 import { getRegion } from "@/lib/data/regions"
 import { listCartShippingMethods } from "@/lib/data/fulfillment"
@@ -20,7 +20,7 @@ export default async function CartPage({
   const { locale } = await params
   const region = await getRegion(locale)
   const [cart, user] = await Promise.all([
-    region ? getOrSetCart(locale) : Promise.resolve(null),
+    region ? retrieveCart() : Promise.resolve(null),
     retrieveCustomer().catch(() => null),
   ])
 

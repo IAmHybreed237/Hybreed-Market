@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
-import { getOrSetCart } from '@/lib/data/cart';
+import { retrieveCart } from '@/lib/data/cart';
 import { retrieveCustomer } from '@/lib/data/customer';
 import { getRegion } from '@/lib/data/regions';
 import { listCartShippingMethods } from '@/lib/data/fulfillment';
@@ -46,7 +46,7 @@ async function CheckoutPageContent({
   regionId?: string;
   currencyCode: string;
 }) {
-  const cart = await getOrSetCart(locale).catch(() => null);
+  const cart = await retrieveCart();
 
   if (!cart || !(cart.items?.length ?? 0)) {
     redirect(`/${locale}/cart`);
