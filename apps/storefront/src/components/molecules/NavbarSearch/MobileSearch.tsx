@@ -75,6 +75,7 @@ export const MobileSearch = ({
     setRetracting(true)
     openTimer.current = setTimeout(() => {
       setRetracting(false)
+      headerInputRef.current?.blur()
       setOpen(true)
       refreshLists()
     }, RETRACT_MS)
