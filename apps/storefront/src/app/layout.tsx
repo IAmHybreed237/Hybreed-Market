@@ -12,16 +12,30 @@ import { retrieveCart } from '@/lib/data/cart';
 
 import { Providers } from './providers';
 
+const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'Hybreed';
+const siteDescription =
+  process.env.NEXT_PUBLIC_SITE_DESCRIPTION ||
+  'Marketplace for Cameroon — buy, sell, and bid on everything. Every order protected by Hybreed Escrow.';
+
 export const metadata: Metadata = {
   title: {
-    template: `%s | ${
-      process.env.NEXT_PUBLIC_SITE_NAME || 'Mercur B2C Demo - Marketplace Storefront'
-    }`,
-    default: process.env.NEXT_PUBLIC_SITE_NAME || 'Mercur B2C Demo - Marketplace Storefront'
+    template: `%s | ${siteName}`,
+    default: siteName
   },
-  description:
-    process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Mercur B2C Demo - Marketplace Storefront',
+  description: siteDescription,
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+  openGraph: {
+    title: siteName,
+    description: siteDescription,
+    siteName,
+    type: 'website',
+    images: [{ url: '/images/hero/banner-desktop-home.png' }]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteName,
+    description: siteDescription
+  },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
