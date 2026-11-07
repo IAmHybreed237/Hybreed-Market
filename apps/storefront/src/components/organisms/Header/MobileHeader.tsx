@@ -110,8 +110,8 @@ export const MobileHeader = ({
         style={{
           maxHeight: `${(1 - effectiveProg) * 88}px`,
           opacity: 1 - effectiveProg,
-          paddingTop: `${(1 - effectiveProg) * 12}px`,
-          paddingBottom: `${(1 - effectiveProg) * 20}px`,
+          paddingTop: `${(1 - effectiveProg) * 8}px`,
+          paddingBottom: `${(1 - effectiveProg) * 10}px`,
           transition: rowTransition,
         }}
       >
@@ -123,7 +123,7 @@ export const MobileHeader = ({
         />
         <LocalizedClientLink
           href="/categories"
-          className="shrink-0 bg-white text-[#2563EB] text-[14px] font-bold rounded-full px-5 py-2"
+          className="shrink-0 bg-white text-[#2563EB] text-[13px] font-bold rounded-full px-4 py-1.5"
         >
           Offers
         </LocalizedClientLink>

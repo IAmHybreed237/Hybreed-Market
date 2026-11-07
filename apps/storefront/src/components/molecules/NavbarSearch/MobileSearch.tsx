@@ -16,7 +16,7 @@ import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 import { ImageSearchModal } from "./ImageSearchModal"
 
 const imageSearchEnabled = process.env.NEXT_PUBLIC_IMAGE_SEARCH_ENABLED === "true"
-const RETRACT_MS = 340
+const RETRACT_MS = 200
 
 const CameraIcon = () => (
   // eslint-disable-next-line @next/next/no-img-element
@@ -165,7 +165,11 @@ export const MobileSearch = ({
 
       {/* full-screen search page */}
       {open && (
-        <div className="fixed inset-0 z-[90] bg-white flex flex-col">
+        <div
+          className="fixed inset-0 z-[90] bg-white flex flex-col"
+          style={{ animation: "searchOverlayIn .22s ease-out" }}
+        >
+          <style>{`@keyframes searchOverlayIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}`}</style>
           <div
             className="px-3 pb-2.5 flex items-center gap-2 shrink-0 bg-white"
             style={{ paddingTop: "max(env(safe-area-inset-top), 10px)" }}
