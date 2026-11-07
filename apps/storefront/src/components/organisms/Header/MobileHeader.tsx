@@ -52,7 +52,7 @@ export const MobileHeader = ({
   // hide the whole header shell + its spacer below lg on /user and /search pages,
   // and keep the spacer matched to the header's real height
   useEffect(() => {
-    const el = document.querySelector('[data-testid="header"]')
+    const el = document.querySelector<HTMLElement>('[data-testid="header"]')
     const spacer = document.querySelector<HTMLElement>(
       '[data-testid="mobile-header-spacer"]'
     )

@@ -281,6 +281,14 @@ export const WbProductMobile = ({
   const brand = seller?.name || "Hybreed"
   const typeName = product?.metadata?.product_type || "Sneakers"
   const md = (product?.metadata || {}) as Record<string, any>
+  // sale = explicitly flagged -> red; plain discount -> blue
+  const onSale =
+    md.sale === true || String(md.badge ?? "").trim().toUpperCase() === "SALE"
+  const discountPct =
+    oldAmount != null && amount != null && amount > 0
+      ? Math.round((1 - amount / oldAmount) * 100)
+      : null
+  const priceAccent = oldAmount != null && !onSale ? "#2563EB" : "#FA1F4B"
 
   const aboutRows = useMemo(() => {
     const rows: [string, string][] = []
@@ -422,9 +430,14 @@ export const WbProductMobile = ({
           </>
         )}
         {/* badges */}
-        {oldAmount && (
+        {oldAmount && onSale && (
           <span className="absolute bottom-4 left-4 h-[31px] px-3 rounded-xl bg-[#E11D48] text-white text-[17px] font-semibold flex items-center">
             SALE
+          </span>
+        )}
+        {oldAmount && !onSale && discountPct != null && (
+          <span className="absolute bottom-4 left-4 h-[31px] px-3 rounded-xl bg-[#EFF6FF] text-[#2563EB] text-[17px] font-semibold flex items-center">
+            -{discountPct}%
           </span>
         )}
         <button
@@ -450,8 +463,11 @@ export const WbProductMobile = ({
           className="flex items-center gap-1.5 h-7 w-full text-left"
           aria-label="Price breakdown"
         >
-          <WalletIcon size={18} />
-          <p className="text-[18px] font-semibold text-[#FA1F4B] leading-[24px]">
+          <WalletIcon size={18} color={priceAccent} />
+          <p
+            className="text-[18px] font-semibold leading-[24px]"
+            style={{ color: priceAccent }}
+          >
             {amount != null ? `${num(amount)} XAF` : "-"}
           </p>
           {oldAmount && (
@@ -570,30 +586,30 @@ export const WbProductMobile = ({
       )}
 
       {/* 4. ratings + questions tiles */}
-      <div className="grid grid-cols-2 gap-1 mb-1">
-        <button onClick={() => scrollToId("reviews")} className="bg-white rounded-[28px] p-4 text-left active:scale-[0.99] transition-transform">
+      <div className="grid grid-cols-[65fr_35fr] gap-1 mb-1">
+        <button onClick={() => scrollToId("reviews")} className="bg-white rounded-[20px] px-3 py-2.5 text-left active:scale-[0.99] transition-transform">
           <span className="flex items-center gap-1.5">
             <StarIcon />
-            <span className="text-[20px] font-semibold text-[#1F1F23]">4.8</span>
+            <span className="text-[18px] font-semibold text-[#1F1F23]">4.8</span>
           </span>
-          <span className="block text-[15px] text-[#8A8A96] mt-1">128 ratings</span>
+          <span className="block text-[13px] text-[#8A8A96] mt-0.5">128 ratings</span>
         </button>
-        <button onClick={() => scrollToId("reviews")} className="bg-white rounded-[28px] p-4 text-left active:scale-[0.99] transition-transform">
+        <button onClick={() => scrollToId("reviews")} className="bg-white rounded-[20px] px-3 py-2.5 text-left active:scale-[0.99] transition-transform">
           <span className="flex items-center gap-1.5">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A8A96" strokeWidth="2" aria-hidden><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-4.7a8.38 8.38 0 0 1-1.9-4.8 8.5 8.5 0 0 1 9-8.5 8.38 8.38 0 0 1 9 8.5z"/><text x="11" y="15" fontSize="11" fill="#8A8A96" stroke="none" fontWeight="bold">?</text></svg>
-            <span className="text-[20px] font-semibold text-[#1F1F23]">14</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8A96" strokeWidth="2" aria-hidden><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-4.7a8.38 8.38 0 0 1-1.9-4.8 8.5 8.5 0 0 1 9-8.5 8.38 8.38 0 0 1 9 8.5z"/><text x="11" y="15" fontSize="11" fill="#8A8A96" stroke="none" fontWeight="bold">?</text></svg>
+            <span className="text-[18px] font-semibold text-[#1F1F23]">14</span>
           </span>
-          <span className="block text-[15px] text-[#8A8A96] mt-1">Questions</span>
+          <span className="block text-[13px] text-[#8A8A96] mt-0.5">Questions</span>
         </button>
       </div>
 
       {/* 5. delivery card */}
-      <button onClick={() => openSheet("delivery")} className="w-full bg-white rounded-[28px] p-4 mb-1 text-left active:scale-[0.99] transition-transform">
+      <button onClick={() => openSheet("delivery")} className="w-full bg-white rounded-[20px] px-4 py-2.5 mb-1 text-left active:scale-[0.99] transition-transform">
         <span className="flex items-center justify-between">
-          <span className="text-[17px] font-semibold text-[#1F1F23]">Tomorrow</span>
-          <span className="flex items-center gap-1 text-[15px] text-[#8A8A96]">Full Terms <Chevron /></span>
+          <span className="text-[16px] font-semibold text-[#1F1F23]">Tomorrow</span>
+          <span className="flex items-center gap-1 text-[13px] text-[#8A8A96]">Full Terms <Chevron /></span>
         </span>
-        <span className="block text-[15px] text-[#8A8A96] mt-0.5">To pickup point or by courier</span>
+        <span className="block text-[13px] text-[#8A8A96]">To pickup point or by courier</span>
       </button>
 
       {/* 6. product info card */}

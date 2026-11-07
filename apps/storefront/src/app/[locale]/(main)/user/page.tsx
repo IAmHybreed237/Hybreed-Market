@@ -1,4 +1,5 @@
 import { retrieveCustomer } from "@/lib/data/customer"
+import { getWalletStatement } from "@/lib/data/wallet"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { TopUpButton } from "@/components/cells/TopUpSheet/TopUpSheet"
 import { HbMark } from "@/components/atoms"
@@ -97,6 +98,12 @@ export default async function UserPage({
   const name =
     [user.first_name, user.last_name].filter(Boolean).join(" ") || user.email
 
+  const wallet = await getWalletStatement().catch(() => null)
+  const balance = wallet?.balance ?? 0
+  const fmtBalance = `${Math.round(balance)
+    .toLocaleString("en-US")
+    .replace(/,/g, " ")} XAF`
+
   return (
     <main
       className="w-full mx-auto px-[5px] pb-12"
@@ -113,7 +120,7 @@ export default async function UserPage({
       }
     >
       {/* ===== MOBILE ACCOUNT (below 768px) ===== */}
-      <MobileAccount name={name} />
+      <MobileAccount name={name} balance={balance} />
 
       {/* ===== DESKTOP ===== */}
       <div
@@ -223,7 +230,7 @@ export default async function UserPage({
             <div>
               <div className="flex items-center gap-2.5 text-[#2563EB]">
                 <WalletIcon />
-                <p className="text-[22px] font-semibold text-[#1F1F23]">0 XAF</p>
+                <p className="text-[22px] font-semibold text-[#1F1F23]">{fmtBalance}</p>
               </div>
               <p className="text-[17px] font-[350] mt-1" style={{ color: "var(--muted)" }}>
                 Hybreed Wallet

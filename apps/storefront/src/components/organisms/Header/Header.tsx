@@ -51,6 +51,7 @@ import {
   ArrowDownIcon,
 } from "@/icons"
 import { listCategories } from "@/lib/data/categories"
+import { getWalletStatement } from "@/lib/data/wallet"
 import { listRegions } from "@/lib/data/regions"
 import { retrieveCustomer } from "@/lib/data/customer"
 
@@ -87,6 +88,14 @@ const HeaderNavItem = ({
 export const Header = async ({ locale }: { locale: string }) => {
   const user = await retrieveCustomer().catch(() => null)
   const isLoggedIn = Boolean(user)
+
+  const wallet = isLoggedIn
+    ? await getWalletStatement().catch(() => null)
+    : null
+  const fmtBalance = `${Math.round(wallet?.balance ?? 0)
+    .toLocaleString("en-US")
+    .replace(/,/g, " ")} XAF`
+  const fmtPoints = `${Math.round(wallet?.points ?? 0).toLocaleString("en-US")} pts`
 
   const regions = await listRegions()
 
@@ -150,13 +159,13 @@ export const Header = async ({ locale }: { locale: string }) => {
               className="flex items-center gap-1 rounded-full bg-white/20 px-2.5 h-[24px] text-[12px] font-medium text-white hover:bg-white/30 transition-colors"
               data-testid="header-wallet"
             >
-              <WalletIcon /> 0 XAF
+              <WalletIcon /> {fmtBalance}
             </LocalizedClientLink>
             <LocalizedClientLink
               href="/user"
               className="flex items-center gap-1 rounded-full bg-white/20 px-2.5 h-[24px] text-[12px] font-medium text-white hover:bg-white/30 transition-colors"
             >
-              <HbMark h={13} /> 0 pts
+              <HbMark h={13} /> {fmtPoints}
             </LocalizedClientLink>
             <span className="flex items-center gap-1.5 rounded-full bg-white/20 px-2.5 h-[24px] text-[12px] font-medium text-white">
               <CMFlag />
@@ -215,6 +224,7 @@ export const Header = async ({ locale }: { locale: string }) => {
               <span className="relative">
                 <UserDropdown
                   isLoggedIn={isLoggedIn}
+                  walletBalance={fmtBalance}
                   userName={
                     [user?.first_name, user?.last_name]
                       .filter(Boolean)

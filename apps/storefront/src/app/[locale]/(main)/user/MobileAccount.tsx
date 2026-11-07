@@ -70,7 +70,13 @@ const services = [
 const card =
   "bg-white rounded-[24px] transition-transform duration-100 active:scale-[0.98]"
 
-export const MobileAccount = ({ name }: { name: string }) => {
+export const MobileAccount = ({
+  name,
+  balance = 0,
+}: {
+  name: string
+  balance?: number
+}) => {
   const topUp = useTopUpSheet()
   const [open, setOpen] = useState(false)
   const [closing, setClosing] = useState(false)
@@ -241,7 +247,11 @@ export const MobileAccount = ({ name }: { name: string }) => {
         <div className="grid grid-cols-2 gap-2">
           <div className={`${card} h-[130px] p-4 flex flex-col`}>
             <LocalizedClientLink href="/user/wallet" className="flex items-start justify-between">
-              <p className="text-[18px] font-medium text-[#1F1F23] leading-none">0 XAF</p>
+              <p className="text-[18px] font-medium text-[#1F1F23] leading-none">
+                {`${Math.round(balance)
+                  .toLocaleString("en-US")
+                  .replace(/,/g, " ")} XAF`}
+              </p>
               <Chevron />
             </LocalizedClientLink>
             <p className="text-[15px] -mt-0.5" style={{ color: "var(--muted)" }}>

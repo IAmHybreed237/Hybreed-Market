@@ -12,9 +12,11 @@ const itemCls =
 export const UserDropdown = ({
   isLoggedIn,
   userName,
+  walletBalance,
 }: {
   isLoggedIn: boolean
   userName?: string
+  walletBalance?: string
 }) => {
   const [open, setOpen] = useState(false)
 
@@ -69,7 +71,7 @@ export const UserDropdown = ({
                 <NavigationItem href="/user" className={itemCls}>
                   <span className="flex items-center justify-between">
                     Hybreed Wallet
-                    <span className="font-semibold">0 XAF</span>
+                    <span className="font-semibold">{walletBalance || "0 XAF"}</span>
                   </span>
                 </NavigationItem>
               </div>
