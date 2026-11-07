@@ -6,15 +6,6 @@ import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedL
 import { MobileSearch } from "@/components/molecules/NavbarSearch/MobileSearch"
 import { LocationSelector } from "@/components/molecules/LocationSelector/LocationSelector"
 
-const ads = [
-  { label: "Sneaker deals", img: "sneakers", href: "/categories/sneakers" },
-  { label: "Beauty week", img: "hair-beauty", href: "/categories/beauty" },
-  { label: "Phones fest", img: "phones", href: "/categories/phones" },
-  { label: "Fresh fashion", img: "shirt", href: "/categories/shirt" },
-  { label: "Sport picks", img: "sport", href: "/categories/sport" },
-  { label: "Accessories", img: "accessories", href: "/categories/accessories" },
-]
-
 export const MobileHeader = ({
   savedLocation,
 }: {
@@ -22,7 +13,19 @@ export const MobileHeader = ({
 }) => {
   const [prog, setProg] = useState(0) // 0 = fully expanded, 1 = fully retracted
   const [searchActive, setSearchActive] = useState(false)
+  const [anim, setAnim] = useState(false)
   const effectiveProg = searchActive ? 1 : prog
+
+  // animate the retract/expand only when search mode toggles - scroll-driven
+  // prog changes stay instant so they keep up with the scroll position
+  useEffect(() => {
+    setAnim(true)
+    const t = setTimeout(() => setAnim(false), 400)
+    return () => clearTimeout(t)
+  }, [searchActive])
+  const rowTransition = anim
+    ? "max-height .35s ease, opacity .3s ease, padding-top .35s ease, padding-bottom .35s ease"
+    : "none"
 
   useEffect(() => {
     let raf = 0
@@ -64,6 +67,7 @@ export const MobileHeader = ({
           maxHeight: `${(1 - effectiveProg) * 44}px`,
           opacity: 1 - effectiveProg,
           paddingTop: `${(1 - effectiveProg) * 8}px`,
+          transition: rowTransition,
         }}
       >
         <LocationSelector
@@ -100,34 +104,29 @@ export const MobileHeader = ({
         <MobileSearch onActiveChange={setSearchActive} />
       </div>
 
-      {/* Row 3 - ads: retracts on scroll down */}
+      {/* Row 3 - offers banner: retracts on scroll down */}
       <div
-        className="flex gap-5 px-3 scrollbar-hide overflow-hidden"
+        className="flex items-center justify-between gap-3 px-3 overflow-hidden"
         style={{
           maxHeight: `${(1 - effectiveProg) * 88}px`,
           opacity: 1 - effectiveProg,
           paddingTop: `${(1 - effectiveProg) * 12}px`,
           paddingBottom: `${(1 - effectiveProg) * 20}px`,
+          transition: rowTransition,
         }}
       >
-        {ads.map((ad) => (
-          <LocalizedClientLink
-            key={ad.label}
-            href={ad.href}
-            className="flex items-center gap-2 shrink-0"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`/images/categories/${ad.img}.png`}
-              alt={ad.label}
-              className="w-11 h-11 object-contain"
-              loading="lazy"
-            />
-            <span className="text-[13px] font-semibold text-white leading-tight max-w-[80px]">
-              {ad.label}
-            </span>
-          </LocalizedClientLink>
-        ))}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/offers/designer.png"
+          alt="Offers"
+          className="h-11 w-auto object-contain shrink-0"
+        />
+        <LocalizedClientLink
+          href="/categories"
+          className="shrink-0 bg-white text-[#2563EB] text-[14px] font-bold rounded-full px-5 py-2"
+        >
+          Offers
+        </LocalizedClientLink>
       </div>
     </div>
   )

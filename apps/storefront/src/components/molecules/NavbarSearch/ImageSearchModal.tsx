@@ -74,7 +74,7 @@ export const ImageSearchModal = ({ onClose }: { onClose: () => void }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[95] bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <div
         className="bg-white rounded-[24px] w-full max-w-[420px] p-4"
         onClick={(e) => e.stopPropagation()}
