@@ -11,7 +11,10 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ['glorious-train-97vvpr5p5q4j3x7x6-3000.app.github.dev'],
   experimental: {
     serverActions: {
-      allowedOrigins: ['glorious-train-97vvpr5p5q4j3x7x6-3000.app.github.dev']
+      allowedOrigins: [
+        'glorious-train-97vvpr5p5q4j3x7x6-3000.app.github.dev',
+        'localhost:3000'
+      ]
     }
   },
   output: "standalone",
