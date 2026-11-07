@@ -40,6 +40,30 @@ const optionValue = (v: any, key: string) => {
 
 const num = (n: number) => n.toLocaleString("fr-FR").replace(/ /g, " ")
 
+const ABOUT_FIELDS: [string, string][] = [
+  ["color", "Colour"],
+  ["gender", "Gender"],
+  ["product_type", "Category"],
+  ["texture", "Texture"],
+  ["length", "Length"],
+  ["lace_type", "Lace type"],
+  ["cap", "Cap"],
+  ["hairline", "Hairline"],
+  ["composition", "Composition"],
+  ["hair_type", "Hair type"],
+  ["material", "Material"],
+  ["style", "Style"],
+  ["density", "Density"],
+  ["fit", "Fit"],
+  ["insulation", "Insulation"],
+  ["season", "Season"],
+  ["condition", "Condition"],
+  ["country_of_origin", "Origin"],
+  ["item_no", "Item No."],
+]
+
+const ABOUT_SKIP = new Set(["color_images", "pay_in_parts", "breadcrumb"])
+
 export const WbProductMobile = ({
   product,
   offers,
@@ -62,7 +86,7 @@ export const WbProductMobile = ({
   const [shake, setShake] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [header, setHeader] = useState(false)
-  const [sheet, setSheet] = useState<null | "sizes" | "delivery" | "parts">(null)
+  const [sheet, setSheet] = useState<null | "sizes" | "delivery" | "parts" | "about">(null)
   const [viewerIdx, setViewerIdx] = useState<number | null>(null)
   const [tab, setTab] = useState<"like" | "buy">("like")
   const galleryRef = useRef<HTMLDivElement>(null)
@@ -159,6 +183,31 @@ export const WbProductMobile = ({
 
   const brand = seller?.name || "Hybreed"
   const typeName = product?.metadata?.product_type || "Sneakers"
+  const md = (product?.metadata || {}) as Record<string, any>
+
+  const aboutRows = useMemo(() => {
+    const rows: [string, string][] = []
+    const seen = new Set<string>()
+    for (const [key, label] of ABOUT_FIELDS) {
+      const v = md[key]
+      if (v != null && v !== "") {
+        rows.push([label, String(v)])
+        seen.add(key)
+      }
+    }
+    if (Array.isArray(md.breadcrumb) && md.breadcrumb.length) {
+      rows.unshift(["Category", md.breadcrumb.join(" › ")])
+    }
+    for (const [key, v] of Object.entries(md)) {
+      if (seen.has(key) || ABOUT_SKIP.has(key) || v == null || v === "" || typeof v === "object") continue
+      rows.push([
+        key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        String(v),
+      ])
+    }
+    return rows
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product])
 
   const buy = async (go: boolean) => {
     if (sizes.length && !size) {
@@ -395,15 +444,22 @@ export const WbProductMobile = ({
           <span className="text-[15px] font-medium text-[#1F1F23] uppercase">{brand}</span>
           <Chevron size={14} />
         </LocalizedClientLink>
-        <h1 className="text-[18px] font-semibold text-[#1F1F23] leading-snug mt-2.5 line-clamp-2">
-          {product?.title}
-        </h1>
-        <p className="relative text-[15px] leading-[20px] text-[#8A8A96] mt-1 line-clamp-2">
-          {[product?.metadata?.color || "Black", product?.metadata?.gender || "Men", "calf suede", "All-season", "Made in Italy"].join(" · ")}
-          <a href="#details" className="absolute right-0 bottom-0 pl-8 text-[#2563EB] font-medium" style={{ background: "linear-gradient(90deg,transparent,#fff 40%)" }}>
-            More
-          </a>
-        </p>
+        <div
+          role="button"
+          aria-label="About this item"
+          onClick={() => setSheet("about")}
+          className="cursor-pointer"
+        >
+          <h1 className="text-[18px] font-semibold text-[#1F1F23] leading-snug mt-2.5 line-clamp-2">
+            {product?.title}
+          </h1>
+          <p className="relative text-[15px] leading-[20px] text-[#8A8A96] mt-1 line-clamp-2">
+            {[product?.metadata?.color || "Black", product?.metadata?.gender || "Men", "calf suede", "All-season", "Made in Italy"].join(" · ")}
+            <span className="absolute right-0 bottom-0 pl-8 text-[#2563EB] font-medium" style={{ background: "linear-gradient(90deg,transparent,#fff 40%)" }}>
+              More
+            </span>
+          </p>
+        </div>
 
         {/* seller card */}
         <LocalizedClientLink
@@ -469,16 +525,7 @@ export const WbProductMobile = ({
           {product?.description}
         </p>
         <h3 className="text-[17px] font-semibold text-[#1F1F23] mt-5">Characteristics</h3>
-        {[
-          ["Colour", product?.metadata?.color || "Black"],
-          ["Gender", product?.metadata?.gender || "Men"],
-          ["Material", "Calf suede (Veau Velours)"],
-          ["Sole", "Rubber, red lacquered outsole"],
-          ["Lining", "Tan calfskin leather"],
-          ["Season", "All-season"],
-          ["Origin", "Italy"],
-          ["Item No.", String(product?.id || "").replace("prod_", "").slice(-10)],
-        ].map(([k, v]) => (
+        {aboutRows.map(([k, v]) => (
           <div key={k} className="flex py-2.5 border-b border-[#F0F0F3] last:border-0">
             <span className="w-[42%] text-[15px] text-[#8A8A96]">{k}</span>
             <span className="w-[58%] text-[15px] text-[#1F1F23]">{v}</span>
@@ -562,6 +609,27 @@ export const WbProductMobile = ({
                   Split your payment into {pipParts} interest-free parts.
                   {amount != null ? ` That's ${num(Math.ceil(amount / pipParts))} XAF every 2 weeks, first payment 0 XAF at pickup.` : ""}
                 </p>
+              </>
+            )}
+            {sheet === "about" && (
+              <>
+                <h3 className="text-[20px] font-semibold text-[#1F1F23] leading-snug">{product?.title}</h3>
+                {product?.description && (
+                  <p className="text-[15px] leading-[22px] text-[#1F1F23]/80 mt-2 whitespace-pre-line">
+                    {product.description}
+                  </p>
+                )}
+                {aboutRows.length > 0 && (
+                  <>
+                    <h3 className="text-[17px] font-semibold text-[#1F1F23] mt-5">Characteristics</h3>
+                    {aboutRows.map(([k, v]) => (
+                      <div key={k} className="flex py-2.5 border-b border-[#E4E4EA] last:border-0">
+                        <span className="w-[42%] text-[15px] text-[#8A8A96] shrink-0">{k}</span>
+                        <span className="w-[58%] text-[15px] text-[#1F1F23]">{v}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
               </>
             )}
           </div>
