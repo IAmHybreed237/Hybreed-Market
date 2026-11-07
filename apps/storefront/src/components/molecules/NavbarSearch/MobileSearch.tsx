@@ -169,13 +169,18 @@ export const MobileSearch = ({
           className="fixed inset-0 z-[90] bg-white flex flex-col"
           style={{ animation: "searchOverlayIn .22s ease-out" }}
         >
-          <style>{`@keyframes searchOverlayIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}`}</style>
+          <style>{`
+            @keyframes searchOverlayIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+            @keyframes searchFieldIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+            @keyframes searchCancelIn{from{opacity:0;transform:translateX(52px)}to{opacity:1;transform:none}}
+          `}</style>
           <div
             className="px-3 pb-2.5 flex items-center gap-2 shrink-0 bg-white"
             style={{ paddingTop: "max(env(safe-area-inset-top), 10px)" }}
           >
             <form
               className="relative flex-1"
+              style={{ animation: "searchFieldIn .3s cubic-bezier(.2,.8,.2,1) both" }}
               onSubmit={(e) => {
                 e.preventDefault()
                 go()
@@ -208,12 +213,16 @@ export const MobileSearch = ({
               type="button"
               onClick={close}
               className="shrink-0 text-[15px] font-semibold text-[#2563EB] px-1"
+              style={{ animation: "searchCancelIn .3s cubic-bezier(.2,.8,.2,1) .07s both" }}
             >
               Cancel
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
+          <div
+            className="flex-1 overflow-y-auto overscroll-contain px-4 pb-8"
+            style={{ animation: "searchOverlayIn .25s ease-out .08s both" }}
+          >
             {searching ? (
               <div>
                 {suggestions.length === 0 && (
