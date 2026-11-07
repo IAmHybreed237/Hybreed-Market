@@ -82,7 +82,7 @@ export default async function SearchPage({
         }).catch(() => ({ products: [], count: 0, nextPage: null }))
       : Promise.resolve({ products: [], count: 0, nextPage: null }),
     getSearchFacets().catch(() => ({ attributes: {} }) as SearchFacets),
-    listCategories().catch(() => []),
+    listCategories().catch(() => ({ categories: [] }) as any),
   ])
 
   const priceOf = (p: any) =>
@@ -134,7 +134,7 @@ export default async function SearchPage({
         initialProducts={list}
         initialCount={count}
         facets={facets}
-        categories={categories as any[]}
+        categories={(categories as any)?.categories || []}
       />
       <SearchRedirectDesktop q={q} />
     </>

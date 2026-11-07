@@ -59,9 +59,14 @@ export const MobileSearch = ({
 
   useBodyScrollLock(open)
 
-  // focus the overlay input once it mounts
+  // focus the overlay input once it mounts — delayed so the body scroll-lock
+  // (position:fixed on iOS) settles first, otherwise iOS drops keyboard focus
   useEffect(() => {
-    if (open) overlayInputRef.current?.focus()
+    if (!open) return
+    const t = setTimeout(() => {
+      overlayInputRef.current?.focus({ preventScroll: true })
+    }, 80)
+    return () => clearTimeout(t)
   }, [open])
 
   const refreshLists = () => {
