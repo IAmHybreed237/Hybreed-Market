@@ -798,34 +798,36 @@ export const WbProductMobile = ({
               <>
                 <h3 className="text-[20px] font-semibold text-[#1F1F23] mb-1">Price breakdown</h3>
                 <p className="text-[14px] text-[#8A8A96] mb-4">
-                  Prices are shown including your personal discount
+                  Prices are shown including
+                  <br />
+                  your personal discount
                 </p>
                 <div className="grid grid-cols-2 gap-2.5">
-                  <div className="bg-white rounded-[20px] p-4 border-2 border-[#2563EB]">
-                    <span className="text-[13px] font-medium text-[#2563EB] uppercase tracking-wide">
-                      Hybreed Wallet
-                    </span>
-                    <p className="text-[20px] font-semibold text-[#1F1F23] mt-1.5">
+                  <div className="bg-white rounded-[20px] p-3 border-2 border-[#2563EB]">
+                    <p className="text-[20px] font-semibold text-[#1F1F23]">
                       {walletAmount != null ? `${num(walletAmount)} XAF` : "-"}
                     </p>
-                    <span className="inline-block mt-2 text-[12px] font-semibold text-white bg-[#2563EB] px-2 py-0.5 rounded-full">
+                    <span className="inline-block mt-1 text-[12px] font-medium text-[#2563EB] uppercase tracking-wide">
+                      Hybreed Wallet
+                    </span>
+                    <span className="inline-block ml-1.5 align-middle text-[11px] font-semibold text-white bg-[#2563EB] px-1.5 py-0.5 rounded-full">
                       −3%
                     </span>
                     {oldAmount && (
-                      <p className="text-[13px] text-[#8A8A96] line-through mt-2">
+                      <p className="text-[12px] text-[#8A8A96] line-through mt-1">
                         {num(oldAmount)} XAF
                       </p>
                     )}
                   </div>
-                  <div className="bg-white rounded-[20px] p-4">
-                    <span className="text-[13px] font-medium text-[#8A8A96] uppercase tracking-wide">
-                      Other payment
-                    </span>
-                    <p className="text-[20px] font-semibold text-[#1F1F23] mt-1.5">
+                  <div className="bg-white rounded-[20px] p-3">
+                    <p className="text-[20px] font-semibold text-[#1F1F23]">
                       {amount != null ? `${num(amount)} XAF` : "-"}
                     </p>
+                    <span className="inline-block mt-1 text-[12px] font-medium text-[#8A8A96] uppercase tracking-wide">
+                      Without Hybreed Wallet
+                    </span>
                     {oldAmount && (
-                      <p className="text-[13px] text-[#8A8A96] line-through mt-2">
+                      <p className="text-[12px] text-[#8A8A96] line-through mt-1">
                         {num(oldAmount)} XAF
                       </p>
                     )}
