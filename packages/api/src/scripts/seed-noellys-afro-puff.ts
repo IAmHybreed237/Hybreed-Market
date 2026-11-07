@@ -7,24 +7,19 @@ import {
 } from "@mercurjs/core/workflows"
 import { createProductCategoriesWorkflow } from "@medusajs/medusa/core-flows"
 
+import {
+  AFRO_PUFF_DESCRIPTION,
+  AFRO_PUFF_IMAGES,
+  AFRO_PUFF_METADATA,
+  AFRO_PUFF_SUBTITLE,
+  AFRO_PUFF_TITLE,
+} from "./noellys-afro-puff-content"
+
 const SELLER_EMAIL = "noellys@hybreed.dev"
+const COLOR = "Natural Black"
+const PRICE = 1800
 
-const DESCRIPTION = `Elevate your look with the ultimate blend of volume, definition, and luxury. This stunning 16-inch Water Wave Wig features a flawless, high-definition full frontal lace for an incredibly natural, seamless hairline. Crafted with an eye-catching brown-to-honey-blonde ombre highlight pattern, it offers effortless bounce and premium dimension right out of the box. Perfect for everyday glamour or special occasions.
-
-- Melted Hairline: The premium frontal lace mimics a natural scalp line, allowing you to wear it glueless or completely melted.
-- Pre-Highlighted Dimension: Skip the salon dye job - the professional golden-blonde highlights are perfectly placed to frame and brighten your face.
-- Low Maintenance Curls: The water wave texture holds its pattern beautifully and can be easily refreshed with a quick mist of water and leave-in conditioner.
-
-Specifications:
-- Hair Texture: Deep Water Wave (defined spiral curls with natural bounce)
-- Length: 16 Inches
-- Lace Type: Full Frontal Lace (ear-to-ear sheer mesh for versatile styling and realistic parting)
-- Color: Dimensional Chocolate Brown with Honey & Golden Blonde Highlights (ombre effect)
-- Cap Construction: Breathable, secure fit with adjustable straps`
-
-const COLOR = "Chocolate Brown Ombré"
-
-export default async function seedNoellysWaterwave({ container }: ExecArgs) {
+export default async function seedNoellysAfroPuff({ container }: ExecArgs) {
   const query = container.resolve("query") as any
   const logger = container.resolve("logger") as any
 
@@ -119,20 +114,17 @@ export default async function seedNoellysWaterwave({ container }: ExecArgs) {
     return
   }
 
-  const images = [1, 2, 3, 4].map(
-    (i) => `/images/noellys-waterwave/wig-${i}.png`
-  )
+  const images = AFRO_PUFF_IMAGES
 
   const { result: products } = await createProductsWorkflow(container).run({
     input: {
       created_by: memberId,
       products: [
         {
-          title: `Premium 16-Inch Water Wave Full Frontal Lace Wig`,
+          title: AFRO_PUFF_TITLE,
           handle,
-          subtitle:
-            "Deep water wave · Full frontal lace · Chocolate brown honey-blonde ombré",
-          description: DESCRIPTION,
+          subtitle: AFRO_PUFF_SUBTITLE,
+          description: AFRO_PUFF_DESCRIPTION,
           status: "published",
           category_ids: [catId],
           thumbnail: images[0],
@@ -155,8 +147,8 @@ export default async function seedNoellysWaterwave({ container }: ExecArgs) {
           ],
           variants: [
             {
-              title: `${COLOR} / 16"`,
-              sku: "NOELLYS-WW-16IN",
+              title: `${COLOR} / One Size`,
+              sku: "NOELLYS-AFROPUFF",
               options: {
                 Color: COLOR,
                 ...(conditionAttr ? { Condition: "New" } : {}),
@@ -164,20 +156,7 @@ export default async function seedNoellysWaterwave({ container }: ExecArgs) {
             },
           ],
           seller_ids: [seller.id],
-          metadata: {
-            brand: "Noellys' Hair",
-            gender: "Women",
-            condition: "New",
-            product_type: "Wigs",
-            breadcrumb: ["Beauty & Hair", "Women", "Wigs & Extensions"],
-            texture: "Deep Water Wave",
-            color: "Chocolate Brown with Honey & Golden Blonde Highlights (Ombré)",
-            length: "16 inches",
-            lace_type: "Full Frontal Lace - ear-to-ear",
-            cap: "Breathable cap, adjustable straps",
-            hairline: "High-definition lace, glueless or melted install",
-            country_of_origin: "Imported",
-          },
+          metadata: AFRO_PUFF_METADATA,
         },
       ],
     } as any,
@@ -194,18 +173,18 @@ export default async function seedNoellysWaterwave({ container }: ExecArgs) {
   const offers: CreateOfferDTO[] = variants.map((v) => ({
     seller_id: seller.id,
     created_by: memberId,
-    sku: `OFFER-NOELLYS-${v.sku}`,
+    sku: `OFFER-NOELLYS-AFRO-${v.sku}`,
     variant_id: v.id,
     shipping_profile_id: shippingProfileId,
     inventory_items: [
       {
-        sku: `OFFER-NOELLYS-${v.sku}`,
+        sku: `OFFER-NOELLYS-AFRO-${v.sku}`,
         stock_levels: [
           { location_id: stockLocation.id, stocked_quantity: 10 },
         ],
       },
     ],
-    prices: [{ amount: 22000, currency_code: "xaf" }],
+    prices: [{ amount: PRICE, currency_code: "xaf" }],
   }))
 
   await createOffersWorkflow(container).run({ input: { offers } })
