@@ -11,7 +11,11 @@ const isIOS = () =>
  * reliable on iOS Safari, so there the body is pinned and the scroll
  * position restored on unlock.
  */
-export const useBodyScrollLock = (active: boolean) => {
+export const useBodyScrollLock = (
+  active: boolean,
+  opts?: { pin?: boolean }
+) => {
+  const pin = opts?.pin !== false
   useEffect(() => {
     if (!active || typeof document === "undefined") return
 
@@ -27,7 +31,7 @@ export const useBodyScrollLock = (active: boolean) => {
     body.style.overflow = "hidden"
     document.documentElement.style.overscrollBehavior = "none"
 
-    if (isIOS()) {
+    if (pin && isIOS()) {
       body.style.position = "fixed"
       body.style.top = `-${scrollY}px`
       body.style.width = "100%"
@@ -36,7 +40,7 @@ export const useBodyScrollLock = (active: boolean) => {
     return () => {
       body.style.overflow = prev.overflow
       document.documentElement.style.overscrollBehavior = ""
-      if (isIOS()) {
+      if (pin && isIOS()) {
         body.style.position = prev.position
         body.style.top = prev.top
         body.style.width = prev.width

@@ -57,16 +57,13 @@ export const MobileSearch = ({
   const overlayInputRef = useRef<HTMLInputElement>(null)
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useBodyScrollLock(open)
+  // pin:false - iOS drops keyboard focus when body becomes position:fixed
+  useBodyScrollLock(open, { pin: false })
 
-  // focus the overlay input once it mounts — delayed so the body scroll-lock
-  // (position:fixed on iOS) settles first, otherwise iOS drops keyboard focus
+  // focus the overlay input on mount. The header input is never blurred, so
+  // focus transfers directly and the keyboard stays open.
   useEffect(() => {
-    if (!open) return
-    const t = setTimeout(() => {
-      overlayInputRef.current?.focus({ preventScroll: true })
-    }, 80)
-    return () => clearTimeout(t)
+    if (open) overlayInputRef.current?.focus({ preventScroll: true })
   }, [open])
 
   const refreshLists = () => {
@@ -81,7 +78,6 @@ export const MobileSearch = ({
     setRetracting(true)
     openTimer.current = setTimeout(() => {
       setRetracting(false)
-      headerInputRef.current?.blur()
       setOpen(true)
       refreshLists()
     }, RETRACT_MS)

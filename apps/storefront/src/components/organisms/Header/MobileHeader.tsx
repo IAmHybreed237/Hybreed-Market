@@ -49,12 +49,15 @@ export const MobileHeader = ({
   const onUserPage =
     pathname?.includes("/user") || pathname?.includes("/search")
 
-  // hide the whole header shell below lg on /user pages
+  // hide the whole header shell + its spacer below lg on /user and /search pages
   useEffect(() => {
     const el = document.querySelector('[data-testid="header"]')
-    if (!el) return
-    el.classList.toggle("hidden", Boolean(onUserPage))
-    el.classList.toggle("lg:block", Boolean(onUserPage))
+    const spacer = document.querySelector(
+      '[data-testid="mobile-header-spacer"]'
+    )
+    el?.classList.toggle("hidden", Boolean(onUserPage))
+    el?.classList.toggle("lg:block", Boolean(onUserPage))
+    spacer?.classList.toggle("hidden", Boolean(onUserPage))
   }, [onUserPage])
 
   if (onUserPage) return null
