@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react"
 import { useRouter } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { useCartContext } from "@/components/providers"
@@ -87,10 +87,14 @@ export const WbProductMobile = ({
   const [toast, setToast] = useState<string | null>(null)
   const [header, setHeader] = useState(false)
   const [sheet, setSheet] = useState<null | "sizes" | "delivery" | "parts" | "about">(null)
+  const [sheetClosing, setSheetClosing] = useState(false)
+  const [dragY, setDragY] = useState(0)
   const [viewerIdx, setViewerIdx] = useState<number | null>(null)
   const [tab, setTab] = useState<"like" | "buy">("like")
   const galleryRef = useRef<HTMLDivElement>(null)
   const sizesRef = useRef<HTMLDivElement>(null)
+  const sheetScrollRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<number | null>(null)
 
   const images = (product?.images || []).map((i: any) => i.url || i)
   const seller = product?.seller || offers?.[0]?.seller
@@ -124,6 +128,53 @@ export const WbProductMobile = ({
     const t = setTimeout(() => setToast(null), 2200)
     return () => clearTimeout(t)
   }, [toast])
+
+  useEffect(() => {
+    if (!sheet) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [sheet])
+
+  const openSheet = (s: "sizes" | "delivery" | "parts" | "about") => {
+    setSheetClosing(false)
+    setDragY(0)
+    setSheet(s)
+  }
+
+  const closeSheet = () => {
+    if (sheetClosing) return
+    const target = sheet
+    setSheetClosing(true)
+    setTimeout(() => {
+      setSheet((s) => (s === target ? null : s))
+      setSheetClosing(false)
+      setDragY(0)
+    }, 220)
+  }
+
+  const sheetTouchStart = (e: TouchEvent) => {
+    if (sheetScrollRef.current && sheetScrollRef.current.scrollTop <= 0) {
+      dragRef.current = e.touches[0].clientY
+    }
+  }
+  const sheetTouchMove = (e: TouchEvent) => {
+    if (dragRef.current == null) return
+    const dy = e.touches[0].clientY - dragRef.current
+    if (dy > 0) setDragY(dy)
+    else {
+      dragRef.current = null
+      setDragY(0)
+    }
+  }
+  const sheetTouchEnd = () => {
+    if (dragRef.current == null) return
+    dragRef.current = null
+    if (dragY > 90) closeSheet()
+    else setDragY(0)
+  }
 
   const sizes = useMemo(() => {
     const set = new Map<string, any>()
@@ -386,7 +437,7 @@ export const WbProductMobile = ({
             </div>
             <div className="mt-2 h-5 flex items-center justify-between">
               <span className="text-[15px] text-[#8A8A96]">83% True to size</span>
-              <button onClick={() => setSheet("sizes")} className="text-[15px] font-medium text-[#2563EB]">Size Chart</button>
+              <button onClick={() => openSheet("sizes")} className="text-[15px] font-medium text-[#2563EB]">Size Chart</button>
             </div>
           </div>
         )}
@@ -394,7 +445,7 @@ export const WbProductMobile = ({
 
       {/* 3. installments card */}
       {pipParts > 0 && (
-      <button id="installments" onClick={() => setSheet("parts")} className="w-full bg-white rounded-[28px] px-4 py-4 mb-1 flex items-center gap-3.5 text-left active:scale-[0.99] transition-transform">
+      <button id="installments" onClick={() => openSheet("parts")} className="w-full bg-white rounded-[28px] px-4 py-4 mb-1 flex items-center gap-3.5 text-left active:scale-[0.99] transition-transform">
         <img src="/images/installments.png" alt="" className="w-[35px] h-[35px] object-contain" />
         <span className="flex-1 min-w-0">
           <span className="block text-[17px] font-semibold text-[#1F1F23] leading-snug">
@@ -425,7 +476,7 @@ export const WbProductMobile = ({
       </div>
 
       {/* 5. delivery card */}
-      <button onClick={() => setSheet("delivery")} className="w-full bg-white rounded-[28px] p-4 mb-1 text-left active:scale-[0.99] transition-transform">
+      <button onClick={() => openSheet("delivery")} className="w-full bg-white rounded-[28px] p-4 mb-1 text-left active:scale-[0.99] transition-transform">
         <span className="flex items-center justify-between">
           <span className="text-[17px] font-semibold text-[#1F1F23]">Tomorrow</span>
           <span className="flex items-center gap-1 text-[15px] text-[#8A8A96]">Full Terms <Chevron /></span>
@@ -447,7 +498,7 @@ export const WbProductMobile = ({
         <div
           role="button"
           aria-label="About this item"
-          onClick={() => setSheet("about")}
+          onClick={() => openSheet("about")}
           className="cursor-pointer"
         >
           <h1 className="text-[18px] font-semibold text-[#1F1F23] leading-snug mt-2.5 line-clamp-2">
@@ -518,21 +569,6 @@ export const WbProductMobile = ({
         </div>
       </div>
 
-      {/* 8. about item */}
-      <div id="details" className="bg-white rounded-[28px] p-4 mb-1 scroll-mt-20">
-        <h2 className="text-[20px] font-semibold text-[#1F1F23]">About item</h2>
-        <p className="text-[15px] leading-[22px] text-[#1F1F23]/80 mt-2 whitespace-pre-line">
-          {product?.description}
-        </p>
-        <h3 className="text-[17px] font-semibold text-[#1F1F23] mt-5">Characteristics</h3>
-        {aboutRows.map(([k, v]) => (
-          <div key={k} className="flex py-2.5 border-b border-[#F0F0F3] last:border-0">
-            <span className="w-[42%] text-[15px] text-[#8A8A96]">{k}</span>
-            <span className="w-[58%] text-[15px] text-[#1F1F23]">{v}</span>
-          </div>
-        ))}
-      </div>
-
       {/* buy bar */}
       <div
         className="fixed left-0 right-0 z-[45] flex gap-2.5 px-3 pt-2 bg-[#F5F5F7] border-t border-[#E4E4EA]"
@@ -575,12 +611,32 @@ export const WbProductMobile = ({
         />
       )}
 
-      {/* simple bottom sheets */}
+      {/* bottom sheets */}
       {sheet && (
         <>
-          <div className="fixed inset-0 bg-black/40 z-[55]" onClick={() => setSheet(null)} />
-          <div className="fixed bottom-0 left-0 right-0 z-[56] bg-[#F5F5F7] rounded-t-[24px] p-5 pb-8 max-h-[70vh] overflow-y-auto">
-            <div className="w-10 h-1.5 rounded-full bg-[#D4D4DC] mx-auto mb-4" />
+          <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
+          <div className="fixed inset-0 bg-black/40 z-[55]" onClick={closeSheet} />
+          <div
+            className="fixed bottom-0 left-0 right-0 z-[56] bg-[#F5F5F7] rounded-t-[24px] max-h-[80vh] flex flex-col overflow-hidden"
+            style={{
+              transform: sheetClosing ? "translateY(105%)" : `translateY(${dragY}px)`,
+              transition:
+                dragRef.current == null
+                  ? "transform .24s cubic-bezier(.32,.72,0,1)"
+                  : "none",
+              animation: sheetClosing ? "none" : "sheetUp .28s cubic-bezier(.32,.72,0,1)",
+            }}
+            onTouchStart={sheetTouchStart}
+            onTouchMove={sheetTouchMove}
+            onTouchEnd={sheetTouchEnd}
+          >
+            <div className="pt-3 pb-2 shrink-0 flex justify-center cursor-grab touch-none">
+              <div className="w-10 h-1.5 rounded-full bg-[#D4D4DC]" />
+            </div>
+            <div
+              ref={sheetScrollRef}
+              className="overflow-y-auto px-5 pb-8 min-h-0 overscroll-contain"
+            >
             {sheet === "sizes" && (
               <>
                 <h3 className="text-[20px] font-semibold text-[#1F1F23] mb-3">Size chart</h3>
@@ -632,6 +688,7 @@ export const WbProductMobile = ({
                 )}
               </>
             )}
+            </div>
           </div>
         </>
       )}
