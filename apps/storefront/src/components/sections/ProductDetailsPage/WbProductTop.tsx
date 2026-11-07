@@ -20,6 +20,15 @@ const optionValue = (v: any, key: string) => {
   if (Array.isArray(o)) return o.find((x: any) => x.option?.title === key || x.option_title === key)?.value ?? o.find((x: any) => x.title === key)?.value
   return o[key]
 }
+const optionEntries = (v: any): [string, any][] => {
+  const o = v?.options
+  if (!o) return []
+  if (Array.isArray(o))
+    return o
+      .map((x: any) => [x.option?.title || x.option_title || x.title, x.value] as [string, any])
+      .filter(([k]) => k)
+  return Object.entries(o)
+}
 
 export const WbProductTop = ({
   product,
@@ -35,8 +44,10 @@ export const WbProductTop = ({
   const [imgIdx, setImgIdx] = useState(0)
   const [size, setSize] = useState<string | null>(null)
   const [color, setColor] = useState<string | null>(null)
+  const [extraSel, setExtraSel] = useState<Record<string, string>>({})
   const [sizeErr, setSizeErr] = useState(false)
   const [colorErr, setColorErr] = useState(false)
+  const [extraErr, setExtraErr] = useState(false)
   const [added, setAdded] = useState(false)
   const [viewerOpen, setViewerOpen] = useState(false)
 
@@ -66,6 +77,22 @@ export const WbProductTop = ({
     return [...set]
   }, [product])
 
+  // option axes other than Color/Size (e.g. "Pack") rendered as generic pickers
+  const extraAxes = useMemo(() => {
+    const map = new Map<string, Set<string>>()
+    for (const v of product?.variants || []) {
+      for (const [k, val] of optionEntries(v)) {
+        if (k === "Color" || k === "Size") continue
+        const set = map.get(k) ?? new Set<string>()
+        set.add(String(val))
+        map.set(k, set)
+      }
+    }
+    return [...map.entries()]
+      .filter(([, vals]) => vals.size > 1)
+      .map(([k, vals]) => [k, [...vals]] as [string, string[]])
+  }, [product])
+
   const colorImages = (product?.metadata?.color_images || {}) as Record<string, string>
 
   const selectedVariant = useMemo(() => {
@@ -74,10 +101,11 @@ export const WbProductTop = ({
       vs.find(
         (v: any) =>
           (!color || optionValue(v, "Color") === color) &&
-          (!size || optionValue(v, "Size") === size)
+          (!size || optionValue(v, "Size") === size) &&
+          Object.entries(extraSel).every(([k, val]) => optionValue(v, k) === val)
       ) || null
     )
-  }, [product, color, size])
+  }, [product, color, size, extraSel])
   const offer = useMemo(() => {
     if (!offers?.length) return null
     if (selectedVariant)
@@ -104,6 +132,18 @@ export const WbProductTop = ({
       maximumFractionDigits: 0,
     }).format(n)
 
+  const priceForOption = (key: string, val: string) => {
+    const v = (product?.variants || []).find((x: any) => optionValue(x, key) === val)
+    const o = v && offers?.find((x: any) => x.variant_id === v.id)
+    return (
+      o?.calculated_price?.calculated_amount ??
+      (o?.prices || []).find(
+        (p: any) => String(p.currency_code || "").toLowerCase() === "xaf"
+      )?.amount ??
+      null
+    )
+  }
+
   const buy = async (go: boolean) => {
     if (sizes.length && !size) {
       setSizeErr(true)
@@ -111,6 +151,10 @@ export const WbProductTop = ({
     }
     if (colors.length > 1 && !color) {
       setColorErr(true)
+      return
+    }
+    if (extraAxes.some(([key]) => !extraSel[key])) {
+      setExtraErr(true)
       return
     }
     if (!offer?.id) return
@@ -302,6 +346,43 @@ export const WbProductTop = ({
             </div>
           </div>
           )}
+
+          {/* other option axes (e.g. pack size) */}
+          {extraAxes.map(([key, vals]) => (
+            <div key={key} className="mt-6">
+              <div className="flex items-center justify-between mb-2.5">
+                <p className={`text-[15px] font-semibold ${extraErr ? "text-[#EF4444]" : "text-[#1F1F23]"}`}>
+                  {extraErr ? `Select ${key.toLowerCase()}` : key}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {vals.map((val) => {
+                  const p = priceForOption(key, val)
+                  return (
+                    <button
+                      key={val}
+                      onClick={() => {
+                        setExtraSel((s) => ({ ...s, [key]: val }))
+                        setExtraErr(false)
+                      }}
+                      className={`min-h-[44px] px-3.5 py-1.5 rounded-xl border text-[15px] font-semibold transition-colors flex flex-col items-center justify-center ${
+                        extraSel[key] === val
+                          ? "border-[#2563EB] bg-[#2563EB] text-white"
+                          : "border-[#E4E4EA] bg-white text-[#1F1F23] hover:border-[#2563EB]"
+                      }`}
+                    >
+                      <span>{val}</span>
+                      {p != null && (
+                        <span className={`text-[12px] font-normal ${extraSel[key] === val ? "text-white/80" : "text-[#8A8A96]"}`}>
+                          {fmt(p, "XAF")}
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
 
           {/* details card */}
           <div className="mt-6 bg-white rounded-[20px] p-5">

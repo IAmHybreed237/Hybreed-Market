@@ -41,6 +41,15 @@ const optionValue = (v: any, key: string) => {
   if (Array.isArray(o)) return o.find((x: any) => x.option?.title === key || x.option_title === key)?.value ?? o.find((x: any) => x.title === key)?.value
   return o[key]
 }
+const optionEntries = (v: any): [string, any][] => {
+  const o = v?.options
+  if (!o) return []
+  if (Array.isArray(o))
+    return o
+      .map((x: any) => [x.option?.title || x.option_title || x.title, x.value] as [string, any])
+      .filter(([k]) => k)
+  return Object.entries(o)
+}
 
 const num = (n: number) => n.toLocaleString("fr-FR").replace(/ /g, " ")
 
@@ -89,6 +98,7 @@ export const WbProductMobile = ({
   const [imgIdx, setImgIdx] = useState(0)
   const [size, setSize] = useState<string | null>(null)
   const [color, setColor] = useState<string | null>(null)
+  const [extraSel, setExtraSel] = useState<Record<string, string>>({})
   const [fav, setFav] = useState(false)
   const [followed, setFollowed] = useState(false)
   const [added, setAdded] = useState(false)
@@ -197,6 +207,22 @@ export const WbProductMobile = ({
     return [...set]
   }, [product])
 
+  // option axes other than Color/Size (e.g. "Pack") rendered as generic pills
+  const extraAxes = useMemo(() => {
+    const map = new Map<string, Set<string>>()
+    for (const v of product?.variants || []) {
+      for (const [k, val] of optionEntries(v)) {
+        if (k === "Color" || k === "Size") continue
+        const set = map.get(k) ?? new Set<string>()
+        set.add(String(val))
+        map.set(k, set)
+      }
+    }
+    return [...map.entries()]
+      .filter(([, vals]) => vals.size > 1)
+      .map(([k, vals]) => [k, [...vals]] as [string, string[]])
+  }, [product])
+
   const colorImages = (product?.metadata?.color_images || {}) as Record<string, string>
   const colorImg = (c: string) => colorImages[c] || null
 
@@ -206,10 +232,11 @@ export const WbProductMobile = ({
       vs.find(
         (v: any) =>
           (!color || optionValue(v, "Color") === color) &&
-          (!size || optionValue(v, "Size") === size)
+          (!size || optionValue(v, "Size") === size) &&
+          Object.entries(extraSel).every(([k, val]) => optionValue(v, k) === val)
       ) || null
     )
-  }, [product, color, size])
+  }, [product, color, size, extraSel])
 
   // when a color has its own photo, show it first in the gallery
   const displayImages = useMemo(() => {
@@ -237,6 +264,18 @@ export const WbProductMobile = ({
   const walletAmount = amount != null ? Math.round(amount * 0.97) : null
   const stock = offer?.inventory_quantity ?? null
   const outOfStock = stock !== null && stock <= 0
+
+  const priceForOption = (key: string, val: string) => {
+    const v = (product?.variants || []).find((x: any) => optionValue(x, key) === val)
+    const o = v && offers?.find((x: any) => x.variant_id === v.id)
+    return (
+      o?.calculated_price?.calculated_amount ??
+      (o?.prices || []).find(
+        (p: any) => String(p.currency_code || "").toLowerCase() === "xaf"
+      )?.amount ??
+      null
+    )
+  }
 
   const brand = seller?.name || "Hybreed"
   const typeName = product?.metadata?.product_type || "Sneakers"
@@ -276,6 +315,11 @@ export const WbProductMobile = ({
     }
     if (colors.length > 1 && !color) {
       setToast("Select a color")
+      return
+    }
+    const missingAxis = extraAxes.find(([key]) => !extraSel[key])
+    if (missingAxis) {
+      setToast(`Select ${missingAxis[0].toLowerCase()}`)
       return
     }
     if (!offer?.id) return
@@ -472,6 +516,35 @@ export const WbProductMobile = ({
             </div>
           </div>
         )}
+
+        {extraAxes.map(([key, vals]) => (
+          <div key={key} className="mt-3">
+            <p className="text-[14px] text-[#8A8A96] mb-1.5">{key}</p>
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide" style={{ scrollSnapType: "x proximity" }}>
+              {vals.map((val) => {
+                const p = priceForOption(key, val)
+                return (
+                  <button
+                    key={val}
+                    onClick={() => setExtraSel((s) => ({ ...s, [key]: val }))}
+                    className={`min-w-[110px] px-3 h-12 rounded-[14px] shrink-0 snap-start flex flex-col items-center justify-center transition-colors ${
+                      extraSel[key] === val
+                        ? "border-2 border-[#2563EB] bg-[#DBEAFE]"
+                        : "bg-[#F0F0F3]"
+                    }`}
+                  >
+                    <span className="text-[14px] font-medium text-[#1F1F23] leading-none">{val}</span>
+                    {p != null && (
+                      <span className="text-[12px] text-[#8A8A96] leading-none mt-0.5">
+                        {num(p)} XAF
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* 3. installments card */}
