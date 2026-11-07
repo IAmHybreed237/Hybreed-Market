@@ -70,6 +70,15 @@ export default defineMiddlewares({
       middlewares: [authenticate("customer", ["session", "bearer"])],
     },
     {
+      matcher: "/store/push/subscribe",
+      method: ["POST"],
+      middlewares: [
+        authenticate("customer", ["session", "bearer"], {
+          allowUnauthenticated: true,
+        }),
+      ],
+    },
+    {
       matcher: "/store/payment-collections/:id/payment-sessions",
       method: ["POST"],
       middlewares: [

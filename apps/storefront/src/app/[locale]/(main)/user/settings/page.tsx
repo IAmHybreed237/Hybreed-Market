@@ -1,6 +1,7 @@
 import { LoginForm, ProfileDetails } from "@/components/molecules"
 import { UserNavigation } from "@/components/molecules"
 import { ProfilePassword } from "@/components/molecules/ProfileDetails/ProfilePassword"
+import { PushNotificationsCard } from "@/components/molecules/PushNotificationsCard/PushNotificationsCard"
 import { retrieveCustomer } from "@/lib/data/customer"
 
 export default async function ReviewsPage() {
@@ -16,6 +17,7 @@ export default async function ReviewsPage() {
           <h1 className="heading-md uppercase mb-8">Settings</h1>
           <ProfileDetails user={user} />
           <ProfilePassword user={user} />
+          <PushNotificationsCard />
         </div>
       </div>
     </main>

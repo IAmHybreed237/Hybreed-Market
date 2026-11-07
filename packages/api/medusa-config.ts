@@ -84,6 +84,9 @@ module.exports = withMercur({
       resolve: './src/modules/wallet',
     },
     {
+      resolve: './src/modules/push-notifications',
+    },
+    {
       resolve: '@medusajs/medusa/file',
       options: {
         providers: [
