@@ -103,7 +103,7 @@ export default async function seedNoellysAfroPuff({ container }: ExecArgs) {
   const valueId = (attr: any, name: string) =>
     attr.values.find((v: any) => v.name === name)?.id
 
-  const handle = "noellys-16in-waterwave-frontal-wig"
+  const handle = "noellys-afro-puff-postiche"
   const { data: existing } = await query.graph({
     entity: "product",
     fields: ["id"],
