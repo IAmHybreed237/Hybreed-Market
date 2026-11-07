@@ -36,6 +36,17 @@ export const ProductDetailsPage = async ({
       <TrackView
         productId={prod.id}
         categoryIds={(prod as any).categories?.map((c: any) => c.id) || []}
+        info={{
+          title: prod.title,
+          handle: prod.handle,
+          image:
+            (prod as any).thumbnail ||
+            (prod.images?.[0] as any)?.url ||
+            undefined,
+          price:
+            (prod.variants?.[0] as any)?.calculated_price?.calculated_amount ??
+            null,
+        }}
       />
       <div data-testid="product-details-page" className="hidden md:block">
         <WbProductTop

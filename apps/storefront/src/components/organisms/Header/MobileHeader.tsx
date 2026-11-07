@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
-import { NavbarSearch } from "@/components/molecules/NavbarSearch/NavbarSearch"
+import { MobileSearch } from "@/components/molecules/NavbarSearch/MobileSearch"
 import { LocationSelector } from "@/components/molecules/LocationSelector/LocationSelector"
 
 const ads = [
@@ -21,6 +21,8 @@ export const MobileHeader = ({
   savedLocation?: string | null
 }) => {
   const [prog, setProg] = useState(0) // 0 = fully expanded, 1 = fully retracted
+  const [searchActive, setSearchActive] = useState(false)
+  const effectiveProg = searchActive ? 1 : prog
 
   useEffect(() => {
     let raf = 0
@@ -59,9 +61,9 @@ export const MobileHeader = ({
       <div
         className="flex items-center justify-between px-3 overflow-hidden"
         style={{
-          maxHeight: `${(1 - prog) * 44}px`,
-          opacity: 1 - prog,
-          paddingTop: `${(1 - prog) * 8}px`,
+          maxHeight: `${(1 - effectiveProg) * 44}px`,
+          opacity: 1 - effectiveProg,
+          paddingTop: `${(1 - effectiveProg) * 8}px`,
         }}
       >
         <LocationSelector
@@ -95,17 +97,17 @@ export const MobileHeader = ({
 
       {/* Row 2 - search: always visible */}
       <div className="px-3 pt-2.5" data-testid="header-search-mobile">
-        <NavbarSearch />
+        <MobileSearch onActiveChange={setSearchActive} />
       </div>
 
       {/* Row 3 - ads: retracts on scroll down */}
       <div
         className="flex gap-5 px-3 scrollbar-hide overflow-hidden"
         style={{
-          maxHeight: `${(1 - prog) * 88}px`,
-          opacity: 1 - prog,
-          paddingTop: `${(1 - prog) * 12}px`,
-          paddingBottom: `${(1 - prog) * 20}px`,
+          maxHeight: `${(1 - effectiveProg) * 88}px`,
+          opacity: 1 - effectiveProg,
+          paddingTop: `${(1 - effectiveProg) * 12}px`,
+          paddingBottom: `${(1 - effectiveProg) * 20}px`,
         }}
       >
         {ads.map((ad) => (

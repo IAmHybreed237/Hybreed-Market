@@ -4,7 +4,8 @@ const KEY = "hb_behavior"
 const MAX_VIEWS = 24
 const MAX_SEARCHES = 20
 
-type View = { id: string; cats: string[]; at: number }
+export type ViewInfo = { title: string; handle: string; image?: string; price?: number | null }
+type View = { id: string; cats: string[]; at: number; info?: ViewInfo }
 type Behavior = { views: View[]; searches: string[]; cats: Record<string, number> }
 
 const empty: Behavior = { views: [], searches: [], cats: {} }
@@ -26,10 +27,14 @@ function write(b: Behavior) {
 }
 
 /** Record a product view - bumps its categories in the profile. */
-export function trackView(productId: string, categoryIds: string[] = []) {
+export function trackView(
+  productId: string,
+  categoryIds: string[] = [],
+  info?: ViewInfo
+) {
   const b = read()
   b.views = [
-    { id: productId, cats: categoryIds, at: Date.now() },
+    { id: productId, cats: categoryIds, at: Date.now(), info },
     ...b.views.filter((v) => v.id !== productId),
   ].slice(0, MAX_VIEWS)
   for (const c of categoryIds) b.cats[c] = (b.cats[c] || 0) + 1
@@ -43,6 +48,16 @@ export function trackSearch(term: string) {
   write(b)
 }
 
+export function getSearches(n = 10): string[] {
+  return read().searches.slice(0, n)
+}
+
+export function removeSearch(term: string) {
+  const b = read()
+  b.searches = b.searches.filter((s) => s !== term)
+  write(b)
+}
+
 /** Most-viewed category ids, weighted. */
 export function getTopCategories(n = 3): string[] {
   return Object.entries(read().cats)
@@ -53,6 +68,13 @@ export function getTopCategories(n = 3): string[] {
 
 export function getRecent(n = 12): string[] {
   return read().views.slice(0, n).map((v) => v.id)
+}
+
+export function getRecentProducts(n = 10): ViewInfo[] {
+  return read()
+    .views.slice(0, n)
+    .map((v) => v.info)
+    .filter((i): i is ViewInfo => Boolean(i?.handle))
 }
 
 export function hasProfile(): boolean {
