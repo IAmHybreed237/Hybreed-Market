@@ -803,34 +803,26 @@ export const WbProductMobile = ({
                   your personal discount
                 </p>
                 <div className="grid grid-cols-2 gap-2.5">
-                  <div className="bg-white rounded-[20px] p-3 border-2 border-[#2563EB]">
-                    <p className="text-[20px] font-semibold text-[#1F1F23]">
+                  <div className="bg-white rounded-[20px] px-3 py-2.5 border-2 border-[#2563EB]">
+                    <p className="text-[20px] font-semibold text-[#1F1F23] leading-tight">
                       {walletAmount != null ? `${num(walletAmount)} XAF` : "-"}
                     </p>
-                    <span className="inline-block mt-1 text-[12px] font-medium text-[#2563EB] uppercase tracking-wide">
-                      Hybreed Wallet
-                    </span>
-                    <span className="inline-block ml-1.5 align-middle text-[11px] font-semibold text-white bg-[#2563EB] px-1.5 py-0.5 rounded-full">
-                      −3%
-                    </span>
-                    {oldAmount && (
-                      <p className="text-[12px] text-[#8A8A96] line-through mt-1">
-                        {num(oldAmount)} XAF
-                      </p>
-                    )}
+                    <p className="text-[13px] font-medium text-[#2563EB] mt-1">
+                      With Hybreed Wallet
+                    </p>
                   </div>
-                  <div className="bg-white rounded-[20px] p-3">
-                    <p className="text-[20px] font-semibold text-[#1F1F23]">
+                  <div className="bg-white rounded-[20px] px-3 py-2.5">
+                    <p className="text-[20px] font-semibold text-[#1F1F23] leading-tight">
                       {amount != null ? `${num(amount)} XAF` : "-"}
                     </p>
-                    <span className="inline-block mt-1 text-[12px] font-medium text-[#8A8A96] uppercase tracking-wide">
-                      Without Hybreed Wallet
-                    </span>
                     {oldAmount && (
-                      <p className="text-[12px] text-[#8A8A96] line-through mt-1">
+                      <p className="text-[12px] text-[#8A8A96] line-through mt-0.5">
                         {num(oldAmount)} XAF
                       </p>
                     )}
+                    <p className="text-[13px] font-medium text-[#8A8A96] mt-1">
+                      Without Hybreed Wallet
+                    </p>
                   </div>
                 </div>
                 <p className="text-[13px] text-[#8A8A96] mt-3 leading-[18px]">
