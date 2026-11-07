@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { useCartContext } from "@/components/providers"
 import { VerifiedBadge } from "@/components/atoms/VerifiedBadge/VerifiedBadge"
+import { ProductImageViewer } from "@/components/organisms/ProductImageViewer/ProductImageViewer"
 
 const Clover = ({ size = 16, color = "#2563EB" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={color} aria-hidden>
@@ -62,6 +63,7 @@ export const WbProductMobile = ({
   const [toast, setToast] = useState<string | null>(null)
   const [header, setHeader] = useState(false)
   const [sheet, setSheet] = useState<null | "sizes" | "delivery" | "parts">(null)
+  const [viewerIdx, setViewerIdx] = useState<number | null>(null)
   const [tab, setTab] = useState<"like" | "buy">("like")
   const galleryRef = useRef<HTMLDivElement>(null)
   const sizesRef = useRef<HTMLDivElement>(null)
@@ -220,7 +222,13 @@ export const WbProductMobile = ({
           }}
         >
           {displayImages.map((src: string, i: number) => (
-            <div key={i} className="w-full shrink-0 aspect-[0.95] snap-start relative bg-[#E7E7EA]">
+            <div
+              key={i}
+              className="w-full shrink-0 aspect-[0.95] snap-start relative bg-[#E7E7EA] cursor-zoom-in"
+              onClick={() => setViewerIdx(i)}
+              role="button"
+              aria-label="View photos fullscreen"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={src} alt={product?.title} loading={i === 0 ? "eager" : "lazy"} className="absolute inset-0 w-full h-full object-cover" />
             </div>
@@ -510,6 +518,14 @@ export const WbProductMobile = ({
         <div className="fixed left-1/2 -translate-x-1/2 z-[60] bg-[#1F1F23] text-white text-[15px] font-medium px-5 py-3 rounded-2xl" style={{ bottom: "calc(56px + 8px + 52px + 20px + env(safe-area-inset-bottom,0px))" }}>
           {toast}
         </div>
+      )}
+
+      {viewerIdx !== null && (
+        <ProductImageViewer
+          images={displayImages}
+          index={viewerIdx}
+          onClose={() => setViewerIdx(null)}
+        />
       )}
 
       {/* simple bottom sheets */}

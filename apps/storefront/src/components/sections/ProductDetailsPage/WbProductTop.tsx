@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { useCartContext } from "@/components/providers"
 import { VerifiedBadge } from "@/components/atoms/VerifiedBadge/VerifiedBadge"
+import { ProductImageViewer } from "@/components/organisms/ProductImageViewer/ProductImageViewer"
 
 const Chevron = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="9 18 15 12 9 6"/></svg>
@@ -34,6 +35,7 @@ export const WbProductTop = ({
   const [sizeErr, setSizeErr] = useState(false)
   const [colorErr, setColorErr] = useState(false)
   const [added, setAdded] = useState(false)
+  const [viewerOpen, setViewerOpen] = useState(false)
 
   const images = (product?.images || []).map((i: any) => i.url || i)
   const seller = product?.seller || offers?.[0]?.seller
@@ -154,7 +156,12 @@ export const WbProductTop = ({
                 ))}
               </div>
             )}
-            <div className="relative flex-1 aspect-[3/4] rounded-[24px] overflow-hidden bg-[#F6F6F9]">
+            <div
+              className="relative flex-1 aspect-[3/4] rounded-[24px] overflow-hidden bg-[#F6F6F9] cursor-zoom-in"
+              onClick={() => images.length > 0 && setViewerOpen(true)}
+              role="button"
+              aria-label="View photos fullscreen"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={images[imgIdx]}
@@ -404,6 +411,14 @@ export const WbProductTop = ({
           </div>
         </aside>
       </div>
+
+      {viewerOpen && (
+        <ProductImageViewer
+          images={images}
+          index={imgIdx}
+          onClose={() => setViewerOpen(false)}
+        />
+      )}
     </div>
   )
 }
