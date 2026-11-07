@@ -32,7 +32,7 @@ const HeartIcon = ({ size = 28, filled = false, color = "#fff" }: { size?: numbe
 const ShareIcon = ({ size = 28, color = "#fff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.6" y1="10.6" x2="15.4" y2="6.4" /><line x1="8.6" y1="13.4" x2="15.4" y2="17.6" /></svg>
 )
-const WalletIcon = ({ size = 18, color = "#2563EB" }: { size?: number; color?: string }) => (
+const WalletIcon = ({ size = 18, color = "#FA1F4B" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M20 7H4a2 2 0 0 1 0-4h13a2 2 0 0 1 2 2v2M4 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2" /></svg>
 )
 const optionValue = (v: any, key: string) => {
@@ -394,11 +394,11 @@ export const WbProductMobile = ({
           aria-label="Price breakdown"
         >
           <WalletIcon size={18} />
-          <p className="text-[17px] font-semibold text-[#FA1F4B] leading-[22px]">
+          <p className="text-[18px] font-semibold text-[#FA1F4B] leading-[24px]">
             {amount != null ? `${num(amount)} XAF` : "-"}
           </p>
           {oldAmount && (
-            <p className="text-[16px] text-[#8A8A96] line-through">{num(oldAmount)} XAF</p>
+            <p className="text-[15px] text-[#8A8A96] line-through">{num(oldAmount)} XAF</p>
           )}
         </button>
 
