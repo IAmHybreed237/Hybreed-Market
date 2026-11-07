@@ -14,6 +14,15 @@ const isStandalone = () =>
   (window.matchMedia?.("(display-mode: standalone)").matches ||
     (navigator as { standalone?: boolean }).standalone === true)
 
+const isDue = () => {
+  const opens = Number(localStorage.getItem(OPENS_KEY) || "0") + 1
+  localStorage.setItem(OPENS_KEY, String(opens))
+  const last = Number(localStorage.getItem(SNOOZE_KEY) || "0")
+  return Date.now() - last > SNOOZE_MS && opens % PROMPT_EVERY_N_OPENS === 1
+}
+
+const markAsked = () => localStorage.setItem(SNOOZE_KEY, String(Date.now()))
+
 export const PushPermissionPrompt = () => {
   const [show, setShow] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -31,17 +40,24 @@ export const PushPermissionPrompt = () => {
         return
       }
       if (state.permission !== "default" || state.subscribed) return
+      if (!isDue()) return
 
-      const opens = Number(localStorage.getItem(OPENS_KEY) || "0") + 1
-      localStorage.setItem(OPENS_KEY, String(opens))
-
-      const last = Number(localStorage.getItem(SNOOZE_KEY) || "0")
-      const due = Date.now() - last > SNOOZE_MS
-      const cadence = opens % PROMPT_EVERY_N_OPENS === 1
-      if (due && cadence && !cancelled) {
-        localStorage.setItem(SNOOZE_KEY, String(Date.now()))
-        setShow(true)
+      // Ask natively on open, same as the location prompt. Some browsers
+      // (iOS Safari) ignore requests without a user gesture and return
+      // "default" — for those we show the banner so the user can tap.
+      markAsked()
+      try {
+        const perm = await Notification.requestPermission()
+        if (cancelled) return
+        if (perm === "granted") {
+          await subscribeToPush()
+          return
+        }
+        if (perm === "denied") return
+      } catch {
+        // fall through to banner
       }
+      if (!cancelled) setShow(true)
     }
     run()
     return () => {
