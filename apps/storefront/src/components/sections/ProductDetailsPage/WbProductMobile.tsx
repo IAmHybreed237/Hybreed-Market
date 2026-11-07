@@ -6,7 +6,6 @@ import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedL
 import { useCartContext } from "@/components/providers"
 import { VerifiedBadge } from "@/components/atoms/VerifiedBadge/VerifiedBadge"
 import { ProductImageViewer } from "@/components/organisms/ProductImageViewer/ProductImageViewer"
-import { ProductVideo } from "@/components/molecules/ProductVideo/ProductVideo"
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 const Clover = ({ size = 16, color = "#2563EB" }: { size?: number; color?: string }) => (
@@ -290,6 +289,18 @@ export const WbProductMobile = ({
       : null
   const priceAccent = oldAmount != null && !onSale ? "#2563EB" : "#FA1F4B"
 
+  // gallery = product images + optional video slide (appended last)
+  const galleryItems = useMemo(() => {
+    const items = displayImages.map((src: string) => ({
+      type: "image" as const,
+      src,
+    }))
+    if (md.video_url)
+      items.push({ type: "video" as const, src: String(md.video_url) })
+    return items
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayImages, md.video_url])
+
   const aboutRows = useMemo(() => {
     const rows: [string, string][] = []
     const seen = new Set<string>()
@@ -380,12 +391,39 @@ export const WbProductMobile = ({
             setImgIdx(Math.round(el.scrollLeft / el.clientWidth))
           }}
         >
-          {displayImages.map((src: string, i: number) => (
+          {galleryItems.map((item: { type: "image" | "video"; src: string }, i: number) =>
+            item.type === "video" ? (
+              <div
+                key="video"
+                className="w-full shrink-0 snap-start relative bg-black"
+                style={{
+                  aspectRatio: String(imgRatios[displayImages[0]] ?? 0.95),
+                  maxHeight: "85svh",
+                }}
+                onClick={(e) => {
+                  const v = e.currentTarget.querySelector("video")
+                  if (v) v.muted = !v.muted
+                }}
+              >
+                {/* mount only near the active slide so it autoplays on swipe-in */}
+                {Math.abs(i - imgIdx) <= 1 && (
+                  <video
+                    src={item.src}
+                    poster={displayImages[0]}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )}
+              </div>
+            ) : (
             <div
               key={i}
               className="w-full shrink-0 snap-start relative bg-[#E7E7EA] cursor-zoom-in"
               style={{
-                aspectRatio: String(imgRatios[src] ?? 0.95),
+                aspectRatio: String(imgRatios[item.src] ?? 0.95),
                 maxHeight: "85svh",
               }}
               onClick={() => setViewerIdx(i)}
@@ -394,7 +432,7 @@ export const WbProductMobile = ({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={src}
+                src={item.src}
                 alt={product?.title}
                 loading={i === 0 ? "eager" : "lazy"}
                 className="absolute inset-0 w-full h-full object-cover"
@@ -406,12 +444,13 @@ export const WbProductMobile = ({
                     Math.max(0.75, img.naturalWidth / img.naturalHeight)
                   )
                   setImgRatios((prev) =>
-                    prev[src] === ratio ? prev : { ...prev, [src]: ratio }
+                    prev[item.src] === ratio ? prev : { ...prev, [item.src]: ratio }
                   )
                 }}
               />
             </div>
-          ))}
+            )
+          )}
         </div>
         {/* overlay buttons */}
         {!header && (
@@ -448,13 +487,6 @@ export const WbProductMobile = ({
           Similar Items
         </button>
       </div>
-
-      {/* product video */}
-      {md.video_url && (
-        <div className="mx-4 mt-2 mb-1 rounded-[20px] overflow-hidden">
-          <ProductVideo url={md.video_url} poster={images[0]} />
-        </div>
-      )}
 
       {/* 2. main card */}
       <div className="bg-white rounded-b-[28px] px-4 pt-3 pb-4 mb-1">
