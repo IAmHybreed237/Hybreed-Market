@@ -87,11 +87,12 @@ export const WbProductMobile = ({
   const [shake, setShake] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [header, setHeader] = useState(false)
-  const [sheet, setSheet] = useState<null | "sizes" | "delivery" | "parts" | "about">(null)
+  const [sheet, setSheet] = useState<null | "sizes" | "delivery" | "parts" | "about" | "price">(null)
   const [sheetClosing, setSheetClosing] = useState(false)
   const [dragY, setDragY] = useState(0)
   const [viewerIdx, setViewerIdx] = useState<number | null>(null)
   const [tab, setTab] = useState<"like" | "buy">("like")
+  const [imgRatios, setImgRatios] = useState<Record<string, number>>({})
   const galleryRef = useRef<HTMLDivElement>(null)
   const sizesRef = useRef<HTMLDivElement>(null)
   const sheetScrollRef = useRef<HTMLDivElement>(null)
@@ -132,7 +133,7 @@ export const WbProductMobile = ({
 
   useBodyScrollLock(!!sheet)
 
-  const openSheet = (s: "sizes" | "delivery" | "parts" | "about") => {
+  const openSheet = (s: "sizes" | "delivery" | "parts" | "about" | "price") => {
     setSheetClosing(false)
     setDragY(0)
     setSheet(s)
@@ -223,6 +224,9 @@ export const WbProductMobile = ({
     (offer?.prices || []).find((p: any) => String(p.currency_code || "").toLowerCase() === "xaf")?.amount
   const origAmount = offer?.calculated_price?.original_amount
   const oldAmount = origAmount != null && amount != null && origAmount > amount ? origAmount : null
+  // Hybreed Wallet orders get an extra 3% off (WALLET3 promo) on top of the
+  // displayed price, which already includes any personal discount.
+  const walletAmount = amount != null ? Math.round(amount * 0.97) : null
   const stock = offer?.inventory_quantity ?? null
   const outOfStock = stock !== null && stock <= 0
 
@@ -318,13 +322,33 @@ export const WbProductMobile = ({
           {displayImages.map((src: string, i: number) => (
             <div
               key={i}
-              className="w-full shrink-0 aspect-[0.95] snap-start relative bg-[#E7E7EA] cursor-zoom-in"
+              className="w-full shrink-0 snap-start relative bg-[#E7E7EA] cursor-zoom-in"
+              style={{
+                aspectRatio: String(imgRatios[src] ?? 0.95),
+                maxHeight: "85svh",
+              }}
               onClick={() => setViewerIdx(i)}
               role="button"
               aria-label="View photos fullscreen"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt={product?.title} loading={i === 0 ? "eager" : "lazy"} className="absolute inset-0 w-full h-full object-cover" />
+              <img
+                src={src}
+                alt={product?.title}
+                loading={i === 0 ? "eager" : "lazy"}
+                className="absolute inset-0 w-full h-full object-cover"
+                onLoad={(e) => {
+                  const img = e.currentTarget
+                  if (!img.naturalWidth || !img.naturalHeight) return
+                  const ratio = Math.min(
+                    1.5,
+                    Math.max(0.75, img.naturalWidth / img.naturalHeight)
+                  )
+                  setImgRatios((prev) =>
+                    prev[src] === ratio ? prev : { ...prev, [src]: ratio }
+                  )
+                }}
+              />
             </div>
           ))}
         </div>
@@ -361,14 +385,18 @@ export const WbProductMobile = ({
 
       {/* 2. main card */}
       <div className="bg-white rounded-b-[28px] px-4 pt-3 pb-4 mb-1">
-        <div className="flex items-baseline gap-1.5 h-7">
+        <button
+          onClick={() => openSheet("price")}
+          className="flex items-baseline gap-1.5 h-7 w-full text-left"
+          aria-label="Price breakdown"
+        >
           <p className="text-[23px] font-semibold text-[#FA1F4B] leading-[28px]">
             {amount != null ? `${num(amount)} XAF` : "-"}
           </p>
           {oldAmount && (
             <p className="text-[16px] text-[#8A8A96] line-through">{num(oldAmount)} XAF</p>
           )}
-        </div>
+        </button>
 
         {pipParts > 0 && (
           <button onClick={() => scrollToId("installments")} className="mt-1.5 h-[22px] px-2.5 rounded-full bg-[#DBEAFE] inline-flex items-center gap-1.5">
@@ -658,6 +686,48 @@ export const WbProductMobile = ({
                 <p className="text-[15px] text-[#1F1F23]/80 leading-[22px]">
                   Split your payment into {pipParts} interest-free parts.
                   {amount != null ? ` That's ${num(Math.ceil(amount / pipParts))} XAF every 2 weeks, first payment 0 XAF at pickup.` : ""}
+                </p>
+              </>
+            )}
+            {sheet === "price" && (
+              <>
+                <h3 className="text-[20px] font-semibold text-[#1F1F23] mb-1">Price breakdown</h3>
+                <p className="text-[14px] text-[#8A8A96] mb-4">
+                  Prices are shown including your personal discount
+                </p>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="bg-white rounded-[20px] p-4 border-2 border-[#2563EB]">
+                    <span className="text-[13px] font-medium text-[#2563EB] uppercase tracking-wide">
+                      Hybreed Wallet
+                    </span>
+                    <p className="text-[20px] font-semibold text-[#1F1F23] mt-1.5">
+                      {walletAmount != null ? `${num(walletAmount)} XAF` : "-"}
+                    </p>
+                    <span className="inline-block mt-2 text-[12px] font-semibold text-white bg-[#2563EB] px-2 py-0.5 rounded-full">
+                      −3%
+                    </span>
+                    {oldAmount && (
+                      <p className="text-[13px] text-[#8A8A96] line-through mt-2">
+                        {num(oldAmount)} XAF
+                      </p>
+                    )}
+                  </div>
+                  <div className="bg-white rounded-[20px] p-4">
+                    <span className="text-[13px] font-medium text-[#8A8A96] uppercase tracking-wide">
+                      Other payment
+                    </span>
+                    <p className="text-[20px] font-semibold text-[#1F1F23] mt-1.5">
+                      {amount != null ? `${num(amount)} XAF` : "-"}
+                    </p>
+                    {oldAmount && (
+                      <p className="text-[13px] text-[#8A8A96] line-through mt-2">
+                        {num(oldAmount)} XAF
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <p className="text-[13px] text-[#8A8A96] mt-3 leading-[18px]">
+                  Paying with Hybreed Wallet gives you an extra 3% off your order.
                 </p>
               </>
             )}
