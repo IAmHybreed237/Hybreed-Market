@@ -47,9 +47,12 @@ export async function generateMetadata({
   })
 
   const title = "Home"
+  const siteName =
+    process.env.NEXT_PUBLIC_SITE_NAME || "Hybreed"
   const description =
-    "Welcome to Mercur B2C Demo! Create a modern marketplace that you own and customize in every aspect with high-performance, fully customizable storefront."
-  const ogImage = "/B2C_Storefront_Open_Graph.png"
+    process.env.NEXT_PUBLIC_SITE_DESCRIPTION ||
+    "Marketplace for Cameroon - buy, sell, and bid on everything. Every order protected by Hybreed Escrow."
+  const ogImage = "/images/hero/banner-desktop-home.png"
 
   return {
     title,
@@ -70,30 +73,23 @@ export async function generateMetadata({
       languages,
     },
     openGraph: {
-      title: `${title} | ${
-        process.env.NEXT_PUBLIC_SITE_NAME ||
-        "Mercur B2C Demo - Marketplace Storefront"
-      }`,
+      title: siteName,
       description,
       url: canonical,
-      siteName:
-        process.env.NEXT_PUBLIC_SITE_NAME ||
-        "Mercur B2C Demo - Marketplace Storefront",
+      siteName,
       type: "website",
       images: [
         {
           url: ogImage.startsWith("http") ? ogImage : `${baseUrl}${ogImage}`,
           width: 1200,
           height: 630,
-          alt:
-            process.env.NEXT_PUBLIC_SITE_NAME ||
-            "Mercur B2C Demo - Marketplace Storefront",
+          alt: siteName,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: siteName,
       description,
       images: [ogImage.startsWith("http") ? ogImage : `${baseUrl}${ogImage}`],
     },
@@ -112,9 +108,7 @@ export default async function Home({
   const protocol = headersList.get("x-forwarded-proto") || "https"
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`
 
-  const siteName =
-    process.env.NEXT_PUBLIC_SITE_NAME ||
-    "Mercur B2C Demo - Marketplace Storefront"
+  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "Hybreed"
 
   return (
     <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start text-primary">
