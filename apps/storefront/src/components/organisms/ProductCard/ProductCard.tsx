@@ -13,9 +13,9 @@ const HeartIcon = ({ filled }: { filled: boolean }) => (
     <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z" />
   </svg>
 )
-const BagIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="#FA1F4B" aria-hidden>
-    <path d="M6 7V6a6 6 0 1 1 12 0v1h3l-1.2 13.2a2 2 0 0 1-2 1.8H6.2a2 2 0 0 1-2-1.8L3 7h3zm2 0h8V6a4 4 0 1 0-8 0v1z" />
+const WalletIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M20 7H4a2 2 0 0 1 0-4h13a2 2 0 0 1 2 2v2M4 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2" />
   </svg>
 )
 const StarIcon = () => (
@@ -166,7 +166,7 @@ export const ProductCard = ({
       >
         <div className="mt-2.5" data-testid="product-card-info">
           <div className="flex items-center gap-1.5" data-testid="product-card-price">
-            <BagIcon />
+            <WalletIcon />
             <p className="text-[16px] font-bold text-[#FA1F4B]" data-testid="product-card-current-price">
               {priceStr}
             </p>

@@ -29,9 +29,9 @@ const CheckIcon = () => (
     <polyline points="20 6 9 17 4 12" />
   </svg>
 )
-const TagIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="#E11D48" aria-hidden>
-    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+const WalletIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M20 7H4a2 2 0 0 1 0-4h13a2 2 0 0 1 2 2v2M4 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2" />
   </svg>
 )
 const StarIcon = () => (
@@ -240,7 +240,7 @@ export const MobileProductCard = ({ p }: { p: any }) => {
       {/* text block */}
       <div className="px-2.5 pt-2 pb-1 flex flex-col gap-[3px]">
         <div className="flex items-start gap-1.5">
-          <TagIcon />
+          <WalletIcon />
           <div className="flex flex-col leading-tight">
             <span
               className="text-[17px] font-medium"
