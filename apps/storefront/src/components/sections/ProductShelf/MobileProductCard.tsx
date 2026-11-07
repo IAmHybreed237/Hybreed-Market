@@ -243,7 +243,7 @@ export const MobileProductCard = ({ p }: { p: any }) => {
           <TagIcon />
           <div className="flex flex-col leading-tight">
             <span
-              className="text-[18px] font-semibold"
+              className="text-[17px] font-medium"
               style={{ color: discounted ? "#E11D48" : "#1f2937" }}
             >
               {price != null ? fmt(price) : "-"}
