@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname, '..', '..')
   },
+  allowedDevOrigins: ['glorious-train-97vvpr5p5q4j3x7x6-3000.app.github.dev'],
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['glorious-train-97vvpr5p5q4j3x7x6-3000.app.github.dev']
+    }
+  },
   output: "standalone",
   trailingSlash: false,
   reactStrictMode: true,
