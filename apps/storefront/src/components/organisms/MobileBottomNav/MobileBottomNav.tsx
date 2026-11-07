@@ -12,7 +12,7 @@ const strokeProps = {
 }
 
 const HomeSearchIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" {...strokeProps} aria-hidden>
+  <svg width="28" height="28" viewBox="0 0 24 24" stroke="currentColor" {...strokeProps} aria-hidden>
     <path d="M3 10.5L12 3l9 7.5" />
     <path d="M5 9.5V21h14V9.5" />
     <circle cx="12" cy="14" r="2.6" />
@@ -55,7 +55,9 @@ export const MobileBottomNav = () => {
 
   const path = pathname?.split("/").slice(2).join("/") || ""
   const active = (href: string) =>
-    href === "/" ? path === "" : path.startsWith(href.slice(1))
+    href === "/"
+      ? path === "" || path === "search"
+      : path.startsWith(href.slice(1))
 
   const items = [
     { href: "/", Icon: HomeSearchIcon, label: "Home", badge: 0 },

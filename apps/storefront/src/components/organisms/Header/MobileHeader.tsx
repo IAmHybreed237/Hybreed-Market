@@ -46,7 +46,8 @@ export const MobileHeader = ({
   }, [])
 
   const pathname = usePathname()
-  const onUserPage = pathname?.includes("/user")
+  const onUserPage =
+    pathname?.includes("/user") || pathname?.includes("/search")
 
   // hide the whole header shell below lg on /user pages
   useEffect(() => {

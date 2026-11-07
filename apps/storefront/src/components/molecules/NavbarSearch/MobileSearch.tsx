@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import clsx from "clsx"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { SearchIcon } from "@/icons"
@@ -41,6 +41,7 @@ export const MobileSearch = ({
   onActiveChange?: (active: boolean) => void
 }) => {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { locale } = useParams() as { locale?: string }
   const loc = locale || "cm"
 
@@ -97,7 +98,7 @@ export const MobileSearch = ({
     if (!q) return
     trackSearch(q)
     close()
-    router.push(`/${loc}/categories?query=${encodeURIComponent(q)}`)
+    router.push(`/${loc}/search?q=${encodeURIComponent(q)}`)
   }
 
   const openProduct = (handle: string, term?: string) => {
@@ -125,6 +126,17 @@ export const MobileSearch = ({
   useEffect(() => () => {
     if (openTimer.current) clearTimeout(openTimer.current)
   }, [])
+
+  // reopen the search input when arriving with ?focus=search
+  // (used by the search results page's search field)
+  const focusHandled = useRef(false)
+  useEffect(() => {
+    if (!focusHandled.current && searchParams.get("focus") === "search") {
+      focusHandled.current = true
+      activate()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   const searching = query.trim().length >= 2
 
