@@ -2,18 +2,20 @@
 set -e
 cd "$(dirname "$0")/.."
 
-echo "==> Installing PostgreSQL 17 (PGDG)..."
-sudo apt-get update -qq
-sudo apt-get install -y -qq postgresql-common
-sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y >/dev/null 2>&1 || true
-sudo apt-get install -y -qq postgresql-17
-sudo service postgresql start
+export PATH="/usr/lib/postgresql/17/bin:$PATH"
+PGDATA="$HOME/pgdata"
+PGPORT=5433
 
-echo "==> Creating hybreed role and database..."
-sudo -u postgres psql -tc "SELECT 1 FROM pg_roles WHERE rolname='hybreed'" | grep -q 1 \
-  || sudo -u postgres psql -c "CREATE USER hybreed WITH PASSWORD 'hybreed' SUPERUSER;"
-sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='hybreed'" | grep -q 1 \
-  || sudo -u postgres createdb -O hybreed hybreed
+echo "==> Initializing user-local PostgreSQL (no sudo)..."
+if [ ! -d "$PGDATA" ]; then
+  initdb -D "$PGDATA" -U hybreed --auth=trust -E UTF8 >/dev/null
+fi
+if ! pg_ctl -D "$PGDATA" status >/dev/null 2>&1; then
+  pg_ctl -D "$PGDATA" -o "-p $PGPORT -c listen_addresses=localhost" -l "$HOME/pg.log" -w start
+fi
+
+echo "==> Creating database..."
+createdb -h localhost -p $PGPORT -U hybreed hybreed 2>/dev/null || true
 
 echo "==> Installing bun..."
 if ! command -v bun >/dev/null 2>&1; then
@@ -34,7 +36,7 @@ VENDOR_CORS=http://localhost:7001,https://*.app.github.dev
 AUTH_CORS=http://localhost:7000,http://localhost:7001,http://localhost:9000,https://*.app.github.dev
 JWT_SECRET=supersecret
 COOKIE_SECRET=supersecret
-DATABASE_URL=postgresql://hybreed:hybreed@localhost:5432/hybreed
+DATABASE_URL=postgresql://hybreed@localhost:5433/hybreed
 MERCUR_VENDOR_URL=http://localhost:7001
 STOREFRONT_REVALIDATE_URL=http://localhost:3000
 STOREFRONT_REVALIDATE_SECRET=supersecret
@@ -57,14 +59,11 @@ EOF
 echo "==> Installing dependencies (bun install)..."
 bun install
 
-echo "==> Setting up database..."
-export PGPASSWORD=hybreed
+echo "==> Restoring database..."
 if [ -f .devcontainer/hybreed.dump ]; then
-  echo "    Restoring database dump..."
-  pg_restore -h localhost -U hybreed -d hybreed --clean --if-exists --no-owner .devcontainer/hybreed.dump || true
+  pg_restore -h localhost -p $PGPORT -U hybreed -d hybreed --clean --if-exists --no-owner .devcontainer/hybreed.dump || true
 else
-  echo "    No dump found - running migrations and seed..."
   (cd packages/api && bunx medusa db:migrate && bun run seed) || echo "    Migration/seed failed - run manually later"
 fi
 
-echo "==> Post-create complete. Servers will auto-start on next codespace start."
+echo "==> Post-create complete."

@@ -1,10 +1,13 @@
 #!/bin/bash
 cd "$(dirname "$0")/.."
+export PATH="/usr/lib/postgresql/17/bin:$HOME/.bun/bin:$PATH"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-export PGPASSWORD=hybreed
 
-sudo service postgresql start >/dev/null 2>&1 || true
+PGDATA="$HOME/pgdata"
+if [ -d "$PGDATA" ] && ! pg_ctl -D "$PGDATA" status >/dev/null 2>&1; then
+  pg_ctl -D "$PGDATA" -o "-p 5433 -c listen_addresses=localhost" -l "$HOME/pg.log" -w start >/dev/null 2>&1 || true
+fi
 
 LOGS="$HOME/hybreed-logs"
 mkdir -p "$LOGS"
