@@ -22,7 +22,12 @@ export const OrderParcels = async ({ orders }: { orders: any[] }) => {
             <div className="p-4 border-b md:flex items-center justify-between">
               <div className="flex items-center gap-4 mb-4 md:mb-0">
                 <Avatar src={order.seller?.logo || undefined} />
-                <p className="text-primary inline-flex items-center gap-1"><VerifiedBadge size={14} />{order.seller?.name}</p>
+                <p className="text-primary inline-flex items-center gap-1">
+                  {(order.seller as { is_premium?: boolean } | undefined)?.is_premium ? (
+                    <VerifiedBadge size={14} />
+                  ) : null}
+                  {order.seller?.name}
+                </p>
               </div>
               <Chat
                 user={user}

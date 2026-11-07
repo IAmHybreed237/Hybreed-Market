@@ -11,6 +11,7 @@ export const SellerInfoHeader = ({
   showArrow,
   bottomBorder = false,
   showReviews = true,
+  verified = false,
 }: {
   photo: string
   name: string
@@ -19,6 +20,7 @@ export const SellerInfoHeader = ({
   showArrow: boolean
   bottomBorder?: boolean
   showReviews?: boolean
+  verified?: boolean
 }) => (
   <div
     className={clsx(
@@ -31,7 +33,7 @@ export const SellerInfoHeader = ({
     </div>
     <div className="flex flex-col gap-1">
       <h3 className="heading-sm text-primary flex items-center gap-1.5">
-        <VerifiedBadge size={18} />
+        {verified ? <VerifiedBadge size={18} /> : null}
         {name}
       </h3>
       {showReviews && (

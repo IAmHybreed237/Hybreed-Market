@@ -619,7 +619,6 @@ export const WbProductMobile = ({
           className="h-6 px-2.5 rounded-full bg-[#F0F0F3] inline-flex items-center gap-1.5"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="#1F1F23" aria-hidden><path d="M20.6 13.4L11 3.8A2 2 0 0 0 9.6 3H4a1 1 0 0 0-1 1v5.6c0 .5.2 1 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l4.6-4.6a2 2 0 0 0 0-2.6zM6.5 8A1.5 1.5 0 1 1 8 6.5 1.5 1.5 0 0 1 6.5 8z"/></svg>
-          <VerifiedBadge />
           <span className="text-[15px] font-medium text-[#1F1F23] uppercase">{brand}</span>
           <Chevron size={14} />
         </LocalizedClientLink>
@@ -647,7 +646,7 @@ export const WbProductMobile = ({
         >
           <span className="min-w-0">
             <span className="flex items-center gap-1.5 text-[18px] font-semibold text-[#1F1F23] truncate">
-              <VerifiedBadge /> {brand}
+              {seller?.is_premium ? <VerifiedBadge /> : null} {brand}
             </span>
             <span className="flex items-center gap-1.5 text-[14px] text-[#8A8A96]">
               Seller <StarIcon size={14} /> 4.9

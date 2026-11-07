@@ -116,7 +116,9 @@ export const SingleOrderReturn = ({
                 src={item.order.seller.logo || "/talkjs-placeholder.jpg"}
               />
               <p className="label-lg text-primary inline-flex items-center gap-1.5" data-testid={testIdPrefix ? `${testIdPrefix}-seller-name` : undefined}>
-                <VerifiedBadge size={16} />
+                {(item.order.seller as { is_premium?: boolean }).is_premium ? (
+                  <VerifiedBadge size={16} />
+                ) : null}
                 {item.order.seller.name}
               </p>
             </div>

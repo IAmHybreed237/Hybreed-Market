@@ -273,7 +273,7 @@ export const MobileProductCard = ({ p }: { p: any }) => {
           </div>
         </div>
         <div className="flex items-center gap-1.5 text-[15px] text-[#1f2937] min-w-0">
-          <VerifiedBadge size={16} />
+          {p.seller?.is_premium ? <VerifiedBadge size={16} /> : null}
           <span className="truncate">{seller}</span>
         </div>
         <p className="text-[15px] text-[#374151] truncate">{p.title}</p>

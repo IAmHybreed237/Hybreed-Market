@@ -80,7 +80,7 @@ export const CompareOffersModal = ({
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="label-lg text-primary truncate flex items-center gap-1.5">
-                      <VerifiedBadge size={16} />
+                      {offer.seller?.is_premium ? <VerifiedBadge size={16} /> : null}
                       {offer.seller?.name || "Seller"}
                     </p>
                     {index === 0 && buyable && (

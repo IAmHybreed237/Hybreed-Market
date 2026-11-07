@@ -16,7 +16,7 @@ export const CartItemsHeader = ({
 
         <div className="lg:flex gap-2">
           <p className="uppercase heading-xs flex items-center gap-1.5">
-            <VerifiedBadge size={16} />
+            {seller.verified ? <VerifiedBadge size={16} /> : null}
             {seller.name}
           </p>
           {seller.id !== "fleek" && (

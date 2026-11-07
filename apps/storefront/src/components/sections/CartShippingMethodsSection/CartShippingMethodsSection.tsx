@@ -9,7 +9,7 @@ import { clx, Heading, Text } from '@medusajs/ui';
 import clsx from 'clsx';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { Button, VerifiedBadge } from '@/components/atoms';
+import { Button } from '@/components/atoms';
 import ErrorMessage from '@/components/molecules/ErrorMessage/ErrorMessage';
 import { removeShippingMethod, setShippingMethod } from '@/lib/data/cart';
 import { calculatePriceForShippingOption } from '@/lib/data/fulfillment';
@@ -225,7 +225,7 @@ const CartShippingMethodsSection: FC<ShippingProps> = ({ cart, availableShipping
                           level="h3"
                           className="mb-2"
                         >
-                          <span className="inline-flex items-center gap-1.5"><VerifiedBadge size={14} />{groupedBySellerId[key][0].seller_name}</span>
+                          <span className="inline-flex items-center gap-1.5">{groupedBySellerId[key][0].seller_name}</span>
                         </Heading>
                         <Listbox
                           value={selectedMethod?.shipping_option_id ?? null}

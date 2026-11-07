@@ -125,7 +125,7 @@ export const SearchResultCard = ({ p }: { p: any }) => {
   const priceColor = onSale ? "#E11D48" : discounted ? "#2563EB" : "#1F1F23"
   const walletColor = onSale ? "#E11D48" : "#2563EB"
   const seller = p.seller?.name || "Hybreed seller"
-  const verified = p.seller?.is_premium ?? true
+  const verified = p.seller?.is_premium === true
   const rating = p.metadata?.rating
   const ratingCount = p.metadata?.rating_count ?? p.metadata?.reviews
 

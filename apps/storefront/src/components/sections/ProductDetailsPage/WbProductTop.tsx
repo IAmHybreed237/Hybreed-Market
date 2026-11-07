@@ -270,7 +270,7 @@ export const WbProductTop = ({
             href={seller?.handle ? `/sellers/${seller.handle}` : "#"}
             className="inline-flex items-center gap-1.5 text-[16px] font-semibold text-[#2563EB]"
           >
-            <VerifiedBadge />
+            {seller?.is_premium ? <VerifiedBadge /> : null}
             {seller?.name || "Seller"}
           </LocalizedClientLink>
           <h1 className="text-[#1F1F23] text-[22px] md:text-[26px] font-semibold leading-[120%] mt-1">
@@ -503,7 +503,7 @@ export const WbProductTop = ({
               </span>
               <div className="min-w-0">
                 <p className="flex items-center gap-1.5 text-[15px] font-semibold text-[#1F1F23] truncate">
-                  <VerifiedBadge size={15} />
+                  {seller?.is_premium ? <VerifiedBadge size={15} /> : null}
                   {seller?.name || "Gaya Shopping"}
                 </p>
                 <p className="flex items-center gap-1.5 text-[13px] text-[#8A8A96] mt-0.5">

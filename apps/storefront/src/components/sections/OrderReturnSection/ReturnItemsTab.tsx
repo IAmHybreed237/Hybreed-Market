@@ -29,7 +29,7 @@ export const ReturnItemsTab = ({
     <div>
       <Card className="bg-secondary p-4">
         <p className="label-md">
-          Seller: <span className="font-semibold inline-flex items-center gap-1"><VerifiedBadge size={14} />{order.seller.name}</span>
+          Seller: <span className="font-semibold inline-flex items-center gap-1">{(order.seller as { is_premium?: boolean }).is_premium ? <VerifiedBadge size={14} /> : null}{order.seller.name}</span>
         </p>
       </Card>
       <Card className="flex items-center justify-between p-4">

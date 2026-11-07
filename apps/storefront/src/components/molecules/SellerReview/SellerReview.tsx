@@ -34,7 +34,11 @@ export const SellerReview = ({ review }: { review: SingleProductReview }) => {
             <div className="flex flex-col gap-2">
               <div className="flex gap-2 items-center">
                 <p className="label-md text-primary">
-                  Reply from <VerifiedBadge size={14} /> {review.seller.name}
+                  Reply from{" "}
+                  {(review.seller as { is_premium?: boolean }).is_premium ? (
+                    <VerifiedBadge size={14} />
+                  ) : null}{" "}
+                  {review.seller.name}
                 </p>
                 <Divider
                   orientation="vertical"

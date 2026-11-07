@@ -21,6 +21,7 @@ export const SellerInfo = ({
     <SellerInfoHeader
       photo={logo ?? ""}
       name={name}
+      verified={Boolean((seller as { is_premium?: boolean }).is_premium)}
       showArrow={showArrow}
       bottomBorder={bottomBorder}
       showReviews={showReviews}

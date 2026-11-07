@@ -56,7 +56,9 @@ export const ParcelAccordionItems = ({
         <p className="label-md col-span-2 px-2">
           Seller:{' '}
           <span className="font-semibold text-primary inline-flex items-center gap-1">
-            <VerifiedBadge size={14} />
+            {(order.seller as { is_premium?: boolean } | undefined)?.is_premium ? (
+              <VerifiedBadge size={14} />
+            ) : null}
             {order.seller.name}
           </span>
         </p>

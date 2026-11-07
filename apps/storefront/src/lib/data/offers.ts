@@ -75,7 +75,12 @@ export const getProductSellerMap = async ({
 }: {
   countryCode?: string;
   regionId?: string;
-}): Promise<Record<string, { id: string; name: string; handle?: string }>> => {
+}): Promise<
+  Record<
+    string,
+    { id: string; name: string; handle?: string; is_premium?: boolean }
+  >
+> => {
   const { offers } = await listOffers({ countryCode, regionId, limit: 200 });
 
   const byProduct = new Map<string, StoreOffer[]>();
@@ -87,13 +92,26 @@ export const getProductSellerMap = async ({
     byProduct.set(productId, list);
   }
 
-  const map: Record<string, { id: string; name: string; handle?: string }> = {};
+  const map: Record<
+    string,
+    { id: string; name: string; handle?: string; is_premium?: boolean }
+  > = {};
   for (const [productId, list] of byProduct) {
     const seller = getBuyboxWinner(rankOffers(list))?.seller as
-      | { id?: string; name?: string; handle?: string }
+      | {
+          id?: string
+          name?: string
+          handle?: string
+          is_premium?: boolean
+        }
       | undefined;
     if (seller?.id && seller?.name) {
-      map[productId] = { id: seller.id, name: seller.name, handle: seller.handle };
+      map[productId] = {
+        id: seller.id,
+        name: seller.name,
+        handle: seller.handle,
+        is_premium: seller.is_premium,
+      };
     }
   }
   return map;
