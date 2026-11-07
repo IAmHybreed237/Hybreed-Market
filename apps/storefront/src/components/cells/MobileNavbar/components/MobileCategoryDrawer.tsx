@@ -1,11 +1,11 @@
 "use client"
 
 import { HttpTypes } from "@medusajs/types"
-import { useEffect } from "react"
 import { cn } from "@/lib/utils"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { ArrowLeftIcon, CloseIcon } from "@/icons"
 import { IconButton } from "@/components/atoms"
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 interface MobileCategoryDrawerProps {
   category: HttpTypes.StoreProductCategory
@@ -22,17 +22,7 @@ export const MobileCategoryDrawer = ({
 }: MobileCategoryDrawerProps) => {
   const childCategories = category.category_children || []
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = ""
-    }
-
-    return () => {
-      document.body.style.overflow = ""
-    }
-  }, [isOpen])
+  useBodyScrollLock(isOpen)
 
   const handleLinkClick = () => {
     onLinkClick?.()

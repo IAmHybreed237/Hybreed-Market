@@ -9,6 +9,7 @@ import { applyPromotions, deletePromotionCode } from "@/lib/data/cart"
 import { convertToLocale } from "@/lib/helpers/money"
 import { paymentInfoMap, WALLET_PROVIDER_ID } from "@/lib/constants"
 import { getWalletStatement } from "@/lib/data/wallet"
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 import { Cash } from "@medusajs/icons"
 import {
   WB_FONT,
@@ -616,16 +617,15 @@ export const CheckoutOverlay = ({
     return () => window.removeEventListener("popstate", onPop)
   }, [onClose])
 
+  useBodyScrollLock(open)
+
   useEffect(() => {
     if (!open) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = "hidden"
     if (new URLSearchParams(window.location.search).get("checkout") !== "1") {
       window.history.pushState({ checkout: true }, "", "?checkout=1")
     }
     const t = setTimeout(() => closeRef.current?.focus(), 50)
     return () => {
-      document.body.style.overflow = prev
       clearTimeout(t)
       const p = new URLSearchParams(window.location.search)
       if (p.get("checkout") === "1") {

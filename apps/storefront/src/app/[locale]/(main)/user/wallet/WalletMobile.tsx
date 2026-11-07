@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useTopUpSheet } from "@/components/cells/TopUpSheet/TopUpSheet"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { HbMark } from "@/components/atoms"
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 /* ---------- icons ---------- */
 const I = ({ d, s = 20, c = "currentColor" }: { d: string; s?: number; c?: string }) => (
@@ -61,6 +62,7 @@ export const WalletMobile = ({ balance = 0, points = 0 }: { balance?: number; po
   const [scrolled, setScrolled] = useState(false)
   const [tick, setTick] = useState(0)
   const [sheet, setSheet] = useState<"none" | "more" | "soon" | "all">("none")
+  useBodyScrollLock(sheet !== "none")
   const sentinel = useRef<HTMLDivElement>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
 

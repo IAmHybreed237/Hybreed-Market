@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react"
 
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
+
 const XIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -34,17 +36,14 @@ export const ProductImageViewer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useBodyScrollLock(true)
+
   useEffect(() => {
-    const prev = document.body.style.overflow
-    document.body.style.overflow = "hidden"
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose()
     }
     window.addEventListener("keydown", onKey)
-    return () => {
-      document.body.style.overflow = prev
-      window.removeEventListener("keydown", onKey)
-    }
+    return () => window.removeEventListener("keydown", onKey)
   }, [onClose])
 
   if (!images.length) return null

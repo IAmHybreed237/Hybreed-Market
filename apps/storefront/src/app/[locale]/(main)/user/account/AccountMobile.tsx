@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { HbMark } from "@/components/atoms"
 import { toast } from "@/lib/helpers/toast"
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 /* ---------- icons ---------- */
 const BackChevron = () => (
@@ -111,6 +112,7 @@ export const AccountMobile = ({
   const [items, setItems] = useState(reviewItems)
   const [hidden, setHidden] = useState<Set<string>>(new Set())
   const [sheet, setSheet] = useState<"menu" | "review" | "achievement" | null>(null)
+  useBodyScrollLock(!!sheet)
   const [activeItem, setActiveItem] = useState<ReviewItem | null>(null)
   const [activeAchievement, setActiveAchievement] = useState<(typeof ACHIEVEMENTS)[number] | null>(null)
   const [rating, setRating] = useState(0)

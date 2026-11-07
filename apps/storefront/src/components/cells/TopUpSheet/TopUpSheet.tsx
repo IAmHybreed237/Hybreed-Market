@@ -21,6 +21,7 @@ import {
   WHATSAPP_NUMBER,
 } from "./topup.config"
 import { requestWalletTopUp, uploadTopUpReceipt } from "@/lib/data/wallet"
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 const TopUpCtx = createContext<{ open: () => void; close: () => void }>({
   open: () => {},
@@ -69,6 +70,7 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
   const [dragY, setDragY] = useState(0)
   const pushedRef = useRef(false)
   const [isDesktop, setIsDesktop] = useState(false)
+  useBodyScrollLock(open)
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)")
@@ -113,11 +115,9 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
     return () => window.removeEventListener("popstate", onPop)
   }, [])
 
-  // esc, scroll lock, focus
+  // esc, focus trap
   useEffect(() => {
     if (!open) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = "hidden"
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeSheet()
       if (e.key === "Tab" && sheetRef.current) {
@@ -137,7 +137,6 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
     window.addEventListener("keydown", onKey)
     const t = setTimeout(() => sheetRef.current?.focus(), 60)
     return () => {
-      document.body.style.overflow = prev
       window.removeEventListener("keydown", onKey)
       clearTimeout(t)
       triggerRef.current?.focus?.()

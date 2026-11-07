@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { updateLineItem, deleteLineItem, addToCart } from "@/lib/data/cart"
 import { CheckoutOverlay } from "./CheckoutOverlay"
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 /* ---------- icons ---------- */
 const I = ({ d, s = 24, sw = 1.75 }: { d: string; s?: number; sw?: number }) => (
@@ -288,8 +289,9 @@ export const CartClient = ({
     open: boolean
     onClose: () => void
     children: React.ReactNode
-  }) =>
-    open ? (
+  }) => {
+    useBodyScrollLock(open)
+    return open ? (
       <>
         <div className="fixed inset-0 bg-black/40 z-[60]" onClick={onClose} />
         <div
@@ -301,6 +303,7 @@ export const CartClient = ({
         </div>
       </>
     ) : null
+  }
 
   const itemCardMobile = (i: Item) => {
     const gone = removing.has(i.id)

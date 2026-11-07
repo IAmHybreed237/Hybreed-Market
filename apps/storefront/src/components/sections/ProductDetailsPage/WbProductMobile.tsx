@@ -6,6 +6,7 @@ import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedL
 import { useCartContext } from "@/components/providers"
 import { VerifiedBadge } from "@/components/atoms/VerifiedBadge/VerifiedBadge"
 import { ProductImageViewer } from "@/components/organisms/ProductImageViewer/ProductImageViewer"
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 const Clover = ({ size = 16, color = "#2563EB" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={color} aria-hidden>
@@ -129,14 +130,7 @@ export const WbProductMobile = ({
     return () => clearTimeout(t)
   }, [toast])
 
-  useEffect(() => {
-    if (!sheet) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-    return () => {
-      document.body.style.overflow = prev
-    }
-  }, [sheet])
+  useBodyScrollLock(!!sheet)
 
   const openSheet = (s: "sizes" | "delivery" | "parts" | "about") => {
     setSheetClosing(false)

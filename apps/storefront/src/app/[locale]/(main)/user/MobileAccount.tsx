@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useTopUpSheet } from "@/components/cells/TopUpSheet/TopUpSheet"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { HbMark } from "@/components/atoms"
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 /* ---------- icons ---------- */
 const Chevron = ({ size = 16, cls = "text-[#8A8A96]" }) => (
@@ -73,6 +74,7 @@ export const MobileAccount = ({ name }: { name: string }) => {
   const topUp = useTopUpSheet()
   const [open, setOpen] = useState(false)
   const [closing, setClosing] = useState(false)
+  useBodyScrollLock(open)
   const [dragY, setDragY] = useState(0)
   const dragStart = useRef<number | null>(null)
 

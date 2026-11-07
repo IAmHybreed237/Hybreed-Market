@@ -21,6 +21,7 @@ import {
   submitOrder,
   usePaymentSelect,
 } from "@/components/checkout/checkout-shared"
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 /* ---------- icons ---------- */
 const ChevronRight = ({ s = 20, className = "" }: { s?: number; className?: string }) => (
@@ -244,6 +245,7 @@ const AddressSheet = ({
   const router = useRouter()
   const [busy, setBusy] = useState(false)
   const addresses = cartAddresses(customer)
+  useBodyScrollLock(open)
   if (!open) return null
   return (
     <div className="fixed inset-0 z-[60]">
@@ -415,6 +417,7 @@ const MobilePaymentCard = ({ cart, paymentMethods }: { cart: any; paymentMethods
 /* ---------- D. promo codes card + sheet ---------- */
 const PromoCard = ({ cart, currencyCode }: { cart: any; currencyCode: string }) => {
   const [open, setOpen] = useState(false)
+  useBodyScrollLock(open)
   const [code, setCode] = useState("")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)

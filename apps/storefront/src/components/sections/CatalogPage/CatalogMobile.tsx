@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { LocationSelector } from "@/components/molecules/LocationSelector/LocationSelector"
 import { CATEGORIES, FEATURES, HERO, PARTNERS } from "./catalog.config"
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 const SearchGlyph = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -82,6 +83,7 @@ const TileIcon = ({ icon }: { icon: { bg: string; border?: string; text?: string
 export const CatalogMobile = ({ remainingCategories = 20 }: { remainingCategories?: number }) => {
   const router = useRouter()
   const [sheet, setSheet] = useState<string | null>(null)
+  useBodyScrollLock(!!sheet)
 
   // desktop gets the normal site chrome + home page instead
   useEffect(() => {

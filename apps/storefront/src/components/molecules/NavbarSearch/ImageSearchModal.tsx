@@ -3,6 +3,8 @@
 import { useRef, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
+
 type Component = { label: string; x: number; y: number }
 type Box = { x: number; y: number; w: number; h: number }
 
@@ -19,6 +21,7 @@ export const ImageSearchModal = ({ onClose }: { onClose: () => void }) => {
   const [boxes, setBoxes] = useState<Record<string, Box>>({})
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState("")
+  useBodyScrollLock(true)
 
   const pick = () => fileRef.current?.click()
 
