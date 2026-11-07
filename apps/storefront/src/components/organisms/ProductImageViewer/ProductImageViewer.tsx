@@ -63,7 +63,7 @@ export const ProductImageViewer = ({
         }`}
       >
         {/* header: counter + close */}
-        <div className="flex items-center justify-between px-4 h-14 shrink-0">
+        <div className="header-gradient md:bg-none flex items-center justify-between px-4 h-14 shrink-0">
           <span className="text-[15px] font-medium text-white/80 tabular-nums">
             {idx + 1} / {images.length}
           </span>
