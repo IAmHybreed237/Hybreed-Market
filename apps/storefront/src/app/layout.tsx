@@ -6,6 +6,7 @@ import { Toaster } from '@medusajs/ui';
 import Head from 'next/head';
 
 import { HtmlLangSetter } from '@/components/atoms/HtmlLangSetter/HtmlLangSetter';
+import { ServiceWorkerRegister } from '@/components/atoms/ServiceWorkerRegister/ServiceWorkerRegister';
 import { SplashScreen } from '@/components/atoms/SplashScreen/SplashScreen';
 import { StatusBarColor } from '@/components/atoms/StatusBarColor/StatusBarColor';
 import { retrieveCart } from '@/lib/data/cart';
@@ -36,7 +37,6 @@ export const metadata: Metadata = {
     title: siteName,
     description: siteDescription
   },
-  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     title: 'Hybreed',
@@ -123,6 +123,7 @@ export default async function RootLayout({
       <body className="relative bg-primary text-secondary antialiased">
         <HtmlLangSetter />
         <StatusBarColor />
+        <ServiceWorkerRegister />
         <SplashScreen />
         <Providers cart={cart}>{children}</Providers>
         <Toaster position="top-right" />
