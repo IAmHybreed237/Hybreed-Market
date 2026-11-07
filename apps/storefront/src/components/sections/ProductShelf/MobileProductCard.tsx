@@ -29,8 +29,8 @@ const CheckIcon = () => (
     <polyline points="20 6 9 17 4 12" />
   </svg>
 )
-const WalletIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+const WalletIcon = ({ color = "#2563EB" }: { color?: string }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <path d="M20 7H4a2 2 0 0 1 0-4h13a2 2 0 0 1 2 2v2M4 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2" />
   </svg>
 )
@@ -65,14 +65,31 @@ export const MobileProductCard = ({ p }: { p: any }) => {
       ? v.calculated_price.original_amount
       : null
   const discounted = Boolean(compare)
+  // "sale" = explicitly flagged (metadata.sale or badge "SALE") -> red pricing;
+  // "discount" = compare-at price only -> blue pricing
+  const onSale =
+    p.metadata?.sale === true ||
+    String(p.metadata?.badge ?? "").trim().toUpperCase() === "SALE"
+  const discountPct =
+    discounted && price != null && compare != null && compare > 0
+      ? Math.round((1 - price / compare) * 100)
+      : null
+  const priceColor = onSale ? "#E11D48" : discounted ? "#2563EB" : "#1f2937"
+  const walletColor = onSale ? "#E11D48" : "#2563EB"
   const seller = p.seller?.name || p.collection?.title || "Hybreed seller"
   const rating = p.metadata?.rating ?? 4.8
   const reviews = p.metadata?.reviews ?? "174,252"
 
   const badges: { label: string; cls: string }[] = []
-  if (discounted) badges.push({ label: "SALE", cls: "bg-[#E11D48] text-white" })
+  if (onSale) badges.push({ label: "SALE", cls: "bg-[#E11D48] text-white" })
+  else if (discounted && discountPct)
+    badges.push({ label: `-${discountPct}%`, cls: "bg-[#EFF6FF] text-[#2563EB]" })
   else badges.push({ label: "GOOD PRICE", cls: "bg-[#DBEAFE] text-[#2563EB]" })
-  if (p.metadata?.badge) badges.push({ label: String(p.metadata.badge), cls: "bg-[#F3E8FF] text-[#7C3AED]" })
+  if (
+    p.metadata?.badge &&
+    String(p.metadata.badge).trim().toUpperCase() !== "SALE"
+  )
+    badges.push({ label: String(p.metadata.badge), cls: "bg-[#F3E8FF] text-[#7C3AED]" })
 
   if (hidden)
     return (
@@ -240,11 +257,11 @@ export const MobileProductCard = ({ p }: { p: any }) => {
       {/* text block */}
       <div className="px-2.5 pt-2 pb-1 flex flex-col gap-[3px]">
         <div className="flex items-start gap-1.5">
-          <WalletIcon />
+          <WalletIcon color={walletColor} />
           <div className="flex flex-col leading-tight">
             <span
               className="text-[17px] font-medium"
-              style={{ color: discounted ? "#E11D48" : "#1f2937" }}
+              style={{ color: priceColor }}
             >
               {price != null ? fmt(price) : "-"}
             </span>

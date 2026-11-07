@@ -67,13 +67,13 @@ const StarIcon = () => (
   </svg>
 )
 
-const WalletIcon = () => (
+const WalletIcon = ({ color = "#2563EB" }: { color?: string }) => (
   <svg
     width="14"
     height="14"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="#E11D48"
+    stroke={color}
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -114,6 +114,16 @@ export const SearchResultCard = ({ p }: { p: any }) => {
   const orig = v?.calculated_price?.original_amount
   const compare = orig != null && price != null && orig > price ? orig : null
   const discounted = Boolean(compare)
+  // "sale" = explicitly flagged -> red pricing; "discount" = compare-at only -> blue
+  const onSale =
+    p.metadata?.sale === true ||
+    String(p.metadata?.badge ?? "").trim().toUpperCase() === "SALE"
+  const discountPct =
+    discounted && price != null && compare != null && compare > 0
+      ? Math.round((1 - price / compare) * 100)
+      : null
+  const priceColor = onSale ? "#E11D48" : discounted ? "#2563EB" : "#1F1F23"
+  const walletColor = onSale ? "#E11D48" : "#2563EB"
   const seller = p.seller?.name || "Hybreed seller"
   const verified = p.seller?.is_premium ?? true
   const rating = p.metadata?.rating
@@ -172,9 +182,10 @@ export const SearchResultCard = ({ p }: { p: any }) => {
   }
 
   const badges: { label: string; cls: string }[] = []
-  if (!discounted)
-    badges.push({ label: "GOOD PRICE", cls: "bg-[#EFF6FF] text-[#2563EB]" })
-  if (discounted) badges.push({ label: "SALE", cls: "bg-[#E11D48] text-white" })
+  if (onSale) badges.push({ label: "SALE", cls: "bg-[#E11D48] text-white" })
+  else if (discounted && discountPct)
+    badges.push({ label: `-${discountPct}%`, cls: "bg-[#EFF6FF] text-[#2563EB]" })
+  else badges.push({ label: "GOOD PRICE", cls: "bg-[#EFF6FF] text-[#2563EB]" })
 
   return (
     <LocalizedClientLink
@@ -277,10 +288,10 @@ export const SearchResultCard = ({ p }: { p: any }) => {
       {/* text block */}
       <div className="px-3 pt-1.5">
         <div className="flex items-center leading-6 gap-1.5">
-          <WalletIcon />
+          <WalletIcon color={walletColor} />
           <span
             className="text-[19px] font-semibold leading-6"
-            style={{ color: discounted ? "#E11D48" : "#1F1F23" }}
+            style={{ color: priceColor }}
           >
             {price != null ? fmt(price) : "-"}
           </span>
