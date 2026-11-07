@@ -239,19 +239,21 @@ export const MobileProductCard = ({ p }: { p: any }) => {
 
       {/* text block */}
       <div className="px-2.5 pt-2 pb-1 flex flex-col gap-[3px]">
-        <div className="flex items-baseline gap-1.5">
+        <div className="flex items-start gap-1.5">
           <TagIcon />
-          <span
-            className="text-[19px] font-bold"
-            style={{ color: discounted ? "#E11D48" : "#1f2937" }}
-          >
-            {price != null ? fmt(price) : "-"}
-          </span>
-          {discounted && (
-            <span className="text-sm text-[#9ca3af] line-through">
-              {fmt(compare!)}
+          <div className="flex flex-col leading-tight">
+            <span
+              className="text-[18px] font-semibold"
+              style={{ color: discounted ? "#E11D48" : "#1f2937" }}
+            >
+              {price != null ? fmt(price) : "-"}
             </span>
-          )}
+            {discounted && (
+              <span className="text-sm text-[#9ca3af] line-through">
+                {fmt(compare!)}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-1.5 text-[15px] text-[#1f2937] min-w-0">
           <VerifiedBadge size={16} />
