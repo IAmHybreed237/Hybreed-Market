@@ -217,6 +217,8 @@ export default async function seedNoellysWigBand({ container }: ExecArgs) {
               "Sewn inside wig caps, lace frontals or closures for a custom secure fit",
             fit: "Adjustable - fits most head sizes",
             country_of_origin: "Imported",
+            video_url:
+              "https://res.cloudinary.com/mykk0ao4/video/upload/19398949472971.mp4",
           },
         },
       ],

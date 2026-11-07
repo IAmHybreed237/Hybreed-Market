@@ -6,6 +6,7 @@ import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedL
 import { useCartContext } from "@/components/providers"
 import { VerifiedBadge } from "@/components/atoms/VerifiedBadge/VerifiedBadge"
 import { ProductImageViewer } from "@/components/organisms/ProductImageViewer/ProductImageViewer"
+import { ProductVideo } from "@/components/molecules/ProductVideo/ProductVideo"
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 const Clover = ({ size = 16, color = "#2563EB" }: { size?: number; color?: string }) => (
@@ -434,6 +435,13 @@ export const WbProductMobile = ({
           Similar Items
         </button>
       </div>
+
+      {/* product video */}
+      {md.video_url && (
+        <div className="mx-4 mt-2 mb-1 rounded-[20px] overflow-hidden">
+          <ProductVideo url={md.video_url} poster={images[0]} />
+        </div>
+      )}
 
       {/* 2. main card */}
       <div className="bg-white rounded-b-[28px] px-4 pt-3 pb-4 mb-1">

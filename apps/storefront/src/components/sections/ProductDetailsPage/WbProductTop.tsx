@@ -6,6 +6,7 @@ import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedL
 import { useCartContext } from "@/components/providers"
 import { VerifiedBadge } from "@/components/atoms/VerifiedBadge/VerifiedBadge"
 import { ProductImageViewer } from "@/components/organisms/ProductImageViewer/ProductImageViewer"
+import { ProductVideo } from "@/components/molecules/ProductVideo/ProductVideo"
 
 const Chevron = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="9 18 15 12 9 6"/></svg>
@@ -408,6 +409,13 @@ export const WbProductTop = ({
               Full details <Chevron />
             </a>
           </div>
+
+          {/* product video */}
+          {md.video_url && (
+            <div className="mt-6 rounded-[20px] overflow-hidden">
+              <ProductVideo url={md.video_url} poster={images[0]} />
+            </div>
+          )}
 
           {/* service chips */}
           <div className="flex flex-wrap gap-2 mt-4">
