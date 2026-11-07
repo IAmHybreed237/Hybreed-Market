@@ -155,7 +155,7 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
     (t.id === 9 && data.hasPhone) ||
     (t.id === 11 && data.hasAddress)
 
-  // claim today's daily XP on visit (idempotent — safe to re-fire)
+  // claim today's daily XP on visit (idempotent - safe to re-fire)
   useEffect(() => {
     fetch("/api/loyalty/daily-xp", { method: "POST" })
       .then((r) => (r.ok ? r.json() : null))
@@ -272,7 +272,7 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
       }
     >
       {/* ===== 1) HERO ===== */}
-      {/* sticky header — matches hero's top colour so it blends seamlessly */}
+      {/* sticky header - matches hero's top colour so it blends seamlessly */}
       <div
         className="sticky top-0 z-40 bg-[#BFDBFE] md:hidden"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
@@ -304,7 +304,7 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
           </button>
         </div>
       </div>
-      {/* pull-to-refresh loader — stretches in-flow between header and hero */}
+      {/* pull-to-refresh loader - stretches in-flow between header and hero */}
       <div
         className="bg-[#BFDBFE] flex items-center justify-center overflow-hidden"
         style={{
@@ -573,7 +573,7 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
                 Free XP every day
               </h2>
               <p className="mt-2 text-[16px] leading-[21px]" style={{ color: "var(--muted)" }}>
-                Just open My Hybreed each day — we add more XP every day. After 7 days the streak starts over.
+                Just open My Hybreed each day - we add more XP every day. After 7 days the streak starts over.
               </p>
             </div>
 
@@ -587,7 +587,7 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
         </>
       )}
 
-      {/* bottom pull loader — stretches in-flow at the end of the page */}
+      {/* bottom pull loader - stretches in-flow at the end of the page */}
       <div
         className="flex items-center justify-center overflow-hidden"
         style={{

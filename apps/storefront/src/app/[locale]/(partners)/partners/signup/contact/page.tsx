@@ -3,12 +3,12 @@ import { ContactStep } from "@/components/sections/Partners/steps/ContactStep"
 import { retrieveCustomer } from "@/lib/data/customer"
 
 export const metadata: Metadata = {
-  title: "Contact details — Hybreed Partners",
+  title: "Contact details - Hybreed Partners",
   robots: { index: false, follow: false },
 }
 
 export default async function ContactPage() {
-  // existing customers get their details prefilled — the seller member
+  // existing customers get their details prefilled - the seller member
   // account is a separate actor type, so their email can be reused
   const user = await retrieveCustomer().catch(() => null)
   const initial = user

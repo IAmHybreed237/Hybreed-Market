@@ -9,9 +9,23 @@ import { sdk } from '../client';
 import { getAuthHeaders } from './cookies';
 import { CACHE_TAGS, getGlobalCacheOptions } from './cache-tags';
 import { getRegion, retrieveRegion } from './regions';
+import { getProductSellerMap } from './offers';
 
 const PRODUCT_LIST_FIELDS =
   '*variants.calculated_price,+variants.inventory_quantity,*variants.prices,*variants.options,*attribute_values,*attribute_values.attribute';
+
+const attachSellers = async (
+  products: HttpTypes.StoreProduct[],
+  countryCode?: string
+): Promise<HttpTypes.StoreProduct[]> => {
+  if (!products?.length) return products;
+  const sellerMap = await getProductSellerMap({ countryCode }).catch(() => ({}));
+  return products.map(product =>
+    sellerMap[product.id]
+      ? ({ ...product, seller: sellerMap[product.id] } as HttpTypes.StoreProduct)
+      : product
+  );
+};
 
 export type SearchFacetBucket = { value: string; count: number };
 
@@ -58,7 +72,7 @@ export const getSearchFacets = async (): Promise<SearchFacets> => {
 };
 
 /**
- * Products in Mercur are master products from a single shared catalog — they are
+ * Products in Mercur are master products from a single shared catalog - they are
  * not owned by a seller. Seller-scoped listings and per-seller price/inventory
  * come from offers, not from a product→seller relation; use `lib/data/offers.ts`.
  */
@@ -114,11 +128,14 @@ export const listProducts = async ({
       },
     } as never) as unknown as Promise<{ products: HttpTypes.StoreProduct[]; count: number }>
   )
-    .then(({ products, count }) => {
+    .then(async ({ products, count }) => {
       const nextPage = count > offset + limit ? pageParam + 1 : null;
 
       return {
-        response: { products, count },
+        response: {
+          products: await attachSellers(products, countryCode),
+          count,
+        },
         nextPage,
         queryParams,
       };
@@ -268,5 +285,9 @@ export const searchProducts = async ({
 
   const nextPage = count > offset + limit ? page + 1 : null;
 
-  return { products: ordered, count, nextPage };
+  return {
+    products: await attachSellers(ordered, countryCode),
+    count,
+    nextPage,
+  };
 };

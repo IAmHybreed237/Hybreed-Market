@@ -1,9 +1,10 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { updateLineItem, deleteLineItem, addToCart } from "@/lib/data/cart"
+import { CheckoutOverlay } from "./CheckoutOverlay"
 
 /* ---------- icons ---------- */
 const I = ({ d, s = 24, sw = 1.75 }: { d: string; s?: number; sw?: number }) => (
@@ -17,6 +18,14 @@ const WalletMini = () => (
 )
 const CheckIcon = ({ s = 14 }: { s?: number }) => (
   <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="20 6 9 17 4 12" /></svg>
+)
+const HbPlusIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="#2563EB" aria-hidden>
+    <circle cx="12" cy="6.2" r="4.6" />
+    <circle cx="6.2" cy="12" r="4.6" />
+    <circle cx="17.8" cy="12" r="4.6" />
+    <circle cx="12" cy="17.8" r="4.6" />
+  </svg>
 )
 const icons = {
   heart: "M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z",
@@ -32,6 +41,9 @@ const icons = {
 
 const fmt = (n: number, cur: string) =>
   `${Math.round(n).toLocaleString("en-US").replace(/,/g, " ")} ${cur}`
+
+const WB_FONT =
+  '"Google Sans", "WB Currency", "Segoe UI", -apple-system, Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
 
 type Item = {
   id: string
@@ -50,11 +62,17 @@ export const CartClient = ({
   locale,
   addresses,
   currencyCode = "XAF",
+  checkoutData,
 }: {
   cart: { items?: Item[] } | null
   locale: string
   addresses: { id: string; address_1?: string; city?: string }[]
   currencyCode?: string
+  checkoutData?: {
+    customer: any
+    shippingMethods: any
+    paymentMethods: any
+  } | null
 }) => {
   const router = useRouter()
   const items = useMemo(() => cart?.items || [], [cart])
@@ -70,8 +88,19 @@ export const CartClient = ({
     addresses[0] || null
   )
   const [toast, setToast] = useState<string | null>(null)
+  const [promoDismissed, setPromoDismissed] = useState(false)
   const [undoItem, setUndoItem] = useState<Item | null>(null)
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [pending, startTransition] = useTransition()
+
+  // deep-link: /cart?checkout=1 opens the overlay on load (desktop only)
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+      if (new URLSearchParams(window.location.search).get("checkout") === "1") {
+        setCheckoutOpen(true)
+      }
+    }
+  }, [])
 
   const qtyOf = (i: Item) => qty[i.id] ?? i.quantity
   const selItems = items.filter((i) => selected.has(i.id) && !removing.has(i.id))
@@ -83,6 +112,25 @@ export const CartClient = ({
   const allSelected =
     items.length > 0 && selItems.length === items.length - removing.size
   const someSelected = selItems.length > 0 && !allSelected
+
+  // Hybreed+ member savings - no loyalty pricing exists yet, so this stays
+  // null and the promo strip is hidden until it can be computed.
+  const hybreedSaving: number | null = null
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("hybreed_cart_promo_dismissed") === "1") {
+        setPromoDismissed(true)
+      }
+    } catch {}
+  }, [])
+
+  const dismissPromo = () => {
+    setPromoDismissed(true)
+    try {
+      localStorage.setItem("hybreed_cart_promo_dismissed", "1")
+    } catch {}
+  }
 
   const showToast = (t: string) => {
     setToast(t)
@@ -155,6 +203,7 @@ export const CartClient = ({
     size = 24,
     overlay = false,
     disabled = false,
+    mobile = false,
     label,
   }: {
     checked: boolean
@@ -163,6 +212,7 @@ export const CartClient = ({
     size?: number
     overlay?: boolean
     disabled?: boolean
+    mobile?: boolean
     label: string
   }) => (
     <button
@@ -180,12 +230,14 @@ export const CartClient = ({
       }`}
     >
       <span
-        className="flex items-center justify-center rounded-lg border-2"
+        className={`flex items-center justify-center rounded-lg border-2 ${
+          checked || indet ? "text-white" : ""
+        }`}
         style={{
           width: size,
           height: size,
-          borderColor: checked || indet ? "#2563EB" : overlay ? "rgba(0,0,0,0.25)" : "#D4D4DB",
-          background: checked || indet ? "#2563EB" : "#fff",
+          borderColor: checked || indet ? "#fff" : mobile ? "#C9C9D2" : overlay ? "rgba(0,0,0,0.25)" : "#D4D4DB",
+          background: checked || indet ? "#2563EB" : mobile ? "transparent" : "#fff",
         }}
       >
         {indet ? (
@@ -201,8 +253,8 @@ export const CartClient = ({
     const q = qtyOf(item)
     return (
       <div
-        className={`flex items-center justify-between rounded-full bg-[#F0F0F3] ${
-          small ? "w-[125px] h-9 rounded-xl px-2.5" : "w-[112px] h-11 px-3"
+        className={`flex items-center justify-between bg-[#F0F0F3] ${
+          small ? "w-[125px] h-9 rounded-xl px-2.5" : "w-[112px] h-11 rounded-2xl px-3"
         }`}
       >
         <button
@@ -211,9 +263,9 @@ export const CartClient = ({
           onClick={() => setQ(item, q - 1)}
           className="w-11 md:w-8 h-full flex items-center justify-center text-[#8A8A96] disabled:opacity-40"
         >
-          <I d={icons.minus} s={small ? 18 : 28} sw={2} />
+          <I d={icons.minus} s={small ? 18 : 22} sw={2} />
         </button>
-        <span className={`font-medium text-[#1F1F23] ${small ? "text-[15px]" : "text-xl"}`}>
+        <span className={`font-medium text-[#1F1F23] ${small ? "text-[15px]" : "text-base"}`}>
           {q}
         </span>
         <button
@@ -222,7 +274,7 @@ export const CartClient = ({
           onClick={() => setQ(item, q + 1)}
           className="w-11 md:w-8 h-full flex items-center justify-center text-[#2563EB] disabled:opacity-40"
         >
-          <I d={icons.plus} s={small ? 18 : 28} sw={2} />
+          <I d={icons.plus} s={small ? 18 : 22} sw={2} />
         </button>
       </div>
     )
@@ -255,7 +307,7 @@ export const CartClient = ({
     return (
       <div
         key={i.id}
-        className="bg-white rounded-[28px] p-4 flex gap-3 transition-all duration-200 overflow-hidden"
+        className="bg-white rounded-[28px] p-4 flex gap-3 transition-all duration-200 overflow-hidden active:scale-[0.98]"
         style={{
           maxHeight: gone ? 0 : 400,
           paddingTop: gone ? 0 : undefined,
@@ -276,6 +328,7 @@ export const CartClient = ({
               checked={selected.has(i.id)}
               onToggle={() => toggleOne(i.id)}
               size={22}
+              mobile
               overlay
               label={`Select ${i.product?.title || "item"}`}
             />
@@ -287,7 +340,7 @@ export const CartClient = ({
           <div className="flex items-start justify-between">
             <div className="flex items-baseline gap-1.5">
               <WalletMini />
-              <span className="text-[22px] font-semibold text-[#1F1F23]">
+              <span className="text-[18px] font-semibold text-[#1F1F23]">
                 {fmt((i.unit_price ?? 0) * qtyOf(i), currencyCode)}
               </span>
             </div>
@@ -299,13 +352,13 @@ export const CartClient = ({
               <I d={icons.dotsV} s={20} />
             </button>
           </div>
-          <p className="text-lg text-[#1F1F23] truncate mt-1">
+          <p className="text-[16px] text-[#1F1F23] truncate mt-1">
             {i.product?.title || i.title}
           </p>
           {variantOf(i) && (
-            <p className="text-lg text-[#1F1F23]/80 truncate">{variantOf(i)}</p>
+            <p className="text-[14px] text-[#8A8A96] truncate">{variantOf(i)}</p>
           )}
-          <p className="text-[19px] font-semibold text-[#1F1F23] mt-2.5">
+          <p className="text-[15px] font-medium text-[#1F1F23] mt-2">
             Delivery: tomorrow
           </p>
           {/* action row */}
@@ -313,7 +366,7 @@ export const CartClient = ({
             <Stepper item={i} />
             <LocalizedClientLink
               href="/checkout?step=address"
-              className="w-[112px] h-11 rounded-full bg-[#DBEAFE] text-[#2563EB] text-xl font-semibold flex items-center justify-center active:scale-[0.98]"
+              className="w-[104px] h-11 rounded-2xl bg-[#DBEAFE] text-[#2563EB] text-[15px] font-semibold flex items-center justify-center active:scale-[0.98]"
             >
               Buy Now
             </LocalizedClientLink>
@@ -350,20 +403,20 @@ export const CartClient = ({
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-[#8A8A96] line-clamp-2">
+          <p className="text-[17px] font-medium text-[#8A8A96] line-clamp-2">
             {i.product?.title || i.title}
           </p>
           {variantOf(i) && (
-            <p className="text-sm text-[#8A8A96] truncate mt-0.5">{variantOf(i)}</p>
+            <p className="text-[17px] font-medium text-[#8A8A96] truncate mt-0.5">{variantOf(i)}</p>
           )}
-          <p className="text-sm font-semibold text-[#1F1F23] mt-2">
-            Tomorrow <span className="font-normal text-[#16A34A] ml-1.5">Free return</span>
+          <p className="text-[18px] font-semibold text-[#1F1F23] mt-2">
+            Tomorrow <span className="font-medium text-[#16A34A] ml-1.5">Free return</span>
           </p>
           <div className="flex gap-2 mt-2.5 h-9 items-center">
             <Stepper item={i} small />
             <LocalizedClientLink
               href="/checkout?step=address"
-              className="w-[178px] h-9 rounded-xl bg-[#F4F4F6] text-[#2563EB] text-sm font-medium flex items-center justify-center hover:bg-[#ECECF0]"
+              className="w-[178px] h-9 rounded-xl bg-[#F4F4F6] text-[#2563EB] text-base font-semibold flex items-center justify-center hover:bg-[#ECECF0]"
             >
               Buy Now
             </LocalizedClientLink>
@@ -382,7 +435,7 @@ export const CartClient = ({
         <div className="w-[180px] shrink-0 pr-6 text-right">
           <div className="flex items-baseline gap-1.5 justify-end">
             <WalletMini />
-            <span className="text-base font-semibold text-[#1F1F23]">
+            <span className="text-[20px] font-semibold text-[#FA1F4B]">
               {fmt((i.unit_price ?? 0) * qtyOf(i), currencyCode)}
             </span>
           </div>
@@ -400,7 +453,7 @@ export const CartClient = ({
   const empty = visible.length === 0
 
   const EmptyState = () => (
-    <div className="bg-white md:rounded-3xl md:max-w-[560px] md:mx-auto rounded-b-[20px] py-16 px-6 flex flex-col items-center text-center">
+    <div className="bg-transparent md:bg-white md:rounded-3xl md:max-w-[560px] md:mx-auto py-16 px-6 flex flex-col items-center text-center">
       <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d={icons.cart} />
       </svg>
@@ -408,7 +461,7 @@ export const CartClient = ({
       <p className="text-[15px] text-[#8A8A96] mt-2">Add something you like</p>
       <LocalizedClientLink
         href="/"
-        className="mt-6 h-12 px-7 rounded-full bg-[#2563EB] text-white font-semibold flex items-center"
+        className="mt-6 h-12 px-7 rounded-2xl bg-[#2563EB] text-white font-semibold flex items-center"
       >
         Start shopping
       </LocalizedClientLink>
@@ -424,7 +477,7 @@ export const CartClient = ({
           "--card": "#FFFFFF",
           "--chip": "#F0F0F3",
           "--text": "#1F1F23",
-          "--muted": "#8A8A96",
+          "--muted": "#6B6B76",
           "--brand": "#2563EB",
           "--brand-tint": "#DBEAFE",
           "--cta": "#2563EB",
@@ -436,7 +489,7 @@ export const CartClient = ({
       {/* ================= MOBILE ================= */}
       <div className="md:hidden pb-[220px]">
         {/* A. header block */}
-        <div className="bg-white rounded-b-[20px]" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
+        <div className="bg-white rounded-b-[24px]" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
           <button
             onClick={() => setAddrSheet(true)}
             className="w-full h-11 px-4 flex items-center gap-1.5"
@@ -444,7 +497,7 @@ export const CartClient = ({
             <span className="text-lg text-[#1F1F23] truncate max-w-[80%]">
               {addr ? `${addr.address_1 || ""}${addr.city ? `, ${addr.city}` : ""}`.trim() || "Select address" : "Select address"}
             </span>
-            <span className="text-[#8A8A96]"><ChevronDown /></span>
+            <span className="text-[#6B6B76]"><ChevronDown /></span>
           </button>
           {!empty && (
             <div className="h-14 px-4 flex items-center justify-between">
@@ -453,18 +506,58 @@ export const CartClient = ({
                   checked={allSelected}
                   indet={someSelected}
                   onToggle={toggleAll}
+                  size={22}
+                  mobile
                   label="Select all items"
                 />
-                <span className="text-xl text-[#1F1F23]">All</span>
+                <span className="text-[18px] text-[#1F1F23]">All</span>
               </div>
-              <div className="flex items-center" style={{ gap: 34 }}>
-                <button aria-label="Add selected to favorites" className="w-11 h-11 flex items-center justify-center text-[#6B6B76]"><I d={icons.heart} s={28} /></button>
-                <button aria-label="Share selected items" className="w-11 h-11 flex items-center justify-center text-[#6B6B76]"><I d={icons.share} s={28} /></button>
-                <button aria-label="Remove selected items" onClick={() => setConfirmDel("all")} className="w-11 h-11 flex items-center justify-center text-[#6B6B76]"><I d={icons.trash} s={28} /></button>
+              <div className="flex items-center" style={{ gap: 12 }}>
+                <button
+                  aria-label="Add selected to favorites"
+                  onClick={() => showToast("Added to favourites")}
+                  className="w-11 h-11 flex items-center justify-center text-[#6B6B76] active:scale-[0.9]"
+                ><I d={icons.heart} s={24} /></button>
+                <button
+                  aria-label="Share selected items"
+                  onClick={async () => {
+                    const text = selItems.map((i) => i.product?.title || i.title || "").filter(Boolean).join(", ")
+                    try {
+                      if (navigator.share) await navigator.share({ title: "My Hybreed cart", text })
+                      else { await navigator.clipboard.writeText(text); showToast("Link copied") }
+                    } catch {}
+                  }}
+                  className="w-11 h-11 flex items-center justify-center text-[#6B6B76] active:scale-[0.9]"
+                ><I d={icons.share} s={24} /></button>
+                <button
+                  aria-label="Remove selected items"
+                  onClick={() => setConfirmDel("all")}
+                  className="w-11 h-11 flex items-center justify-center text-[#6B6B76] active:scale-[0.9]"
+                ><I d={icons.trash} s={24} /></button>
               </div>
             </div>
           )}
         </div>
+
+        {/* B. promo strip - hidden until Hybreed+ savings can be computed */}
+        {!empty && hybreedSaving !== null && !promoDismissed && (
+          <div className="mt-[3px] h-9 bg-white rounded-[20px] px-4 flex items-center gap-2.5">
+            <HbPlusIcon />
+            <LocalizedClientLink href="/my-hybreed" className="flex-1 min-w-0 flex items-center gap-1">
+              <span className="text-[17px] font-medium text-[#1F1F23] truncate">
+                Save {fmt(hybreedSaving, currencyCode)} with Hybreed+
+              </span>
+              <span className="text-[#6B6B76] text-sm">&gt;</span>
+            </LocalizedClientLink>
+            <button
+              aria-label="Dismiss promo"
+              onClick={dismissPromo}
+              className="w-11 h-11 -mr-2.5 flex items-center justify-center text-[#6B6B76] active:scale-[0.9]"
+            >
+              <I d={icons.x} s={22} sw={2} />
+            </button>
+          </div>
+        )}
 
         {/* C. items */}
         {empty ? (
@@ -483,16 +576,16 @@ export const CartClient = ({
           >
             <LocalizedClientLink
               href="/checkout?step=address"
-              className={`w-full h-[52px] rounded-[26px] px-6 flex items-center justify-between ${
+              className={`w-full h-[52px] rounded-2xl px-6 flex items-center justify-between active:scale-[0.99] ${
                 totalQty === 0 ? "bg-[#F0F0F3] pointer-events-none" : "bg-[#2563EB]"
               }`}
               style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.12)" }}
             >
-              <span className={`text-xl font-semibold ${totalQty === 0 ? "text-[#8A8A96]" : "text-white"}`}>
+              <span className={`text-[17px] font-semibold ${totalQty === 0 ? "text-[#8A8A96]" : "text-white"}`}>
                 {totalQty === 0 ? "Select items" : `To Checkout · ${totalQty}`}
               </span>
-              <span className={`flex items-center gap-1.5 text-xl font-semibold ${totalQty === 0 ? "text-[#8A8A96]" : "text-white"}`}>
-                <I d={icons.wallet} s={20} sw={2} />
+              <span className={`flex items-center gap-1.5 text-[17px] font-semibold ${totalQty === 0 ? "text-[#8A8A96]" : "text-white"}`}>
+                <I d={icons.wallet} s={18} sw={2} />
                 {fmt(totalPrice, currencyCode)}
               </span>
             </LocalizedClientLink>
@@ -501,13 +594,19 @@ export const CartClient = ({
       </div>
 
       {/* ================= DESKTOP ================= */}
-      <div className="hidden md:block max-w-[1290px] mx-auto px-[30px] py-6">
+      <div className="hidden md:block max-w-[1400px] mx-auto px-[5px] lg:px-10 py-6">
         {empty ? (
           <EmptyState />
         ) : (
-          <div className="grid lg:grid-cols-[minmax(0,1fr)_342px] gap-4 items-start">
+          <div className="grid lg:grid-cols-[minmax(0,1fr)_382px] gap-4 items-start">
             {/* items card */}
             <div className="bg-white rounded-3xl px-4 pb-2">
+              <p
+                className="text-[20px] font-semibold leading-[22px] text-[#242429] pt-4"
+                style={{ fontFamily: WB_FONT }}
+              >
+                Cart
+              </p>
               {/* sticky select-all */}
               <div className="h-[46px] sticky top-0 z-20 bg-white rounded-t-3xl flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -527,7 +626,10 @@ export const CartClient = ({
 
             {/* summary card */}
             <div className="bg-white rounded-3xl p-4 lg:sticky lg:top-4">
-              <p className="text-base font-semibold text-[#1F1F23]">
+              <p
+                className="text-[20px] font-semibold leading-[22px] text-[#242429]"
+                style={{ fontFamily: WB_FONT }}
+              >
                 Total items in order: {totalQty}
               </p>
               {selItems.length > 0 && (
@@ -548,9 +650,9 @@ export const CartClient = ({
                   )}
                 </div>
               )}
-              <LocalizedClientLink
-                href="/checkout?step=address"
-                className={`mt-3 w-full h-[49px] rounded-[25px] px-4 flex items-center justify-between ${
+              <button
+                onClick={() => setCheckoutOpen(true)}
+                className={`mt-3 w-full h-[49px] rounded-xl px-4 flex items-center justify-between ${
                   totalQty === 0 ? "bg-[#F4F4F6] pointer-events-none" : "bg-[#2563EB] hover:bg-[#1D4ED8]"
                 } transition-colors active:scale-[0.99]`}
               >
@@ -561,10 +663,23 @@ export const CartClient = ({
                   <I d={icons.wallet} s={16} sw={2} />
                   {fmt(totalPrice, currencyCode)}
                 </span>
-              </LocalizedClientLink>
+              </button>
             </div>
           </div>
         )}
+      </div>
+
+      {/* desktop checkout overlay */}
+      <div className="hidden md:block">
+        <CheckoutOverlay
+          open={checkoutOpen}
+          onClose={() => setCheckoutOpen(false)}
+          cart={cart as any}
+          customer={checkoutData?.customer}
+          shippingMethods={checkoutData?.shippingMethods}
+          paymentMethods={checkoutData?.paymentMethods}
+          currencyCode={currencyCode}
+        />
       </div>
 
       {/* sheets */}

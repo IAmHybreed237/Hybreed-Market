@@ -70,11 +70,18 @@ module.exports = withMercur({
                 },
               ]
             : []),
+          {
+            resolve: './src/providers/wallet',
+            id: 'wallet',
+          },
         ],
       },
     },
     {
       resolve: './src/modules/auction',
+    },
+    {
+      resolve: './src/modules/wallet',
     },
     {
       resolve: '@medusajs/medusa/file',

@@ -41,9 +41,9 @@ export const ImageSearchModal = ({ onClose }: { onClose: () => void }) => {
         const map: Record<string, Box> = {}
         ;(data.components || []).forEach((c: any) => { if (c.box) map[c.label] = c.box })
         setBoxes(map)
-        setStatus((data.components || []).length ? "Tap a dot to search that item" : "No items detected — searching whole photo")
+        setStatus((data.components || []).length ? "Tap a dot to search that item" : "No items detected - searching whole photo")
       } catch {
-        setStatus("Couldn't analyze the photo — searching whole photo")
+        setStatus("Couldn't analyze the photo - searching whole photo")
       }
       setBusy(false)
     }
@@ -65,7 +65,7 @@ export const ImageSearchModal = ({ onClose }: { onClose: () => void }) => {
       router.push(`/${locale || "de"}/image-search?ids=${ids}`)
       onClose()
     } catch {
-      setStatus("Search failed — try again")
+      setStatus("Search failed - try again")
       setBusy(false)
     }
   }

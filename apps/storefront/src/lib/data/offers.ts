@@ -6,14 +6,15 @@ import { sdk } from '../client';
 import { getAuthHeaders } from './cookies';
 import { CACHE_TAGS, getGlobalCacheOptions } from './cache-tags';
 import { getRegion } from './regions';
+import { getBuyboxWinner, rankOffers, StoreOffer } from '@/lib/helpers/buybox';
 
 // All fields are `+`-prefixed so they MERGE with the route defaults instead of
 // replacing them. The defaults carry `product_variant.price_set.id` and the
 // `inventory_item_link.*.location_levels` fields that the computed
-// `calculated_price` / `inventory_quantity` depend on — dropping them (via an
+// `calculated_price` / `inventory_quantity` depend on - dropping them (via an
 // unprefixed field) silently yields null prices and zero stock.
 const OFFER_FIELDS =
-  '+seller.logo,+seller.banner,+seller.is_premium,' +
+  '+seller.logo,+seller.banner,+seller.is_premium,+seller.name,+seller.handle,' +
   '+calculated_price,+inventory_quantity,+prices,' +
   '+product.id,+product.title,+product.handle,+product.thumbnail';
 
@@ -61,6 +62,41 @@ export const listOffers = async ({
   )
     .then(({ offers, count }) => ({ offers, count }))
     .catch(() => ({ offers: [], count: 0 }));
+};
+
+/**
+ * Mercur products have no seller of their own - sellers attach to offers.
+ * Listing cards still need a seller name, so this maps each product id to the
+ * seller of its buybox-winning offer.
+ */
+export const getProductSellerMap = async ({
+  countryCode,
+  regionId,
+}: {
+  countryCode?: string;
+  regionId?: string;
+}): Promise<Record<string, { id: string; name: string; handle?: string }>> => {
+  const { offers } = await listOffers({ countryCode, regionId, limit: 200 });
+
+  const byProduct = new Map<string, StoreOffer[]>();
+  for (const offer of offers as StoreOffer[]) {
+    const productId = (offer as { product_id?: string }).product_id;
+    if (!productId) continue;
+    const list = byProduct.get(productId) ?? [];
+    list.push(offer);
+    byProduct.set(productId, list);
+  }
+
+  const map: Record<string, { id: string; name: string; handle?: string }> = {};
+  for (const [productId, list] of byProduct) {
+    const seller = getBuyboxWinner(rankOffers(list))?.seller as
+      | { id?: string; name?: string; handle?: string }
+      | undefined;
+    if (seller?.id && seller?.name) {
+      map[productId] = { id: seller.id, name: seller.name, handle: seller.handle };
+    }
+  }
+  return map;
 };
 
 export const retrieveOffer = async (

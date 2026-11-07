@@ -36,7 +36,7 @@ const PaymentReturnContent = () => {
       </Heading>
       <Text className="text-ui-fg-subtle max-w-md">
         {isComplete &&
-          "Thank you! Your Mobile Money payment was received. Your order is being confirmed — this can take a few seconds."}
+          "Thank you! Your Mobile Money payment was received. Your order is being confirmed - this can take a few seconds."}
         {isFailed &&
           "Your payment could not be completed. No amount was charged. You can try again from your cart."}
         {!isComplete && !isFailed &&

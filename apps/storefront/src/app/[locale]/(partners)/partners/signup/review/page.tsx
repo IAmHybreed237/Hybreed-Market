@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { ReviewStep } from "@/components/sections/Partners/steps/ReviewStep"
 
 export const metadata: Metadata = {
-  title: "Review — Hybreed Partners",
+  title: "Review - Hybreed Partners",
   robots: { index: false, follow: false },
 }
 

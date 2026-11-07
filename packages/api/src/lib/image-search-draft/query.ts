@@ -4,7 +4,7 @@ import { IMAGE_SEARCH_MODULE } from "../../modules/image-search"
 import ImageSearchService from "../../modules/image-search/service"
 import { embedImage, cosine } from "../vision"
 
-// POST /store/image-search/query — { image, box?: {x,y,w,h} in % } -> ranked products
+// POST /store/image-search/query - { image, box?: {x,y,w,h} in % } -> ranked products
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const body = req.body as { image?: string; box?: { x: number; y: number; w: number; h: number } }
   if (!body?.image) return res.status(400).json({ message: "image required" })

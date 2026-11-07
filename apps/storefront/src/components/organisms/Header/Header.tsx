@@ -108,7 +108,7 @@ export const Header = async ({ locale }: { locale: string }) => {
       data-status-color="#2563EB"
     >
       <div className="max-w-[1400px] mx-auto px-[5px] lg:px-10 pt-3 pb-6">
-        {/* Row 1 — utility strip (desktop only) */}
+        {/* Row 1 - utility strip (desktop only) */}
         <div className="hidden lg:flex items-center justify-between mb-5 relative">
           <LocationSelector
             savedLocation={(user as any)?.addresses?.[0]?.city}
@@ -165,7 +165,7 @@ export const Header = async ({ locale }: { locale: string }) => {
           </div>
         </div>
 
-        {/* Row 2 — main bar (desktop) */}
+        {/* Row 2 - main bar (desktop) */}
         <div
           className="hidden lg:flex items-center gap-4 relative"
           data-testid="header-top"
@@ -246,7 +246,7 @@ export const Header = async ({ locale }: { locale: string }) => {
         />
       </div>
     </header>
-    {/* spacer reserves the expanded header height on mobile — must sit outside the fixed header */}
+    {/* spacer reserves the expanded header height on mobile - must sit outside the fixed header */}
     <div aria-hidden data-testid="mobile-header-spacer" className="lg:hidden h-[210px]" />
     </>
   )

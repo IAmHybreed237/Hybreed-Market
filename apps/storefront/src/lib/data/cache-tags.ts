@@ -3,7 +3,7 @@
  * `cookies.ts`, these are NOT suffixed with `_medusa_cache_id`, so the backend
  * can name and invalidate them from a webhook (see
  * `src/app/api/revalidate/route.ts`). Only use these for non-personalized
- * catalog data — never for cart/order/customer.
+ * catalog data - never for cart/order/customer.
  *
  * This module is intentionally free of `server-only` / `next/headers` so it can
  * be imported by catalog data files that also end up in client bundles.

@@ -196,7 +196,7 @@ export default function SellPage() {
         </div>
       </section>
 
-      {/* ===== SECTION 5 — FINAL CTA ===== */}
+      {/* ===== SECTION 5 - FINAL CTA ===== */}
       <section className="max-w-[1400px] mx-auto px-6 pb-16">
         <div
           className="rounded-[28px] px-8 md:px-14 py-16 flex flex-col items-center text-center gap-8"

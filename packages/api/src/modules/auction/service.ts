@@ -12,7 +12,7 @@ class AuctionModuleService extends MedusaService({ Auction, Bid }) {
    *   standing = min(leader.max, runnerUp.max + increment)
    *
    * floored at the starting price. The leader pays `standing`, never their
-   * max — so bidders can safely enter their true ceiling.
+   * max - so bidders can safely enter their true ceiling.
    */
   async recomputeStandingPrice(auctionId: string) {
     const bids = await this.listBids(

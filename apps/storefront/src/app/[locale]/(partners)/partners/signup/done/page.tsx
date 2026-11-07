@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { DoneStep } from "@/components/sections/Partners/steps/DoneStep"
 
 export const metadata: Metadata = {
-  title: "Application received — Hybreed Partners",
+  title: "Application received - Hybreed Partners",
   robots: { index: false, follow: false },
 }
 

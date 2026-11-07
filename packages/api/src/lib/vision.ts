@@ -1,7 +1,7 @@
 /**
  * Local vision helpers: object detection + CLIP embeddings/labels.
  * Models download from HuggingFace on first use and cache in node_modules/.cache.
- * Everything runs on CPU — no external API, no fees.
+ * Everything runs on CPU - no external API, no fees.
  */
 
 type Det = { label: string; score: number; box: { xmin: number; ymin: number; xmax: number; ymax: number } }

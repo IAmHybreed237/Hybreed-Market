@@ -52,26 +52,31 @@ export const ProductCard = ({
   const calcNum = (cheapestPrice as any)?.calculated_price_number as number | undefined
   const origNum = (cheapestPrice as any)?.original_price_number as number | undefined
 
-  let xafAmount: number | null = null
-  let eurAmount: number | null = null
-  for (const v of (product as any).variants || []) {
-    for (const p of v?.prices || []) {
-      const c = String(p?.currency_code || "").toLowerCase()
-      if (c === "xaf") xafAmount = xafAmount == null ? p.amount : Math.min(xafAmount, p.amount)
-      if (c === "eur") eurAmount = eurAmount == null ? p.amount : Math.min(eurAmount, p.amount)
+  // calculated_price already resolves price lists/promotions - prefer it.
+  // Raw variant.prices only hold base prices, so they must not win over it.
+  const calcCurrency = String((cheapestPrice as any)?.currency_code || "").toLowerCase()
+  let xafAmount: number | null =
+    calcNum != null
+      ? calcCurrency === "xaf"
+        ? calcNum
+        : Math.round(calcNum * 655.957)
+      : null
+  if (xafAmount == null) {
+    for (const v of (product as any).variants || []) {
+      for (const p of v?.prices || []) {
+        const c = String(p?.currency_code || "").toLowerCase()
+        if (c === "xaf") xafAmount = xafAmount == null ? p.amount : Math.min(xafAmount, p.amount)
+      }
     }
   }
-  // XAF is pegged to EUR at 655.957 — convert when no CFA price exists
-  const eurBase = eurAmount ?? calcNum
-  const xaf =
-    xafAmount ?? (eurBase != null ? Math.round(eurBase * 655.957) : null)
+  const xaf = xafAmount
   const priceStr = xaf != null ? `${num(xaf)} XAF` : cheapestPrice?.calculated_price
 
   const hasRealSale = origNum != null && calcNum != null && origNum > calcNum
-  const oldNum = hasRealSale ? origNum : xaf != null ? Math.round(xaf * 1.65) : null
+  const oldNum = hasRealSale ? origNum : null
   const pct = hasRealSale
     ? Math.round((1 - calcNum! / origNum!) * 100)
-    : 39
+    : null
 
   const stock = (product.variants || []).reduce(
     (acc: number, v: any) => acc + (v?.inventory_quantity ?? 0),
@@ -141,14 +146,16 @@ export const ProductCard = ({
           <HeartIcon filled={fav} />
         </button>
 
-        <div className="absolute bottom-2.5 left-2.5 flex flex-col items-start gap-1">
-          <span className="h-[18px] px-1.5 rounded-md bg-[#E11D48] text-white text-[10px] font-bold flex items-center">
-            −{pct}%
-          </span>
-          <span className="h-[18px] px-1.5 rounded-md bg-[#6129CE] text-white text-[10px] font-bold flex items-center">
-            SALE
-          </span>
-        </div>
+        {pct != null && (
+          <div className="absolute bottom-2.5 left-2.5 flex flex-col items-start gap-1">
+            <span className="h-[18px] px-1.5 rounded-md bg-[#E11D48] text-white text-[10px] font-bold flex items-center">
+              -{pct}%
+            </span>
+            <span className="h-[18px] px-1.5 rounded-md bg-[#6129CE] text-white text-[10px] font-bold flex items-center">
+              SALE
+            </span>
+          </div>
+        )}
       </div>
 
       {/* info block */}

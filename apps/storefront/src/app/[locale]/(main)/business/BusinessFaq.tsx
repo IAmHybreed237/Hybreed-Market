@@ -5,15 +5,15 @@ import { useState } from "react"
 const items = [
   {
     q: "Who can buy as a business on Hybreed?",
-    a: "Any registered business, sole proprietor, company, or organization in Cameroon — shops, offices, restaurants, startups, schools, and NGOs. You just need your business details to get verified.",
+    a: "Any registered business, sole proprietor, company, or organization in Cameroon - shops, offices, restaurants, startups, schools, and NGOs. You just need your business details to get verified.",
   },
   {
     q: "How do I place an order as a business?",
-    a: "Register your business on this page or in your profile, switch to your business account, then shop as usual — add items to your cart and check out. When paying, choose business payment and we'll issue an invoice or charge your corporate method.",
+    a: "Register your business on this page or in your profile, switch to your business account, then shop as usual - add items to your cart and check out. When paying, choose business payment and we'll issue an invoice or charge your corporate method.",
   },
   {
     q: "Which items can I buy as a business?",
-    a: "Almost everything on Hybreed. A few categories are personal-use only — when you switch to business mode, those items are marked as unavailable for business purchase.",
+    a: "Almost everything on Hybreed. A few categories are personal-use only - when you switch to business mode, those items are marked as unavailable for business purchase.",
   },
   {
     q: "What delivery options are available?",
@@ -21,7 +21,7 @@ const items = [
   },
   {
     q: "How do I pay for a business order?",
-    a: "Pay by bank transfer or corporate Mobile Money using an invoice we generate at checkout — you have 7 days to pay, and prices are fixed during that time. You can also pay instantly with a corporate card or MoMo, which holds prices for 3 hours.",
+    a: "Pay by bank transfer or corporate Mobile Money using an invoice we generate at checkout - you have 7 days to pay, and prices are fixed during that time. You can also pay instantly with a corporate card or MoMo, which holds prices for 3 hours.",
   },
   {
     q: "Can prices change or items sell out while I'm paying an invoice?",
@@ -29,11 +29,11 @@ const items = [
   },
   {
     q: "What documents do I get for my records?",
-    a: "Every business order comes with an invoice before payment and a receipt after delivery. Download them anytime from Orders or Documents in your business profile — they're suitable for your accounting and tax filings.",
+    a: "Every business order comes with an invoice before payment and a receipt after delivery. Download them anytime from Orders or Documents in your business profile - they're suitable for your accounting and tax filings.",
   },
   {
     q: "Can I buy in bulk or request wholesale prices?",
-    a: "Yes. Submit a sourcing request from this page or contact Support — tell us what you need and the quantities, and we'll respond within 3 working days.",
+    a: "Yes. Submit a sourcing request from this page or contact Support - tell us what you need and the quantities, and we'll respond within 3 working days.",
   },
 ]
 

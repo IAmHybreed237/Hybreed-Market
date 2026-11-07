@@ -40,7 +40,7 @@ import {
 } from "@medusajs/medusa/core-flows";
 
 // Demo catalog with fictional brands and generic product names. Titles, brands,
-// and colorways are invented for a trademark-safe marketplace demo — they do not
+// and colorways are invented for a trademark-safe marketplace demo - they do not
 // reference any real brand or protected product design. Product images are generic
 // AI-generated renders hosted from /static via the jsDelivr GitHub CDN (main branch).
 type SeedCatalogItem = {
@@ -686,7 +686,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
           name: sellerConfig.name,
           email: sellerConfig.email,
           currency_code: "eur",
-          description: `${sellerConfig.name} — a demo marketplace footwear seller.`,
+          description: `${sellerConfig.name} - a demo marketplace footwear seller.`,
           logo: sellerLogo(sellerConfig.name),
           banner: sellerBanner(sellerConfig.name),
         },

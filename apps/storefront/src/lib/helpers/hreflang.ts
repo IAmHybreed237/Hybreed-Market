@@ -60,8 +60,8 @@ type HreflangAlternates = {
   languages: Record<string, string>
 }
 
-// Builds hreflang alternates where every entry — including x-default and the
-// self-referencing link — points at a locale-prefixed URL that returns 200.
+// Builds hreflang alternates where every entry - including x-default and the
+// self-referencing link - points at a locale-prefixed URL that returns 200.
 export const buildHreflangAlternates = ({
   baseUrl,
   path,

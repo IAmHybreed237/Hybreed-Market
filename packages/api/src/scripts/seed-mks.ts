@@ -41,9 +41,9 @@ export default async function seedMks({ container }: ExecArgs) {
     {
       title: "Girlfriend's Day Gift Box",
       handle: "girlfriends-day-gift-box",
-      subtitle: "Curated by MK's Gifts and Surprises — Buea",
+      subtitle: "Curated by MK's Gifts and Surprises - Buea",
       description:
-        "A beautifully curated gift box for her. Pre-order only — limited slots. Same-day delivery in Buea.",
+        "A beautifully curated gift box for her. Pre-order only - limited slots. Same-day delivery in Buea.",
       status: "published",
       category_ids: [catId],
       options: [{ title: "Set", values: sets.map((s) => s.t) }],
@@ -66,9 +66,9 @@ export default async function seedMks({ container }: ExecArgs) {
     {
       title: "Custom Gift Basket",
       handle: "custom-gift-basket",
-      subtitle: "From 15,000 XAF — MK's Gifts and Surprises",
+      subtitle: "From 15,000 XAF - MK's Gifts and Surprises",
       description:
-        "Hand-picked gift baskets built to order. Tell us the occasion and budget — we handle the rest.",
+        "Hand-picked gift baskets built to order. Tell us the occasion and budget - we handle the rest.",
       status: "published",
       category_ids: [catId],
       options: [{ title: "Size", values: ["From 15K"] }],

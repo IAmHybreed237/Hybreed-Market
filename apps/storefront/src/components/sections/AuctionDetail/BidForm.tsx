@@ -87,7 +87,7 @@ export function BidForm({
         </button>
       </div>
       <p className="text-xs text-gray-500 mt-2">
-        You only pay the standing price if you win — enter your true maximum.
+        You only pay the standing price if you win - enter your true maximum.
         {depositAmount
           ? ` A ${fmt(depositAmount)} deposit is required for this auction.`
           : ""}

@@ -7,7 +7,7 @@ const maskBidder = (id: string) =>
   id.length <= 6 ? `${id.slice(0, 2)}***` : `${id.slice(0, 6)}***${id.slice(-2)}`
 
 /**
- * GET /store/auctions/:id/bids — public bid history (masked bidders).
+ * GET /store/auctions/:id/bids - public bid history (masked bidders).
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const service = req.scope.resolve(AUCTION_MODULE)
@@ -21,7 +21,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 }
 
 /**
- * POST /store/auctions/:id/bids — place a bid. Requires customer auth
+ * POST /store/auctions/:id/bids - place a bid. Requires customer auth
  * (enforced by middleware); body: { amount, deposit_reference? }.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {

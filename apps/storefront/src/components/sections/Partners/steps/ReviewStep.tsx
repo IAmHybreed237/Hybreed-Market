@@ -83,7 +83,7 @@ export const ReviewStep = () => {
     <StepShell
       step={5}
       title="Check your details"
-      sub="Make sure everything is right — you can edit any section."
+      sub="Make sure everything is right - you can edit any section."
       back="/partners/signup/payout"
     >
       <form onSubmit={submit} className="flex flex-col">

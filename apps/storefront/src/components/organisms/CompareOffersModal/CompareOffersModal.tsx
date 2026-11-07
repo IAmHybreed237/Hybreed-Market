@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-import { Badge, Button } from "@/components/atoms"
+import { Badge, Button, VerifiedBadge } from "@/components/atoms"
 import { SellerAvatar } from "@/components/cells/SellerAvatar/SellerAvatar"
 import { Modal } from "@/components/molecules/Modal/Modal"
 import { useCartContext } from "@/components/providers"
@@ -79,7 +79,8 @@ export const CompareOffersModal = ({
                 />
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="label-lg text-primary truncate">
+                    <p className="label-lg text-primary truncate flex items-center gap-1.5">
+                      <VerifiedBadge size={16} />
                       {offer.seller?.name || "Seller"}
                     </p>
                     {index === 0 && buyable && (
@@ -102,7 +103,7 @@ export const CompareOffersModal = ({
                         currency_code:
                           offer.calculated_price?.currency_code || "eur",
                       })
-                    : "—"}
+                    : "-"}
                 </span>
                 <Button
                   size="small"

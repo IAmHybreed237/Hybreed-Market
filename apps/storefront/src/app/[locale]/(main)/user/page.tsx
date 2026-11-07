@@ -250,7 +250,7 @@ export default async function UserPage({
             <Chevron size={20} />
           </LocalizedClientLink>
 
-          {/* cashback banner — My Hybreed */}
+          {/* cashback banner - My Hybreed */}
           <div
             className="relative overflow-hidden rounded-[20px] h-[100px] flex items-center justify-between pl-6 pr-5"
             style={{
@@ -329,7 +329,7 @@ export default async function UserPage({
             <Chevron size={20} />
           </LocalizedClientLink>
 
-          {/* promo / giveaway banner — same size as the card above */}
+          {/* promo / giveaway banner - same size as the card above */}
           <LocalizedClientLink
             href="/categories"
             className={`${cardCls} p-0 h-[130px] flex items-center overflow-hidden`}
@@ -365,7 +365,7 @@ export default async function UserPage({
         </section>
       </div>
 
-      {/* products — full width, 5 per row */}
+      {/* products - full width, 5 per row */}
       <div className="mt-6">
         <ProductShelf
           heading="Recommended for you"

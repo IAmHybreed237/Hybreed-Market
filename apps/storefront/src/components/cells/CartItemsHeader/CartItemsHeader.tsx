@@ -1,4 +1,4 @@
-import { Divider } from "@/components/atoms"
+import { Divider, VerifiedBadge } from "@/components/atoms"
 import { SingleProductSeller } from "@/types/product"
 import { format } from "date-fns"
 import { SellerAvatar } from "../SellerAvatar/SellerAvatar"
@@ -15,7 +15,10 @@ export const CartItemsHeader = ({
         <SellerAvatar photo={seller.photo} size={32} alt={seller.name} />
 
         <div className="lg:flex gap-2">
-          <p className="uppercase heading-xs">{seller.name}</p>
+          <p className="uppercase heading-xs flex items-center gap-1.5">
+            <VerifiedBadge size={16} />
+            {seller.name}
+          </p>
           {seller.id !== "fleek" && (
             <div className="flex items-center gap-2">
               <Divider square />

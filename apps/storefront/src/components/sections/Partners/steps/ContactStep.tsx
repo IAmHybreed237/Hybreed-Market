@@ -84,7 +84,7 @@ export const ContactStep = ({ initial }: { initial?: RegData }) => {
             />
           </div>
           <p className="mt-1.5 text-[13px] leading-[18px] text-[#8A8A96]">
-            9 digits, no leading zero — the number buyers and Hybreed will use.
+            9 digits, no leading zero - the number buyers and Hybreed will use.
           </p>
         </div>
 

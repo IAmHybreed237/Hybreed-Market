@@ -75,7 +75,7 @@ export class NotchPayClient {
   }
 
   /**
-   * POST /payments — create a hosted-checkout payment.
+   * POST /payments - create a hosted-checkout payment.
    * Returns the transaction id and the authorization_url to redirect to.
    */
   async createPayment(input: {
@@ -107,7 +107,7 @@ export class NotchPayClient {
   }
 
   /**
-   * GET /payments/{reference} — retrieve a payment/transaction by its
+   * GET /payments/{reference} - retrieve a payment/transaction by its
    * reference or transaction id. Always verify status server-side instead
    * of trusting redirect or webhook parameters.
    */
@@ -128,7 +128,7 @@ export class NotchPayClient {
   }
 
   /**
-   * POST /refunds — refund a completed payment (full or partial).
+   * POST /refunds - refund a completed payment (full or partial).
    * Requires the private key (X-Grant).
    */
   async createRefund(input: {
@@ -150,7 +150,7 @@ export class NotchPayClient {
   }
 
   /**
-   * POST /transfers — send money to a Mobile Money recipient.
+   * POST /transfers - send money to a Mobile Money recipient.
    * Requires the private key (X-Grant). Used for seller payouts and refunds.
    */
   async createTransfer(input: {
@@ -179,7 +179,7 @@ export class NotchPayClient {
   }
 
   /**
-   * GET /transfers/{id} — retrieve transfer status for reconciliation.
+   * GET /transfers/{id} - retrieve transfer status for reconciliation.
    */
   async getTransfer(id: string): Promise<Record<string, unknown>> {
     return this.request<Record<string, unknown>>(

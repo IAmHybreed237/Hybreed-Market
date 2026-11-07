@@ -1,6 +1,6 @@
 "use client"
 
-import { Avatar, Badge, Card, Divider } from "@/components/atoms"
+import { Avatar, Badge, Card, Divider, VerifiedBadge } from "@/components/atoms"
 import { CollapseIcon } from "@/icons"
 import { cn } from "@/lib/utils"
 import { Heading } from "@medusajs/ui"
@@ -115,7 +115,10 @@ export const SingleOrderReturn = ({
               <Avatar
                 src={item.order.seller.logo || "/talkjs-placeholder.jpg"}
               />
-              <p className="label-lg text-primary" data-testid={testIdPrefix ? `${testIdPrefix}-seller-name` : undefined}>{item.order.seller.name}</p>
+              <p className="label-lg text-primary inline-flex items-center gap-1.5" data-testid={testIdPrefix ? `${testIdPrefix}-seller-name` : undefined}>
+                <VerifiedBadge size={16} />
+                {item.order.seller.name}
+              </p>
             </div>
             <Chat
               user={user}

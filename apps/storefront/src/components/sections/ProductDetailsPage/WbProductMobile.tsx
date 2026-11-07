@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { useCartContext } from "@/components/providers"
+import { VerifiedBadge } from "@/components/atoms/VerifiedBadge/VerifiedBadge"
 
 const Clover = ({ size = 16, color = "#2563EB" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={color} aria-hidden>
@@ -29,13 +30,6 @@ const HeartIcon = ({ size = 28, filled = false, color = "#fff" }: { size?: numbe
 const ShareIcon = ({ size = 28, color = "#fff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.6" y1="10.6" x2="15.4" y2="6.4" /><line x1="8.6" y1="13.4" x2="15.4" y2="17.6" /></svg>
 )
-const VerifiedBadge = ({ size = 14 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden className="inline-block shrink-0">
-    <path fill="#2563EB" d="M12 1.8l2.4 2.1 3.1-.4 1.4 2.9 2.9 1.4-.4 3.1 2.1 2.4-2.1 2.4.4 3.1-2.9 1.4-1.4 2.9-3.1-.4L12 22.2l-2.4-2.1-3.1.4-1.4-2.9-2.9-1.4.4-3.1L.5 10.7 2.6 8.3l-.4-3.1 2.9-1.4 1.4-2.9 3.1.4z" />
-    <path fill="#fff" d="M10.7 15.4l-3-3 1.4-1.4 1.6 1.6 4.2-4.2 1.4 1.4z" />
-  </svg>
-)
-
 const optionValue = (v: any, key: string) => {
   const o = v?.options
   if (!o) return undefined
@@ -60,6 +54,7 @@ export const WbProductMobile = ({
   const { addToCart, isAddingItem } = useCartContext() as any
   const [imgIdx, setImgIdx] = useState(0)
   const [size, setSize] = useState<string | null>(null)
+  const [color, setColor] = useState<string | null>(null)
   const [fav, setFav] = useState(false)
   const [followed, setFollowed] = useState(false)
   const [added, setAdded] = useState(false)
@@ -73,7 +68,6 @@ export const WbProductMobile = ({
 
   const images = (product?.images || []).map((i: any) => i.url || i)
   const seller = product?.seller || offers?.[0]?.seller
-  const verified = seller?.metadata?.verified || seller?.name === "Gaya Shopping"
   const pip = (product?.metadata?.pay_in_parts || {}) as {
     enabled?: boolean
     parts?: number
@@ -123,28 +117,57 @@ export const WbProductMobile = ({
     return [...set]
   }, [product])
 
-  const selectedVariant = size ? sizes.find(([s]) => s === size)?.[1] : null
+  const colorImages = (product?.metadata?.color_images || {}) as Record<string, string>
+  const colorImg = (c: string) => colorImages[c] || null
+
+  const selectedVariant = useMemo(() => {
+    const vs = product?.variants || []
+    return (
+      vs.find(
+        (v: any) =>
+          (!color || optionValue(v, "Color") === color) &&
+          (!size || optionValue(v, "Size") === size)
+      ) || null
+    )
+  }, [product, color, size])
+
+  // when a color has its own photo, show it first in the gallery
+  const displayImages = useMemo(() => {
+    const cImg = color ? colorImg(color) : null
+    if (!cImg) return images
+    return [cImg, ...images.filter((u: string) => u !== cImg)]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [images, color, colorImages])
+
+  useEffect(() => {
+    setImgIdx(0)
+  }, [color])
   const offer = useMemo(() => {
     if (!offers?.length) return null
     if (selectedVariant) return offers.find((o) => o.variant_id === selectedVariant.id) || offers[0]
     return offers[0]
   }, [offers, selectedVariant])
 
-  const xaf = (offer?.prices || []).find((p: any) => String(p.currency_code || "").toLowerCase() === "xaf")
-  const amount = xaf?.amount ?? offer?.calculated_price?.calculated_amount
-  const oldAmount = amount != null ? Math.round(amount * 1.65) : null
+  const amount = offer?.calculated_price?.calculated_amount ??
+    (offer?.prices || []).find((p: any) => String(p.currency_code || "").toLowerCase() === "xaf")?.amount
+  const origAmount = offer?.calculated_price?.original_amount
+  const oldAmount = origAmount != null && amount != null && origAmount > amount ? origAmount : null
   const stock = offer?.inventory_quantity ?? null
   const outOfStock = stock !== null && stock <= 0
 
   const brand = seller?.name || "Hybreed"
-  const typeName = "Sneakers"
+  const typeName = product?.metadata?.product_type || "Sneakers"
 
   const buy = async (go: boolean) => {
-    if (!size && sizes.length) {
+    if (sizes.length && !size) {
       setShake(true)
       setToast("Select a size")
       sizesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
       setTimeout(() => setShake(false), 500)
+      return
+    }
+    if (colors.length > 1 && !color) {
+      setToast("Select a color")
       return
     }
     if (!offer?.id) return
@@ -160,7 +183,7 @@ export const WbProductMobile = ({
 
   return (
     <div className="bg-[#F5F5F7] -mx-4 md:hidden" style={{ paddingBottom: "calc(56px + 8px + 52px + 16px + env(safe-area-inset-bottom,0px))" }}>
-      {/* product pages have no site header on mobile — the gallery is the top */}
+      {/* product pages have no site header on mobile - the gallery is the top */}
       <style>{`
         @media (max-width: 767.98px) {
           [data-testid="header"], [data-testid="mobile-header-spacer"] { display: none !important }
@@ -196,7 +219,7 @@ export const WbProductMobile = ({
             setImgIdx(Math.round(el.scrollLeft / el.clientWidth))
           }}
         >
-          {images.map((src: string, i: number) => (
+          {displayImages.map((src: string, i: number) => (
             <div key={i} className="w-full shrink-0 aspect-[0.95] snap-start relative bg-[#E7E7EA]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={src} alt={product?.title} loading={i === 0 ? "eager" : "lazy"} className="absolute inset-0 w-full h-full object-cover" />
@@ -238,7 +261,7 @@ export const WbProductMobile = ({
       <div className="bg-white rounded-b-[28px] px-4 pt-3 pb-4 mb-1">
         <div className="flex items-baseline gap-1.5 h-7">
           <p className="text-[23px] font-semibold text-[#FA1F4B] leading-[28px]">
-            {amount != null ? `${num(amount)} XAF` : "—"}
+            {amount != null ? `${num(amount)} XAF` : "-"}
           </p>
           {oldAmount && (
             <p className="text-[16px] text-[#8A8A96] line-through">{num(oldAmount)} XAF</p>
@@ -267,13 +290,21 @@ export const WbProductMobile = ({
           <div className="mt-4">
             <div className="flex gap-1.5 overflow-x-auto scrollbar-hide" style={{ scrollSnapType: "x proximity" }}>
               {colors.map((c) => (
-                <button key={c} className="w-[45px] h-[59px] rounded-[14px] overflow-hidden shrink-0 border-2 border-transparent snap-start">
-                  <img src={images[0]} alt={c} className="w-full h-full object-cover" />
+                <button
+                  key={c}
+                  onClick={() => setColor(c)}
+                  aria-label={`Color ${c}`}
+                  className={`w-[45px] h-[59px] rounded-[14px] overflow-hidden shrink-0 snap-start transition-all ${
+                    color === c ? "border-2 border-[#2563EB]" : "border-2 border-transparent"
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={colorImg(c) || images[0]} alt={c} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
             <div className="mt-1.5 h-5 flex items-center justify-between">
-              <span className="text-[16px] text-[#8A8A96]">{colors[0]?.toLowerCase()}</span>
+              <span className="text-[16px] text-[#8A8A96]">{(color || colors[0])?.toLowerCase()}</span>
               <span className="text-[16px] font-medium text-[#2563EB]">All {colors.length}</span>
             </div>
           </div>
@@ -352,8 +383,8 @@ export const WbProductMobile = ({
           className="h-6 px-2.5 rounded-full bg-[#F0F0F3] inline-flex items-center gap-1.5"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="#1F1F23" aria-hidden><path d="M20.6 13.4L11 3.8A2 2 0 0 0 9.6 3H4a1 1 0 0 0-1 1v5.6c0 .5.2 1 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l4.6-4.6a2 2 0 0 0 0-2.6zM6.5 8A1.5 1.5 0 1 1 8 6.5 1.5 1.5 0 0 1 6.5 8z"/></svg>
+          <VerifiedBadge />
           <span className="text-[15px] font-medium text-[#1F1F23] uppercase">{brand}</span>
-          {verified && <VerifiedBadge />}
           <Chevron size={14} />
         </LocalizedClientLink>
         <h1 className="text-[18px] font-semibold text-[#1F1F23] leading-snug mt-2.5 line-clamp-2">
@@ -373,7 +404,7 @@ export const WbProductMobile = ({
         >
           <span className="min-w-0">
             <span className="flex items-center gap-1.5 text-[18px] font-semibold text-[#1F1F23] truncate">
-              {brand} {verified && <VerifiedBadge />}
+              <VerifiedBadge /> {brand}
             </span>
             <span className="flex items-center gap-1.5 text-[14px] text-[#8A8A96]">
               Seller <StarIcon size={14} /> 4.9
@@ -503,7 +534,7 @@ export const WbProductMobile = ({
                 <h3 className="text-[20px] font-semibold text-[#1F1F23] mb-3">Delivery terms</h3>
                 <p className="text-[15px] text-[#1F1F23]/80 leading-[22px]">
                   Same-day or next-day delivery in Buea to a Hybreed pickup point or by courier.
-                  Standard delivery: 1 500 XAF. Free returns within 14 days — try on at pickup
+                  Standard delivery: 1 500 XAF. Free returns within 14 days - try on at pickup
                   before you accept.
                 </p>
               </>

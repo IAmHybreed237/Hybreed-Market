@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // 1. create the auth identity (email + password) — "member" is the actor
+  // 1. create the auth identity (email + password) - "member" is the actor
   // type that /vendor/* routes authenticate
   const authRes = await fetch(`${BACKEND}/auth/member/emailpass/register`, {
     method: 'POST',

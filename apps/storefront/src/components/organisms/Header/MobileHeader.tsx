@@ -55,7 +55,7 @@ export const MobileHeader = ({
 
   return (
     <div className="lg:hidden">
-      {/* Row 1 — location + bell: retracts on scroll down */}
+      {/* Row 1 - location + bell: retracts on scroll down */}
       <div
         className="flex items-center justify-between px-3 overflow-hidden"
         style={{
@@ -93,12 +93,12 @@ export const MobileHeader = ({
         </LocalizedClientLink>
       </div>
 
-      {/* Row 2 — search: always visible */}
+      {/* Row 2 - search: always visible */}
       <div className="px-3 pt-2.5" data-testid="header-search-mobile">
         <NavbarSearch />
       </div>
 
-      {/* Row 3 — ads: retracts on scroll down */}
+      {/* Row 3 - ads: retracts on scroll down */}
       <div
         className="flex gap-5 px-3 scrollbar-hide overflow-hidden"
         style={{

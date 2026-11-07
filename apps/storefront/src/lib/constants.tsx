@@ -29,7 +29,13 @@ export const paymentInfoMap: Record<
     title: "Mobile Money",
     icon: <Cash />,
   },
+  pp_wallet_wallet: {
+    title: "Hybreed Wallet",
+    icon: <Cash />,
+  },
 }
+
+export const WALLET_PROVIDER_ID = "pp_wallet_wallet"
 
 // This only checks if it is native stripe for card payments, it ignores the other stripe-based providers
 export const isStripe = (providerId?: string) => {
@@ -43,6 +49,9 @@ export const isManual = (providerId?: string) => {
 }
 export const isNotchPay = (providerId?: string) => {
   return providerId?.startsWith("pp_notchpay")
+}
+export const isWallet = (providerId?: string) => {
+  return providerId === WALLET_PROVIDER_ID
 }
 
 // Add currencies that don't need to be divided by 100

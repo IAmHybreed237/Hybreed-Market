@@ -54,7 +54,7 @@ export const CartAddressSection = ({
   }
 
   return (
-    <div className="border p-4 rounded-sm bg-ui-bg-interactive" data-testid="checkout-step-address">
+    <div id="checkout-address-section" className="border p-4 rounded-sm bg-ui-bg-interactive" data-testid="checkout-step-address">
       <div className="flex flex-row items-center justify-between mb-6">
         <Heading
           level="h2"

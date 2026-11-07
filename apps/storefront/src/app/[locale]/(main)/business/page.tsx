@@ -5,13 +5,13 @@ import { BusinessFaq } from "./BusinessFaq"
 export const metadata: Metadata = {
   title: "Shop on Hybreed as a business",
   description:
-    "Buy for your company on Hybreed — business payment, invoices and receipts for your accounting, and bulk deals from verified sellers.",
+    "Buy for your company on Hybreed - business payment, invoices and receipts for your accounting, and bulk deals from verified sellers.",
 }
 
 export default function BusinessPage() {
   return (
     <main className="font-onest w-full bg-[#F5F5F7] pb-20">
-      {/* ===== SECTION 1 — HERO (full-bleed, rounded bottom, form card overlaps edge) ===== */}
+      {/* ===== SECTION 1 - HERO (full-bleed, rounded bottom, form card overlaps edge) ===== */}
       <section className="header-gradient relative w-full h-[480px] md:h-[523px] lg:h-[620px] rounded-b-[40px]">
         {/* copy */}
         <div className="relative z-[2] h-full max-w-[1172px] mx-auto px-4 md:px-8 pt-[110px] md:pt-20 text-center md:text-left">
@@ -35,7 +35,7 @@ export default function BusinessPage() {
           </p>
         </div>
 
-        {/* signup form card — straddles the hero's bottom edge */}
+        {/* signup form card - straddles the hero's bottom edge */}
         <div className="absolute z-[3] left-0 right-0 -bottom-[52px] px-3 flex justify-center">
           <div className="relative w-full max-w-[730px]">
             {/* grey legal tab hanging under the card */}
@@ -54,10 +54,10 @@ export default function BusinessPage() {
         </div>
       </section>
 
-      {/* ===== SECTION 2 — ADVANTAGES GRID ===== */}
+      {/* ===== SECTION 2 - ADVANTAGES GRID ===== */}
       <section className="max-w-[1400px] mx-auto px-4 md:px-6 pt-[120px] md:pt-[130px]">
         <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 lg:h-[700px]">
-          {/* big promo card — left half */}
+          {/* big promo card - left half */}
           <div className="relative flex-1 overflow-hidden rounded-[28px] bg-[#DBEAFE] p-6 md:p-8 min-h-[360px] lg:min-h-0 flex flex-col">
             <div className="relative z-[1] flex flex-col gap-3 max-w-[75%]">
               <p className="text-[#1F1F23] text-[20px] md:text-[24px] font-semibold leading-[120%]">
@@ -138,13 +138,13 @@ export default function BusinessPage() {
         </div>
       </section>
 
-      {/* ===== SECTION 3 — HOW IT WORKS ===== */}
+      {/* ===== SECTION 3 - HOW IT WORKS ===== */}
       <section className="max-w-[1400px] mx-auto px-4 md:px-6 pt-16 md:pt-24">
         <h2 className="text-center text-[#1F1F23] text-[32px] md:text-[48px] font-semibold leading-[110%] mb-8">
           How it works
         </h2>
         <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
-          {/* step 1 — add your business (dark card, cursor mock) */}
+          {/* step 1 - add your business (dark card, cursor mock) */}
           <div className="relative flex-1 overflow-hidden rounded-[28px] bg-[#17255B] p-6 md:p-8 min-h-[420px] lg:min-h-0 lg:h-[520px] flex flex-col">
             <p className="text-white text-[22px] md:text-[24px] font-semibold leading-[120%]">
               Add your business on&nbsp;Hybreed
@@ -165,7 +165,7 @@ export default function BusinessPage() {
             </div>
           </div>
 
-          {/* step 2 — switch to business account (frosted chip mock) */}
+          {/* step 2 - switch to business account (frosted chip mock) */}
           <div className="relative flex-1 overflow-hidden rounded-[28px] bg-white p-6 md:p-8 min-h-[420px] lg:min-h-0 lg:h-[520px] flex flex-col">
             <div className="rounded-[24px] bg-[#F0F0F3] flex items-center gap-3 px-4 py-3.5">
               <span className="w-12 h-12 rounded-full bg-[#2563EB]/15 flex items-center justify-center shrink-0">
@@ -195,7 +195,7 @@ export default function BusinessPage() {
             </div>
           </div>
 
-          {/* step 3 — pickup / delivery (order chip mock) */}
+          {/* step 3 - pickup / delivery (order chip mock) */}
           <div className="relative flex-1 overflow-hidden rounded-[28px] bg-white p-6 md:p-8 min-h-[420px] lg:min-h-0 lg:h-[520px] flex flex-col">
             <p className="text-[#1F1F23] text-[22px] md:text-[24px] font-semibold leading-[120%]">
               Pick up your order at a pickup point or have it delivered
@@ -213,7 +213,7 @@ export default function BusinessPage() {
                     Order #4821
                   </span>
                   <span className="block text-[13px] text-[#16A34A] leading-[18px]">
-                    Ready for pickup — Buea Town
+                    Ready for pickup - Buea Town
                   </span>
                 </span>
               </div>
@@ -222,7 +222,7 @@ export default function BusinessPage() {
         </div>
       </section>
 
-      {/* ===== SECTION 4 — SOURCING REQUEST BANNER ===== */}
+      {/* ===== SECTION 4 - SOURCING REQUEST BANNER ===== */}
       <section className="max-w-[1400px] mx-auto px-4 md:px-6 pt-16 md:pt-24">
         <div className="relative rounded-[28px] bg-[#DBEAFE] p-6 md:p-10 min-h-[260px] md:min-h-[300px] flex flex-col justify-center">
           <div className="relative z-[1] max-w-[420px] flex flex-col gap-3">
@@ -250,7 +250,7 @@ export default function BusinessPage() {
         </div>
       </section>
 
-      {/* ===== SECTION 5 — FAQ ===== */}
+      {/* ===== SECTION 5 - FAQ ===== */}
       <section className="max-w-[1400px] mx-auto px-4 md:px-6 pt-24 md:pt-28">
         <h2 className="text-center text-[#1F1F23] text-[32px] md:text-[48px] font-semibold leading-[110%] mb-8">
           Questions &amp; answers

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 
 /**
- * Hybreed launch splash — brand mark on the header gradient.
+ * Hybreed launch splash - brand mark on the header gradient.
  * Only visible in standalone (home-screen / installed PWA) mode;
  * hidden in normal browser tabs and on desktop via CSS.
  * Shows on cold document load, holds ~1.2s, fades out, unmounts.

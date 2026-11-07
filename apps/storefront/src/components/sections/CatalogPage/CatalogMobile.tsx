@@ -271,7 +271,7 @@ export const CatalogMobile = ({ remainingCategories = 20 }: { remainingCategorie
             <div className="w-10 h-1.5 rounded-full bg-[#D4D4DC] mx-auto mb-4" />
             <h3 className="text-[20px] font-semibold text-[#1F1F23] mb-2 capitalize">{sheet}</h3>
             <p className="text-[15px] text-[#1F1F23]/80 leading-[22px]">
-              This section isn&apos;t live yet — we&apos;re working on it.
+              This section isn&apos;t live yet - we&apos;re working on it.
             </p>
           </div>
         </>

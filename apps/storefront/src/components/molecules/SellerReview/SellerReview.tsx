@@ -1,4 +1,4 @@
-import { StarRating } from "@/components/atoms"
+import { StarRating, VerifiedBadge } from "@/components/atoms"
 import { SingleProductReview } from "@/types/product"
 import { Divider } from "@medusajs/ui"
 import clsx from "clsx"
@@ -34,7 +34,7 @@ export const SellerReview = ({ review }: { review: SingleProductReview }) => {
             <div className="flex flex-col gap-2">
               <div className="flex gap-2 items-center">
                 <p className="label-md text-primary">
-                  Reply from {review.seller.name}
+                  Reply from <VerifiedBadge size={14} /> {review.seller.name}
                 </p>
                 <Divider
                   orientation="vertical"

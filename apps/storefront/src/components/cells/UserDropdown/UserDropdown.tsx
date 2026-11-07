@@ -35,10 +35,8 @@ export const UserDropdown = ({
         <ProfileIcon size={26} />
       </LocalizedClientLink>
       {open && (
-        <div
-          className="absolute right-0 top-[calc(100%+30px)] bg-white text-primary z-50 border rounded-md shadow-xl w-[280px]"
-          data-testid="user-dropdown"
-        >
+        <div className="absolute right-0 top-full pt-2 z-50" data-testid="user-dropdown">
+        <div className="bg-white text-primary border rounded-md shadow-xl w-[280px]">
           {isLoggedIn ? (
             <div className="py-2">
               <div className="px-4 pb-2 border-b">
@@ -82,7 +80,7 @@ export const UserDropdown = ({
                 <NavigationItem href="/user" className={`${itemCls} relative`}>
                   Chats
                   <span className="text-tertiary text-xs ml-1">
-                    — support and other messages
+                    - support and other messages
                   </span>
                   {Boolean(unreads?.length) && (
                     <span className="absolute top-2 right-3 w-4 h-4 rounded-full bg-[#E83B55] text-[10px] font-bold text-white flex items-center justify-center">
@@ -108,6 +106,7 @@ export const UserDropdown = ({
               </NavigationItem>
             </div>
           )}
+        </div>
         </div>
       )}
     </div>

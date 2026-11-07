@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { CityStep } from "@/components/sections/Partners/CityStep"
 
 export const metadata: Metadata = {
-  title: "Sign up — Hybreed Partners",
+  title: "Sign up - Hybreed Partners",
   description:
     "Register as a seller on Hybreed, Cameroon's trusted marketplace.",
   robots: { index: false, follow: false },

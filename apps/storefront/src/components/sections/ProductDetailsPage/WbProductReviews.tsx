@@ -32,7 +32,7 @@ const REVIEWS: Review[] = [
     date: "18 October",
     rating: 5,
     size: "EU 43",
-    text: "The shoes look even better in person. The suede is soft and the red sole really pops — people keep asking where I got them. Delivery to Buea was next day.",
+    text: "The shoes look even better in person. The suede is soft and the red sole really pops - people keep asking where I got them. Delivery to Buea was next day.",
     pros: ["nice look", "high quality", "fast delivery"],
   },
   {
@@ -48,7 +48,7 @@ const REVIEWS: Review[] = [
     date: "03 October",
     rating: 4,
     size: "EU 41",
-    text: "Bought for my brother, he loves them. Only issue — the toe box is stiff because of the spikes, so if your foot is wide go half a size up. Otherwise great quality.",
+    text: "Bought for my brother, he loves them. Only issue - the toe box is stiff because of the spikes, so if your foot is wide go half a size up. Otherwise great quality.",
     pros: ["nice look", "high quality"],
     cons: ["rigid toe box"],
   },
@@ -57,7 +57,7 @@ const REVIEWS: Review[] = [
     date: "21 September",
     rating: 5,
     size: "EU 44",
-    text: "Wearing them to events — they look premium and the sole grip is solid. Escrow payment made me comfortable buying. Gaya Shopping responded fast when I asked about sizing.",
+    text: "Wearing them to events - they look premium and the sole grip is solid. Escrow payment made me comfortable buying. Gaya Shopping responded fast when I asked about sizing.",
     pros: ["comfortable", "nice look", "responsive seller"],
   },
   {
@@ -73,7 +73,7 @@ const REVIEWS: Review[] = [
     date: "28 August",
     rating: 5,
     size: "EU 40",
-    text: "These are my favourite shoes now. Suede brush keeps them fresh. Red bottom still bright after a month — just wipe it.",
+    text: "These are my favourite shoes now. Suede brush keeps them fresh. Red bottom still bright after a month - just wipe it.",
     pros: ["nice look", "durable", "high quality"],
   },
 ]
@@ -85,7 +85,7 @@ export const WbProductReviews = ({ images }: { images: string[] }) => {
 
   return (
     <section id="reviews" className="mt-12 scroll-mt-24">
-      {/* tabs — like the reference: title + counts */}
+      {/* tabs - like the reference: title + counts */}
       <div className="flex items-baseline gap-6 md:gap-8 border-b border-[#E4E4EA]">
         {(
           [
@@ -149,7 +149,7 @@ export const WbProductReviews = ({ images }: { images: string[] }) => {
             </div>
           )}
 
-          {/* reviews carousel — horizontal scroll like the reference */}
+          {/* reviews carousel - horizontal scroll like the reference */}
           <div
             className="mt-6 flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide"
             style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
@@ -198,7 +198,7 @@ export const WbProductReviews = ({ images }: { images: string[] }) => {
               </article>
             ))}
 
-            {/* "view all" end card — like WB's moreCard */}
+            {/* "view all" end card - like WB's moreCard */}
             <button className="bg-white rounded-[16px] w-[200px] h-[190px] shrink-0 snap-start flex flex-col items-center justify-center gap-2 text-[#2563EB] border border-[#E4E4EA] shadow-[0_1px_4px_rgba(31,31,35,0.08)] hover:bg-[#F6F6F9] transition-colors">
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M13 6l6 6-6 6"/></svg>
               <span className="text-[15px] font-semibold">All 128 reviews</span>
@@ -206,7 +206,7 @@ export const WbProductReviews = ({ images }: { images: string[] }) => {
           </div>
         </>
       ) : (
-        /* questions tab placeholder — same tab structure as the reference */
+        /* questions tab placeholder - same tab structure as the reference */
         <div className="mt-6 flex flex-col gap-3">
           {[
             ["Manka'a R.", "Does the red sole fade?", "2 days ago", "1 answer"],

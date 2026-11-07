@@ -139,7 +139,7 @@ export const AccountMobile = ({
   const visibleItems = items.filter((i) => !hidden.has(i.id))
 
   const submitReview = () => {
-    // No reviews backend yet — this removes the card client-side only.
+    // No reviews backend yet - this removes the card client-side only.
     if (activeItem) setHidden((s) => new Set(s).add(activeItem.id))
     setSheet(null)
     toast.success?.({ title: "Thanks for your review" } as never) ??

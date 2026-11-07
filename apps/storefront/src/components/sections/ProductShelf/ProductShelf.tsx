@@ -51,7 +51,7 @@ export const ProductShelf = async ({
           savedLocation={savedCity}
           withLocation={withLocation}
         />
-        {/* mobile cards — spec layout */}
+        {/* mobile cards - spec layout */}
         <div
           className="lg:hidden grid grid-cols-2"
           style={{ columnGap: "4px", rowGap: "24px" }}

@@ -10,7 +10,9 @@ export default async function RootLayout({
 }>) {
   return (
     <>
-      <header>
+      {/* hidden on mobile - the checkout page renders its own sticky header;
+          desktop /checkout redirects to the cart overlay anyway */}
+      <header className="hidden md:block">
         <div className="relative w-full py-2 lg:px-8 px-4">
           <div className="absolute top-3">
             <LocalizedClientLink href="/cart">

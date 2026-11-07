@@ -29,20 +29,25 @@ export async function retrieveCart(cartId?: string) {
     ...(await getAuthHeaders())
   };
 
-  return await sdk.store.carts.$id
-    .query({
-      $id: id,
-      fields:
-        '*items,*region, *items.product, *items.variant, *items.variant.options,' +
-        '*items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name, *items.offer, *items.offer.seller' +
-        '',
-      fetchOptions: { headers, cache: 'no-cache' }
-    })
-    .then(({ cart }) => cart)
-    .catch(error => {
-      console.error('Failed to retrieve cart', error);
-      return null;
-    });
+  try {
+    return await sdk.store.carts.$id
+      .query({
+        $id: id,
+        fields:
+          '*items,*region, *items.product, *items.variant, *items.variant.options,' +
+          '*items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name, *items.offer, *items.offer.seller' +
+          '',
+        fetchOptions: { headers, cache: 'no-cache' }
+      })
+      .then(({ cart }) => cart)
+      .catch(error => {
+        console.error('Failed to retrieve cart', error);
+        return null;
+      });
+  } catch (error) {
+    console.error('Failed to retrieve cart', error);
+    return null;
+  }
 }
 
 export async function getOrSetCart(countryCode: string) {

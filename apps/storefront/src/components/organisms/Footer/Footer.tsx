@@ -48,7 +48,7 @@ const columns = [
   },
   {
     title: "App",
-    links: [{ label: "Android & iOS — coming soon", href: "/user" }],
+    links: [{ label: "Android & iOS - coming soon", href: "/user" }],
   },
 ]
 
@@ -99,13 +99,13 @@ export function Footer() {
               </a>
             ))}
           </div>
-          <p className="text-sm text-[#8A8A96] ml-auto">App — coming soon</p>
+          <p className="text-sm text-[#8A8A96] ml-auto">App - coming soon</p>
         </div>
 
         {/* copyright */}
         <div className="mt-8 pt-6 border-t border-black/[0.06] flex flex-col md:flex-row items-center justify-between gap-2">
           <p className="text-sm text-[#8A8A96]">
-            © 2026 Hybreed — Marketplace for Cameroon
+            © 2026 Hybreed - Marketplace for Cameroon
           </p>
           <p className="text-xs text-[#8A8A96]">
             Every order protected by Hybreed Escrow

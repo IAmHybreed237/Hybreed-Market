@@ -44,7 +44,7 @@ export const clearReg = () => {
 }
 
 export async function submitRegistration(reg: RegData) {
-  // proxied through a storefront API route — the seller/vendor endpoints are
+  // proxied through a storefront API route - the seller/vendor endpoints are
   // not CORS-open to the storefront origin
   const res = await fetch("/api/seller-registration", {
     method: "POST",

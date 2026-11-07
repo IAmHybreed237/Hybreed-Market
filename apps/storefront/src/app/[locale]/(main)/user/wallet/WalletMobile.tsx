@@ -55,7 +55,8 @@ const promos = [
   { t: "Hybreed+ membership", s: "Extra cashback and free delivery", bg: "#DBEAFE", fg: "#1E3A8A" },
 ]
 
-export const WalletMobile = () => {
+export const WalletMobile = ({ balance = 0, points = 0 }: { balance?: number; points?: number }) => {
+  const fmt = (n: number) => `${Math.round(n).toLocaleString("en-US").replace(/,/g, " ")} XAF`
   const topUp = useTopUpSheet()
   const [scrolled, setScrolled] = useState(false)
   const [tick, setTick] = useState(0)
@@ -146,7 +147,7 @@ export const WalletMobile = () => {
     >
       {/* hide the footer on mobile for this page */}
       <style>{`@media (max-width:767.98px){[data-testid="footer"]{display:none}}`}</style>
-      {/* A — sticky header */}
+      {/* A - sticky header */}
       <div ref={sentinel} className="absolute top-0 h-px w-full" />
       <header
         className="sticky top-0 z-40 transition-all duration-150"
@@ -177,7 +178,7 @@ export const WalletMobile = () => {
         </div>
       </header>
 
-      {/* B — hero panel */}
+      {/* B - hero panel */}
       <section
         className="-mt-11 pt-[52px] px-4 overflow-hidden"
         style={{ background: "var(--panel)", borderRadius: "0 0 44px 44px" }}
@@ -274,7 +275,7 @@ export const WalletMobile = () => {
             borderRadius: "28px 28px 0 0",
           }}
         >
-          <p className="text-[20px] font-medium text-white">0 XAF</p>
+          <p className="text-[20px] font-medium text-white">{fmt(balance)}</p>
           <p className="text-base text-white/70">Wallet balance</p>
           {/* glowing rotating border */}
           <div className="absolute bottom-3.5 left-4 right-4 h-[43px] rounded-2xl overflow-hidden p-[1.5px]">
@@ -299,7 +300,7 @@ export const WalletMobile = () => {
         </div>
       </section>
 
-      {/* C — promo carousel */}
+      {/* C - promo carousel */}
       <div
         ref={carouselRef}
         className="mt-8 flex gap-2 overflow-x-auto px-6 scrollbar-hide"
@@ -323,14 +324,14 @@ export const WalletMobile = () => {
         ))}
       </div>
 
-      {/* D — product cards */}
+      {/* D - product cards */}
       <div className="px-4 mt-8 flex flex-col gap-2 pb-[100px]">
         {[
           { t: "Hybreed Cash", v: "+100 000 XAF", sub: null, icon: null, apply: true, bag: true },
           { t: "Savings", v: "0 XAF", sub: "Accounts, deposits, and investments", icon: ic.chest, green: true },
           { t: "Loans", v: null, sub: "For any purpose", icon: ic.loan },
           { t: "Pay in Parts", v: "100 000 XAF", sub: "You can use Pay in Parts to purchase your orders", icon: ic.clover },
-          { t: "Hybreed bonus points", v: "100", sub: "Cashback on your purchases", icon: null, hbPill: true },
+          { t: "Hybreed bonus points", v: `${Math.round(points).toLocaleString("en-US")} HB`, sub: "Cashback on your purchases", icon: null, hbPill: true },
           { t: "Certificates", v: null, sub: "To shop on Hybreed", icon: ic.ticket },
         ].map((c) => (
           <button
@@ -364,7 +365,7 @@ export const WalletMobile = () => {
         ))}
       </div>
 
-      {/* E — floating All Products */}
+      {/* E - floating All Products */}
       <button
         onClick={() => setSheet("all")}
         className="fixed left-4 right-4 z-40 h-[51px] bg-white rounded-3xl text-xl font-semibold text-[#1F1F23] active:scale-[0.98] transition-transform md:hidden"

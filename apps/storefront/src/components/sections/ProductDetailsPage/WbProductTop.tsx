@@ -4,13 +4,7 @@ import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { useCartContext } from "@/components/providers"
-
-const VerifiedBadge = ({ size = 18 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden className="inline-block shrink-0">
-    <path fill="#2563EB" d="M12 1.8l2.4 2.1 3.1-.4 1.4 2.9 2.9 1.4-.4 3.1 2.1 2.4-2.1 2.4.4 3.1-2.9 1.4-1.4 2.9-3.1-.4L12 22.2l-2.4-2.1-3.1.4-1.4-2.9-2.9-1.4.4-3.1L.5 10.7 2.6 8.3l-.4-3.1 2.9-1.4 1.4-2.9 3.1.4z"/>
-    <path fill="#fff" d="M10.7 15.4l-3-3 1.4-1.4 1.6 1.6 4.2-4.2 1.4 1.4z"/>
-  </svg>
-)
+import { VerifiedBadge } from "@/components/atoms/VerifiedBadge/VerifiedBadge"
 
 const Chevron = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="9 18 15 12 9 6"/></svg>
@@ -36,12 +30,13 @@ export const WbProductTop = ({
   const { addToCart, isAddingItem } = useCartContext() as any
   const [imgIdx, setImgIdx] = useState(0)
   const [size, setSize] = useState<string | null>(null)
+  const [color, setColor] = useState<string | null>(null)
   const [sizeErr, setSizeErr] = useState(false)
+  const [colorErr, setColorErr] = useState(false)
   const [added, setAdded] = useState(false)
 
   const images = (product?.images || []).map((i: any) => i.url || i)
   const seller = product?.seller || offers?.[0]?.seller
-  const verified = seller?.metadata?.verified || seller?.name === "Gaya Shopping"
   const pip = (product?.metadata?.pay_in_parts || {}) as {
     enabled?: boolean
     parts?: number
@@ -57,7 +52,27 @@ export const WbProductTop = ({
     return [...set.entries()].sort((a, b) => Number(a[0]) - Number(b[0]))
   }, [product])
 
-  const selectedVariant = size ? sizes.find(([s]) => s === size)?.[1] : null
+  const colors = useMemo(() => {
+    const set = new Set<string>()
+    for (const v of product?.variants || []) {
+      const c = optionValue(v, "Color")
+      if (c) set.add(c)
+    }
+    return [...set]
+  }, [product])
+
+  const colorImages = (product?.metadata?.color_images || {}) as Record<string, string>
+
+  const selectedVariant = useMemo(() => {
+    const vs = product?.variants || []
+    return (
+      vs.find(
+        (v: any) =>
+          (!color || optionValue(v, "Color") === color) &&
+          (!size || optionValue(v, "Size") === size)
+      ) || null
+    )
+  }, [product, color, size])
   const offer = useMemo(() => {
     if (!offers?.length) return null
     if (selectedVariant)
@@ -65,13 +80,18 @@ export const WbProductTop = ({
     return offers[0]
   }, [offers, selectedVariant])
 
-  const xafPrice = (offer?.prices || []).find(
-    (p: any) => String(p.currency_code || "").toLowerCase() === "xaf"
-  )
-  const amount = xafPrice?.amount ?? offer?.calculated_price?.calculated_amount
-  const currency = xafPrice
-    ? "XAF"
-    : offer?.calculated_price?.currency_code || "XAF"
+  const amount = offer?.calculated_price?.calculated_amount ??
+    (offer?.prices || []).find(
+      (p: any) => String(p.currency_code || "").toLowerCase() === "xaf"
+    )?.amount
+  const currency = offer?.calculated_price?.currency_code
+    ? offer.calculated_price.currency_code.toUpperCase()
+    : "XAF"
+  const origAmount = offer?.calculated_price?.original_amount
+  const discountPct =
+    amount != null && origAmount != null && origAmount > amount
+      ? Math.round((1 - amount / origAmount) * 100)
+      : null
   const fmt = (n: number, c: string) =>
     new Intl.NumberFormat("en", {
       style: "currency",
@@ -80,8 +100,12 @@ export const WbProductTop = ({
     }).format(n)
 
   const buy = async (go: boolean) => {
-    if (!size) {
+    if (sizes.length && !size) {
       setSizeErr(true)
+      return
+    }
+    if (colors.length > 1 && !color) {
+      setColorErr(true)
       return
     }
     if (!offer?.id) return
@@ -93,7 +117,10 @@ export const WbProductTop = ({
     }
   }
 
-  const crumbs = ["Main", "Shoes", "Men", "Sneakers"]
+  const md = (product?.metadata || {}) as Record<string, any>
+  const crumbs: string[] = Array.isArray(md.breadcrumb) && md.breadcrumb.length
+    ? md.breadcrumb
+    : ["Main", "Shoes", "Men", "Sneakers"]
 
   return (
     <div className="w-full">
@@ -108,7 +135,7 @@ export const WbProductTop = ({
       </nav>
 
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-        {/* gallery — vertical thumbs left (desktop), row below (mobile) */}
+        {/* gallery - vertical thumbs left (desktop), row below (mobile) */}
         <div className="w-full lg:w-[440px] xl:w-[500px] shrink-0">
           <div className="flex gap-3">
             {images.length > 1 && (
@@ -134,9 +161,11 @@ export const WbProductTop = ({
                 alt={product?.title}
                 className="absolute inset-0 w-full h-full object-cover"
               />
-              <span className="absolute top-3 left-3 bg-[#EF4444] text-white text-[12px] font-bold px-2.5 py-1 rounded-lg">
-                -{amount != null ? Math.round((1 - 1 / 1.65) * 100) : 39}%
-              </span>
+              {discountPct != null && (
+                <span className="absolute top-3 left-3 bg-[#EF4444] text-white text-[12px] font-bold px-2.5 py-1 rounded-lg">
+                  -{discountPct}%
+                </span>
+              )}
               {/* favorite + share */}
               <div className="absolute top-3 right-3 flex flex-col gap-2">
                 <button
@@ -178,8 +207,8 @@ export const WbProductTop = ({
             href={seller?.handle ? `/sellers/${seller.handle}` : "#"}
             className="inline-flex items-center gap-1.5 text-[16px] font-semibold text-[#2563EB]"
           >
+            <VerifiedBadge />
             {seller?.name || "Seller"}
-            {verified && <VerifiedBadge />}
           </LocalizedClientLink>
           <h1 className="text-[#1F1F23] text-[22px] md:text-[26px] font-semibold leading-[120%] mt-1">
             {product?.title}
@@ -195,10 +224,48 @@ export const WbProductTop = ({
             <span className="text-[#8A8A96]">14 questions</span>
           </div>
           <p className="text-[15px] text-[#8A8A96] mt-2">
-            {product?.metadata?.color || "Black"}
+            {color || md.color || ""}
           </p>
 
+          {/* color picker */}
+          {colors.length > 1 && (
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-2.5">
+                <p className={`text-[15px] font-semibold ${colorErr ? "text-[#EF4444]" : "text-[#1F1F23]"}`}>
+                  {colorErr ? "Select a color" : "Select Color"}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {colors.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => {
+                      setColor(c)
+                      setColorErr(false)
+                      const ci = images.indexOf(colorImages[c])
+                      if (ci >= 0) setImgIdx(ci)
+                    }}
+                    className={`flex items-center gap-2 h-12 pl-1.5 pr-3.5 rounded-xl border text-[15px] font-semibold transition-colors ${
+                      color === c
+                        ? "border-[#2563EB] bg-[#DBEAFE] text-[#2563EB]"
+                        : "border-[#E4E4EA] bg-white text-[#1F1F23] hover:border-[#2563EB]"
+                    }`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={colorImages[c] || images[0]}
+                      alt={c}
+                      className="w-9 h-9 rounded-lg object-cover"
+                    />
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* size picker */}
+          {sizes.length > 0 && (
           <div className="mt-6">
             <div className="flex items-center justify-between mb-2.5">
               <p className={`text-[15px] font-semibold ${sizeErr ? "text-[#EF4444]" : "text-[#1F1F23]"}`}>
@@ -224,17 +291,23 @@ export const WbProductTop = ({
               ))}
             </div>
           </div>
+          )}
 
           {/* details card */}
           <div className="mt-6 bg-white rounded-[20px] p-5">
             {[
-              ["Item No.", String(product?.id || "").replace("prod_", "").slice(-10)],
-              ["Color", product?.metadata?.color || "Black"],
-              ["Gender", product?.metadata?.gender || "Men"],
-              ["Composition", "calf suede; rubber"],
+              ["Item No.", md.item_no || String(product?.id || "").replace("prod_", "").slice(-10)],
+              ["Color", color || md.color || "-"],
+              ["Gender", md.gender || "Men"],
+              ["Composition", md.composition || "calf suede; rubber"],
+              ["Texture", md.texture],
+              ["Style", md.style],
+              ["Density", md.density],
               ["Season", "All-season"],
-              ["Origin", product?.metadata?.country_of_origin || "Italy"],
-            ].map(([k, v]) => (
+              ["Origin", md.country_of_origin || "Italy"],
+            ]
+              .filter(([, v]) => v != null && v !== "")
+              .map(([k, v]) => (
               <div key={k} className="flex py-2 border-b border-[#F0F0F3] last:border-0">
                 <span className="w-[45%] text-[14px] text-[#8A8A96]">{k}</span>
                 <span className="w-[55%] text-[14px] text-[#1F1F23]">{v}</span>
@@ -255,16 +328,18 @@ export const WbProductTop = ({
           </div>
         </div>
 
-        {/* right rail — buy panel */}
+        {/* right rail - buy panel */}
         <aside className="w-full lg:w-[380px] shrink-0 lg:sticky lg:top-20 self-start flex flex-col gap-4">
           <div className="bg-white rounded-[24px] p-6 shadow-[0_2px_16px_rgba(0,0,0,0.06)]">
             <div className="flex items-center gap-3">
               <p className="text-[#FA1F4B] text-[23px] font-bold leading-none">
-                {amount != null ? fmt(amount, currency) : "—"}
+                {amount != null ? fmt(amount, currency) : "-"}
               </p>
-              <p className="text-[#8A8A96] text-[20px] line-through">
-                {amount != null ? fmt(amount * 1.65, currency) : ""}
-              </p>
+              {discountPct != null && origAmount != null && (
+                <p className="text-[#8A8A96] text-[20px] line-through">
+                  {fmt(origAmount, currency)}
+                </p>
+              )}
             </div>
             <p className="flex items-center gap-2 mt-3 text-[15px] text-[#1F1F23]">
               <span className="inline-flex items-center justify-center bg-[#2563EB] text-white text-[12px] font-bold rounded-md px-2 py-1">+</span>
@@ -273,7 +348,7 @@ export const WbProductTop = ({
             {pipParts > 0 && (
               <p className="text-[14px] text-[#8A8A96] mt-1.5 flex items-center gap-1.5">
                 <img src="/images/installments.png" alt="" className="w-4 h-4 object-contain" />
-                From {amount != null ? fmt(Math.round(amount / pipParts), currency) : "—"}{" "}
+                From {amount != null ? fmt(Math.round(amount / pipParts), currency) : "-"}{" "}
                 × {pipParts} with installments
               </p>
             )}
@@ -317,8 +392,8 @@ export const WbProductTop = ({
               </span>
               <div className="min-w-0">
                 <p className="flex items-center gap-1.5 text-[15px] font-semibold text-[#1F1F23] truncate">
+                  <VerifiedBadge size={15} />
                   {seller?.name || "Gaya Shopping"}
-                  {verified && <VerifiedBadge size={15} />}
                 </p>
                 <p className="flex items-center gap-1.5 text-[13px] text-[#8A8A96] mt-0.5">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="#F59E0B" aria-hidden><path d="M12 2l3 6.3L22 9.3l-5 4.9L18.2 21 12 17.8 5.8 21 7 14.2 2 9.3l7-1z"/></svg>

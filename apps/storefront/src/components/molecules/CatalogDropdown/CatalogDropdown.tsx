@@ -35,7 +35,7 @@ const ThickBurgerIcon = () => (
   </svg>
 )
 
-// Hybreed equivalents of WB's service menu — Cameroon market adaptation
+// Hybreed equivalents of WB's service menu - Cameroon market adaptation
 const serviceLinks: {
   label: string
   href: string
@@ -116,7 +116,7 @@ export const CatalogDropdown = ({
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          {/* left drawer — ~25% width, white, below header */}
+          {/* left drawer - ~25% width, white, below header */}
           <div
             className="fixed left-0 top-[140px] bottom-0 w-[25vw] min-w-[300px] bg-white shadow-2xl z-50 overflow-y-auto"
             data-testid="catalog-panel"

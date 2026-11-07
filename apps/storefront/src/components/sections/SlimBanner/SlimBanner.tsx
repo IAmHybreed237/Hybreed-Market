@@ -41,7 +41,7 @@ export const SlimBanner = () => {
           <span className="font-semibold text-action">
             protected by Hybreed Escrow
           </span>{" "}
-          — your money is held safely until you receive your item.
+          - your money is held safely until you receive your item.
         </p>
         <LocalizedClientLink
           href="/categories"

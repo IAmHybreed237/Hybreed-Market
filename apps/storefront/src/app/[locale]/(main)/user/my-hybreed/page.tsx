@@ -56,7 +56,7 @@ export default async function MyHybreedPage() {
 
   return (
     <main className="w-full max-w-[1400px] mx-auto px-0 md:px-[5px]">
-      {/* desktop tab nav — My Hybreed active */}
+      {/* desktop tab nav - My Hybreed active */}
       <nav className="hidden md:flex items-center justify-between h-16 mb-1" aria-label="Account sections">
         {tabs.map((t) => (
           <LocalizedClientLink

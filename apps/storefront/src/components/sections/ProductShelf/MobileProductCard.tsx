@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import { usePathname } from "next/navigation"
 import { quickAdd } from "@/lib/quickAdd"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
+import { VerifiedBadge } from "@/components/atoms/VerifiedBadge/VerifiedBadge"
 
 const EyeOffIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -38,13 +39,6 @@ const StarIcon = () => (
     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
   </svg>
 )
-const VerifiedIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" className="shrink-0" aria-hidden>
-    <circle cx="12" cy="12" r="10" fill="#2563EB" />
-    <path d="M8 12.5l2.5 2.5L16.5 9" stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-)
-
 const fmt = (n: number) =>
   `${Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")} XAF`
 
@@ -86,7 +80,7 @@ export const MobileProductCard = ({ p }: { p: any }) => {
         onClick={() => setHidden(false)}
         className="text-xs text-[#2563EB] underline py-6 text-center w-full"
       >
-        Hidden — Undo
+        Hidden - Undo
       </button>
     )
 
@@ -148,7 +142,7 @@ export const MobileProductCard = ({ p }: { p: any }) => {
           )}
         </div>
 
-        {/* hide — top-left */}
+        {/* hide - top-left */}
         <button
           type="button"
           aria-label="Not interested"
@@ -161,7 +155,7 @@ export const MobileProductCard = ({ p }: { p: any }) => {
           <EyeOffIcon />
         </button>
 
-        {/* like — top-right */}
+        {/* like - top-right */}
         <button
           type="button"
           aria-label="Like"
@@ -176,7 +170,7 @@ export const MobileProductCard = ({ p }: { p: any }) => {
           <HeartIcon filled={liked} />
         </button>
 
-        {/* badges — bottom-left stack */}
+        {/* badges - bottom-left stack */}
         <div className="absolute bottom-3 left-0 flex flex-col gap-1 items-start max-w-[70%]">
           {badges.slice(0, 3).map((b) => (
             <span
@@ -190,7 +184,7 @@ export const MobileProductCard = ({ p }: { p: any }) => {
 
         </div>
 
-        {/* add-to-cart — bottom-right, overlapping edge */}
+        {/* add-to-cart - bottom-right, overlapping edge */}
         <div className="absolute -bottom-2 right-2">
           {qty === 0 ? (
             <button
@@ -251,7 +245,7 @@ export const MobileProductCard = ({ p }: { p: any }) => {
             className="text-[19px] font-bold"
             style={{ color: discounted ? "#E11D48" : "#1f2937" }}
           >
-            {price != null ? fmt(price) : "—"}
+            {price != null ? fmt(price) : "-"}
           </span>
           {discounted && (
             <span className="text-sm text-[#9ca3af] line-through">
@@ -260,7 +254,7 @@ export const MobileProductCard = ({ p }: { p: any }) => {
           )}
         </div>
         <div className="flex items-center gap-1.5 text-[15px] text-[#1f2937] min-w-0">
-          {p.seller?.is_verified !== false && <VerifiedIcon />}
+          <VerifiedBadge size={16} />
           <span className="truncate">{seller}</span>
         </div>
         <p className="text-[15px] text-[#374151] truncate">{p.title}</p>

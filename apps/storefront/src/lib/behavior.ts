@@ -25,7 +25,7 @@ function write(b: Behavior) {
   } catch {}
 }
 
-/** Record a product view — bumps its categories in the profile. */
+/** Record a product view - bumps its categories in the profile. */
 export function trackView(productId: string, categoryIds: string[] = []) {
   const b = read()
   b.views = [

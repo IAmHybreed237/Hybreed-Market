@@ -5,7 +5,7 @@ const maskBidder = (id: string) =>
   id.length <= 6 ? `${id.slice(0, 2)}***` : `${id.slice(0, 6)}***${id.slice(-2)}`
 
 /**
- * GET /store/auctions/:id — auction detail with recent bid history
+ * GET /store/auctions/:id - auction detail with recent bid history
  * (bidder ids masked for privacy).
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {

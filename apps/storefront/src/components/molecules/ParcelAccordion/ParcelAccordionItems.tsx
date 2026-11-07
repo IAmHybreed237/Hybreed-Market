@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { Card } from '@/components/atoms';
+import { Card, VerifiedBadge } from '@/components/atoms';
 import { OrderProductListItem } from '@/components/cells';
 import { CollapseIcon } from '@/icons';
 import { convertToLocale } from '@/lib/helpers/money';
@@ -54,7 +54,11 @@ export const ParcelAccordionItems = ({
           <span className="font-semibold uppercase text-primary">{steps[status]}</span>
         </p>
         <p className="label-md col-span-2 px-2">
-          Seller: <span className="font-semibold text-primary">{order.seller.name}</span>
+          Seller:{' '}
+          <span className="font-semibold text-primary inline-flex items-center gap-1">
+            <VerifiedBadge size={14} />
+            {order.seller.name}
+          </span>
         </p>
         <p className="label-md col-span-2 px-2 text-center">
           Shipping:{' '}

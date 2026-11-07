@@ -8,7 +8,7 @@ import { sdk } from '../client';
 import medusaError from '../helpers/medusa-error';
 import { getAuthHeaders, getCacheOptions } from './cookies';
 
-// TODO: legacy returns endpoints — migrate when the returns module lands
+// TODO: legacy returns endpoints - migrate when the returns module lands
 type LooseRoute = {
   query: <T = unknown>(i?: never) => Promise<T>;
   mutate: <T = unknown>(i?: never) => Promise<T>;

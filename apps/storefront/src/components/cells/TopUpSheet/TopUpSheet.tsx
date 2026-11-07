@@ -10,12 +10,17 @@ import {
 } from "react"
 import {
   METHODS,
+  MTN_USSD,
+  MTN_USSD_TEL,
   SHOW_NUMBER_ROW,
   STEPS,
   TOPUP_LIMIT,
+  TOPUP_NAME,
   TOPUP_NUMBER,
   TOPUP_NUMBER_RAW,
+  WHATSAPP_NUMBER,
 } from "./topup.config"
+import { requestWalletTopUp, uploadTopUpReceipt } from "@/lib/data/wallet"
 
 const TopUpCtx = createContext<{ open: () => void; close: () => void }>({
   open: () => {},
@@ -50,6 +55,14 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
   const [mounted, setMounted] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [tuAmount, setTuAmount] = useState("")
+  const [tuPhone, setTuPhone] = useState("")
+  const [tuRef, setTuRef] = useState("")
+  const [tuBusy, setTuBusy] = useState(false)
+  const [tuError, setTuError] = useState<string | null>(null)
+  const [flow, setFlow] = useState<"idle" | "mtn-amount" | "mtn-details">("idle")
+  const [receiptFile, setReceiptFile] = useState<File | null>(null)
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null)
   const triggerRef = useRef<HTMLElement | null>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ y: number; t: number } | null>(null)
@@ -136,6 +149,13 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
   }
   const onTouchMove = (e: React.TouchEvent) => {
     if (!dragRef.current) return
+    // Only allow drag-to-close when the sheet content is already at the top -
+    // otherwise a downward swipe is just normal scrolling and must not close.
+    if ((sheetRef.current?.scrollTop ?? 0) > 0) {
+      dragRef.current = null
+      setDragY(0)
+      return
+    }
     const dy = Math.max(0, e.touches[0].clientY - dragRef.current.y)
     setDragY(dy)
   }
@@ -156,9 +176,82 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
     } catch {}
   }
 
-  const tapMethod = (enabled: boolean, label: string) => {
-    if (!enabled) showToast("Coming soon")
-    else showToast(label) // real flows land here when integrated
+  const tapMethod = (id: string, enabled: boolean, label: string) => {
+    if (!enabled) {
+      showToast("Coming soon")
+      return
+    }
+    if (id === "mtn") {
+      setTuError(null)
+      setFlow("mtn-amount")
+    }
+  }
+
+  const pickReceipt = (file: File | null) => {
+    setReceiptFile(file)
+    setReceiptPreview(file ? URL.createObjectURL(file) : null)
+  }
+
+  const openWhatsApp = (text: string) => {
+    window.open(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`,
+      "_blank"
+    )
+  }
+
+  const submitTopUp = async () => {
+    const amount = Number(tuAmount.replace(/\s/g, ""))
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setTuError("Enter a valid amount")
+      return
+    }
+    if (tuPhone.replace(/\D/g, "").length < 8) {
+      setTuError("Enter the MoMo number you sent from")
+      return
+    }
+    setTuBusy(true)
+    setTuError(null)
+
+    let receiptUrl: string | undefined
+    if (receiptFile) {
+      const up = await uploadTopUpReceipt(receiptFile)
+      if (!up.ok) {
+        setTuBusy(false)
+        setTuError(up.message || "Couldn't upload the receipt - try again")
+        return
+      }
+      receiptUrl = up.url
+    }
+
+    const res = await requestWalletTopUp({
+      amount,
+      sender_phone: tuPhone.trim(),
+      momo_reference: tuRef.trim() || undefined,
+      receipt_url: receiptUrl,
+    })
+    setTuBusy(false)
+    if (!res.ok) {
+      setTuError(res.message || "Couldn't submit the request")
+      return
+    }
+
+    const lines = [
+      "Hybreed Wallet top-up request",
+      `Amount: ${amount.toLocaleString("en-FR")} XAF`,
+      `Sent from: ${tuPhone.trim()}`,
+      tuRef.trim() ? `Reference: ${tuRef.trim()}` : null,
+      receiptUrl ? `Receipt: ${receiptUrl}` : null,
+    ].filter(Boolean)
+    openWhatsApp(lines.join("\n"))
+
+    showToast("Opening WhatsApp - tap send to finish")
+    setTuAmount("")
+    setTuPhone("")
+    setTuRef("")
+    setReceiptFile(null)
+    setReceiptPreview(null)
+    setFlow("idle")
+    setTimeout(closeSheet, 1500)
   }
 
   return (
@@ -200,7 +293,7 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
                 : "transform .28s ease-out, opacity .2s ease-out",
             }}
           >
-            {/* drag handle — floats above the sheet edge */}
+            {/* drag handle - floats above the sheet edge */}
             <div
               aria-hidden
               className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-9 h-[5px] rounded-[3px] md:hidden"
@@ -308,8 +401,8 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
                   <button
                     key={m.id}
                     type="button"
-                    onClick={() => tapMethod(m.enabled, m.label)}
-                    className="w-[90px] h-[84px] shrink-0 rounded-[24px] p-3 flex flex-col justify-between text-left snap-start transition-transform duration-100 active:scale-[0.96]"
+                    onClick={() => tapMethod(m.id, m.enabled, m.label)}
+                    className="relative w-[90px] h-[84px] shrink-0 rounded-[24px] p-3 flex flex-col justify-between text-left snap-start transition-transform duration-100 active:scale-[0.96]"
                     style={{ background: m.tileLight }}
                   >
                     {m.logoImg ? (
@@ -331,12 +424,176 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
                         {m.logoText}
                       </span>
                     )}
+                    {m.badge && (
+                      <span className="absolute top-1.5 right-1.5 text-[9px] font-semibold bg-black/10 text-[#8A8A96] px-1.5 py-0.5 rounded-full">
+                        {m.badge}
+                      </span>
+                    )}
                     <span className="text-[16px] font-medium leading-[17px] text-[#1F1F23] line-clamp-2">
                       {m.label}
                     </span>
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* CARD 3 - MTN MoMo top-up flow */}
+            <div
+              className="mt-1 bg-white rounded-[28px] p-4"
+              style={{
+                paddingBottom: "calc(16px + env(safe-area-inset-bottom,0px))",
+              }}
+            >
+              {flow === "idle" && (
+                <>
+                  <h3 className="text-[20px] font-semibold text-[#1F1F23]">
+                    Top up with Mobile Money
+                  </h3>
+                  <p className="mt-1 text-[14px] leading-snug text-[#8A8A96]">
+                    Select MTN MoMo above to start. Send the money to{" "}
+                    {TOPUP_NUMBER} ({TOPUP_NAME}), then send us the details -
+                    your balance is credited once we confirm the transfer.
+                  </p>
+                </>
+              )}
+
+              {flow === "mtn-amount" && (
+                <>
+                  <h3 className="text-[20px] font-semibold text-[#1F1F23]">
+                    1. Enter amount
+                  </h3>
+                  <div className="mt-4 flex flex-col gap-3">
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[14px] font-medium text-[#1F1F23]">
+                        Amount (XAF)
+                      </span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={tuAmount}
+                        onChange={(e) => setTuAmount(e.target.value)}
+                        placeholder="e.g. 20 000"
+                        className="h-12 px-4 rounded-2xl bg-[#F0F0F3] text-[16px] text-[#1F1F23] outline-none focus:ring-2 focus:ring-[#2563EB]/40"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const amount = Number(tuAmount.replace(/\s/g, ""))
+                        if (!Number.isFinite(amount) || amount <= 0) {
+                          setTuError("Enter a valid amount")
+                          return
+                        }
+                        setTuError(null)
+                        setFlow("mtn-details")
+                      }}
+                      className="h-12 rounded-full bg-[#2563EB] text-white text-[16px] font-semibold active:scale-[0.99] transition-transform"
+                    >
+                      Continue
+                    </button>
+                    {tuError && (
+                      <p className="text-[13px] text-[#DC2626]">{tuError}</p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {flow === "mtn-details" && (
+                <>
+                  <h3 className="text-[20px] font-semibold text-[#1F1F23]">
+                    2. Send via MTN MoMo
+                  </h3>
+                  <div className="mt-3 rounded-2xl bg-[#FFF4C2] p-4">
+                    <p className="text-[13px] text-[#8A6D00]">
+                      Send <b>{tuAmount || "the amount"} XAF</b> to:
+                    </p>
+                    <p className="mt-1 text-[16px] font-semibold text-[#1F1F23]">
+                      {TOPUP_NUMBER}
+                    </p>
+                    <p className="text-[13px] text-[#8A6D00]">{TOPUP_NAME}</p>
+                    {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                    <a
+                      href={MTN_USSD_TEL}
+                      className="mt-3 inline-flex items-center justify-center h-11 px-5 rounded-full bg-[#FFCC00] text-black text-[15px] font-bold active:scale-[0.98] transition-transform"
+                    >
+                      Open {MTN_USSD} on dialpad
+                    </a>
+                    <p className="mt-2 text-[12px] text-[#8A6D00]">
+                      Tap the button, confirm the USSD prompt, then come back
+                      here.
+                    </p>
+                  </div>
+
+                  <h3 className="mt-5 text-[20px] font-semibold text-[#1F1F23]">
+                    3. Confirm your transfer
+                  </h3>
+                  <div className="mt-4 flex flex-col gap-3">
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[14px] font-medium text-[#1F1F23]">
+                        MoMo number you sent from
+                      </span>
+                      <input
+                        type="tel"
+                        inputMode="tel"
+                        value={tuPhone}
+                        onChange={(e) => setTuPhone(e.target.value)}
+                        placeholder="e.g. 6XX XX XX XX"
+                        className="h-12 px-4 rounded-2xl bg-[#F0F0F3] text-[16px] text-[#1F1F23] outline-none focus:ring-2 focus:ring-[#2563EB]/40"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[14px] font-medium text-[#1F1F23]">
+                        Transfer reference (optional)
+                      </span>
+                      <input
+                        type="text"
+                        value={tuRef}
+                        onChange={(e) => setTuRef(e.target.value)}
+                        placeholder="Reference or memo on the transfer"
+                        className="h-12 px-4 rounded-2xl bg-[#F0F0F3] text-[16px] text-[#1F1F23] outline-none focus:ring-2 focus:ring-[#2563EB]/40"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[14px] font-medium text-[#1F1F23]">
+                        Receipt of payment
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={(e) =>
+                          pickReceipt(e.target.files?.[0] ?? null)
+                        }
+                        className="text-[14px] text-[#1F1F23] file:mr-3 file:h-10 file:px-4 file:rounded-full file:border-0 file:bg-[#2563EB] file:text-white file:text-[14px] file:font-semibold"
+                      />
+                      {receiptPreview && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={receiptPreview}
+                          alt="Receipt preview"
+                          className="mt-1 h-24 w-24 rounded-xl object-cover border border-[#E5E5EA]"
+                        />
+                      )}
+                    </label>
+                    {tuError && (
+                      <p className="text-[13px] text-[#DC2626]">{tuError}</p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={submitTopUp}
+                      disabled={tuBusy}
+                      className="h-12 rounded-full bg-[#25D366] text-white text-[16px] font-semibold disabled:opacity-60 active:scale-[0.99] transition-transform"
+                    >
+                      {tuBusy
+                        ? "Sending…"
+                        : "Send request on WhatsApp"}
+                    </button>
+                    <p className="text-[12px] text-[#8A8A96] text-center">
+                      Opens WhatsApp with your details - just tap send.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -352,7 +609,7 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
   )
 }
 
-// Trigger for server-rendered places — same look via caller's className
+// Trigger for server-rendered places - same look via caller's className
 export const TopUpButton = ({
   className,
   children,

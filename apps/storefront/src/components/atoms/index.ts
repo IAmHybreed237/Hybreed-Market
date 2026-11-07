@@ -18,6 +18,7 @@ import { TabsTrigger } from "./TabsTrigger/TabsTrigger"
 import { NavigationItem } from "./NavigationItem/NavigationItem"
 import { LogoutButton } from "./LogoutButton/LogoutButton"
 import { HbMark } from "./HbMark/HbMark"
+import { VerifiedBadge } from "./VerifiedBadge/VerifiedBadge"
 
 export {
   Button,
@@ -40,4 +41,5 @@ export {
   NavigationItem,
   LogoutButton,
   HbMark,
+  VerifiedBadge,
 }

@@ -9,7 +9,7 @@ import { clx, Heading, Text } from '@medusajs/ui';
 import clsx from 'clsx';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { Button } from '@/components/atoms';
+import { Button, VerifiedBadge } from '@/components/atoms';
 import ErrorMessage from '@/components/molecules/ErrorMessage/ErrorMessage';
 import { removeShippingMethod, setShippingMethod } from '@/lib/data/cart';
 import { calculatePriceForShippingOption } from '@/lib/data/fulfillment';
@@ -52,9 +52,13 @@ type ShippingProps = {
           amount?: number;
         }[])
     | null;
+  hideTitle?: boolean;
+  // Single-page checkouts (cart overlay, mobile checkout) have no step
+  // navigation, so the option pickers must always be visible.
+  alwaysOpen?: boolean;
 };
 
-const CartShippingMethodsSection: FC<ShippingProps> = ({ cart, availableShippingMethods }) => {
+const CartShippingMethodsSection: FC<ShippingProps> = ({ cart, availableShippingMethods, hideTitle = false, alwaysOpen = false }) => {
   const [isLoadingPrices, setIsLoadingPrices] = useState(false);
   const [calculatedPricesMap, setCalculatedPricesMap] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +68,7 @@ const CartShippingMethodsSection: FC<ShippingProps> = ({ cart, availableShipping
   const router = useRouter();
   const pathname = usePathname();
 
-  const isOpen = searchParams.get('step') === 'delivery';
+  const isOpen = alwaysOpen || searchParams.get('step') === 'delivery';
 
   const _shippingMethods = availableShippingMethods?.filter(
     sm => sm.rules?.find((rule: any) => rule.attribute === 'is_return')?.value !== 'true'
@@ -180,8 +184,9 @@ const CartShippingMethodsSection: FC<ShippingProps> = ({ cart, availableShipping
   );
 
   return (
-    <div className="bg-ui-bg-interactive rounded-sm border p-4">
-      <div className="mb-6 flex flex-row items-center justify-between">
+    <div className={hideTitle ? "" : "bg-ui-bg-interactive rounded-sm border p-4"}>
+      <div className={`${hideTitle ? "" : "mb-6 "}flex flex-row items-center justify-between`}>
+        {!hideTitle && (
         <Heading
           level="h2"
           className="text-3xl-regular flex flex-row items-baseline gap-x-2"
@@ -189,6 +194,7 @@ const CartShippingMethodsSection: FC<ShippingProps> = ({ cart, availableShipping
           {!isOpen && (cart.shipping_methods?.length ?? 0) > 0 && <CheckCircleSolid />}
           Delivery
         </Heading>
+        )}
         {isEditEnabled && (
           <Text>
             <Button
@@ -204,7 +210,7 @@ const CartShippingMethodsSection: FC<ShippingProps> = ({ cart, availableShipping
         <>
           <div className="grid">
             <div data-testid="delivery-options-container">
-              <div className="pb-8 pt-2 md:pt-0">
+              <div className={hideTitle ? "pb-2 pt-0" : "pb-8 pt-2 md:pt-0"}>
                 {filteredGroupedBySellerId.length === 0
                   ? 'No shipping options available'
                   : filteredGroupedBySellerId.map(key => {
@@ -219,7 +225,7 @@ const CartShippingMethodsSection: FC<ShippingProps> = ({ cart, availableShipping
                           level="h3"
                           className="mb-2"
                         >
-                          {groupedBySellerId[key][0].seller_name}
+                          <span className="inline-flex items-center gap-1.5"><VerifiedBadge size={14} />{groupedBySellerId[key][0].seller_name}</span>
                         </Heading>
                         <Listbox
                           value={selectedMethod?.shipping_option_id ?? null}

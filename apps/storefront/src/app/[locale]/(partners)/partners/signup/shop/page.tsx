@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { ShopStep } from "@/components/sections/Partners/steps/ShopStep"
 
 export const metadata: Metadata = {
-  title: "Your shop — Hybreed Partners",
+  title: "Your shop - Hybreed Partners",
   robots: { index: false, follow: false },
 }
 

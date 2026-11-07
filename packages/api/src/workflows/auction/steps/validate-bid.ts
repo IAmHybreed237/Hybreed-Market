@@ -12,8 +12,8 @@ interface Input {
 
 /**
  * Loads the auction, verifies it is live and inside its window, validates
- * the bid amount against the current standing price, and — when the auction
- * requires a deposit — verifies the referenced Notch Pay transaction is
+ * the bid amount against the current standing price, and - when the auction
+ * requires a deposit - verifies the referenced Notch Pay transaction is
  * complete for at least the deposit amount.
  */
 export const validateBidStep = createStep(
@@ -64,7 +64,7 @@ export const validateBidStep = createStep(
 
     // Deposit commitment: when required, the bidder must reference a
     // completed Notch Pay transaction covering the deposit. Verified
-    // server-side — the reference alone proves nothing.
+    // server-side - the reference alone proves nothing.
     const deposit =
       auction.deposit_amount != null ? Number(auction.deposit_amount) : 0
     if (deposit > 0) {

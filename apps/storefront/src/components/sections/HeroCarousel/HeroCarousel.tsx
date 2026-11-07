@@ -23,14 +23,14 @@ type Slide = GradientSlide | ImageSlide
 
 const slides: Slide[] = [
   {
-    heading: "Big sale — up to 50% off",
+    heading: "Big sale - up to 50% off",
     href: "/categories",
     desktop: "/images/hero/banner-desktop-home.png",
     mobile: "/images/hero/banner-mobile.png",
   },
   {
     heading: "Your money stays protected",
-    sub: "Pay now, we hold it safe — released to the seller only when you receive your item.",
+    sub: "Pay now, we hold it safe - released to the seller only when you receive your item.",
     cta: "Shop with protection",
     href: "/categories",
     bg: "linear-gradient(120deg, #1d4ed8 0%, #2563eb 55%, #3b82f6 100%)",
@@ -44,14 +44,14 @@ const slides: Slide[] = [
   },
   {
     heading: "Pay small small",
-    sub: "Can't pay at once? Reserve the item and pay in installments — no interest.",
+    sub: "Can't pay at once? Reserve the item and pay in installments - no interest.",
     cta: "See how it works",
     href: "/categories",
     bg: "linear-gradient(120deg, #1e40af 0%, #3b82f6 55%, #60a5fa 100%)",
   },
   {
     heading: "Timed auctions are coming",
-    sub: "Bid on phones, fashion and more — winning price set by real competition.",
+    sub: "Bid on phones, fashion and more - winning price set by real competition.",
     cta: "Browse listings",
     href: "/categories",
     bg: "linear-gradient(120deg, #172554 0%, #1e3a8a 55%, #1d4ed8 100%)",

@@ -16,7 +16,7 @@ const Eye = () => (
   </svg>
 )
 
-export const WalletBalance = () => {
+export const WalletBalance = ({ balance = 0 }: { balance?: number }) => {
   const [hidden, setHidden] = useState(false)
 
   useEffect(() => {
@@ -37,7 +37,9 @@ export const WalletBalance = () => {
   return (
     <div className="flex items-center gap-3 mt-2">
       <p className="text-[44px] leading-[1.1] font-medium text-[#1F1F23]">
-        {hidden ? "••••" : "0 XAF"}
+        {hidden
+          ? "••••"
+          : `${Math.round(balance).toLocaleString("en-US").replace(/,/g, " ")} XAF`}
       </p>
       <button
         type="button"

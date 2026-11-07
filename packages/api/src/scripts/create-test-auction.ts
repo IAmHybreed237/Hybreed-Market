@@ -10,7 +10,7 @@ export default async function createTestAuction({ container }: ExecArgs) {
   const now = Date.now()
   const { result: auction } = await wf.run(createAuctionWorkflow, {
     input: {
-      title: "Nike Air Max 90 — Test Auction",
+      title: "Nike Air Max 90 - Test Auction",
       description: "Sandbox test auction for the bidding flow. Ends in 2 hours.",
       offer_id: "offer_01M5N7EKB8QDX8RAKV4XW8HV18",
       product_id: "prod_01M5N7EEPS15KXZVS3Y6WSXXDN",

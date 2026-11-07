@@ -24,7 +24,7 @@ const ClockGlyph = () => (
 const NextSteps = [
   {
     title: "Application under review",
-    desc: "Our team verifies your details — usually within 24 hours.",
+    desc: "Our team verifies your details - usually within 24 hours.",
   },
   {
     title: "Verdict sent to you",
@@ -54,7 +54,7 @@ export const DoneStep = () => {
         Application submitted
       </h1>
       <p className="mt-3 text-[15px] lg:text-[16px] leading-[24px] text-[#1F1F23]">
-        Thanks{info.shopName ? ` — we've received the application for` : " for applying"}
+        Thanks{info.shopName ? ` - we've received the application for` : " for applying"}
         {info.shopName && (
           <span className="font-semibold"> {info.shopName}</span>
         )}

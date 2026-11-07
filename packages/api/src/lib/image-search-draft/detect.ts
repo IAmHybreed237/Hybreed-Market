@@ -1,7 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { detectComponents } from "../vision"
 
-// POST /store/image-search/detect — { image: "<base64 or url>" } -> components with dot positions
+// POST /store/image-search/detect - { image: "<base64 or url>" } -> components with dot positions
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const image = (req.body as { image?: string })?.image
   if (!image) return res.status(400).json({ message: "image required" })

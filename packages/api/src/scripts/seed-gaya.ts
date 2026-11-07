@@ -21,7 +21,7 @@ const SELLER_EMAIL = "gaya@hybreed.dev"
 const SELLER_PASSWORD = "supersecret"
 const BASE = process.env.STOREFRONT_URL || "http://192.168.31.130:3000"
 
-const DESCRIPTION = `Minimalist low-top sneakers in premium Veau Velours calf suede — rich, matte-black depth with tonal hand-placed matte black spikes across the reinforced toe box. All-black rubber midsole over the signature red lacquered rubber outsole. Made in Italy.
+const DESCRIPTION = `Minimalist low-top sneakers in premium Veau Velours calf suede - rich, matte-black depth with tonal hand-placed matte black spikes across the reinforced toe box. All-black rubber midsole over the signature red lacquered rubber outsole. Made in Italy.
 
 • Upper: fine-nap calf suede (Veau Velours), matte black
 • Spikes: hand-placed matte black spikes on structured toe box
@@ -30,11 +30,11 @@ const DESCRIPTION = `Minimalist low-top sneakers in premium Veau Velours calf su
 • Hardware: matte black metal eyelets, flat tonal woven laces
 • Construction: upper stitched directly to the rubber cupsole
 
-Sizing: runs true to size to slightly large. The suede breaks in and stretches slightly across the width; the reinforced spiked toe cap does not stretch — wide feet should go half a size up.
+Sizing: runs true to size to slightly large. The suede breaks in and stretches slightly across the width; the reinforced spiked toe cap does not stretch - wide feet should go half a size up.
 
-Care: apply a water & stain repellent before first wear. Clean only with a crepe suede brush or suede eraser — never water or soap. The red outsole is solid red rubber, so the colour won't wear off — just wipe with a damp cloth.`
+Care: apply a water & stain repellent before first wear. Clean only with a crepe suede brush or suede eraser - never water or soap. The red outsole is solid red rubber, so the colour won't wear off - just wipe with a damp cloth.`
 
-const GDC_DESCRIPTION = `Nike Skateboarding × Girls Don't Cry — Verdy's "Coming Back Home" SB Dunk Low Pro QS. Ultra-limited Japan exclusive released ahead of Valentine's Day 2019, celebrated for its bold monochromatic red palette and playful romantic motifs.
+const GDC_DESCRIPTION = `Nike Skateboarding × Girls Don't Cry - Verdy's "Coming Back Home" SB Dunk Low Pro QS. Ultra-limited Japan exclusive released ahead of Valentine's Day 2019, celebrated for its bold monochromatic red palette and playful romantic motifs.
 
 • Upper: fully tonal University Red premium nubuck/suede base with matching red overlays and a stitched leather Nike Swoosh
 • Heel: contrast white "Girls Don't Cry" script embroidered on the lateral heel panel
@@ -45,9 +45,9 @@ const GDC_DESCRIPTION = `Nike Skateboarding × Girls Don't Cry — Verdy's "Comi
 
 Sizing: men's sizing, fits true to size with typical plush SB padding.
 
-A region-exclusive QS release — quantities are limited.`
+A region-exclusive QS release - quantities are limited.`
 
-const STUSSY_DESCRIPTION = `Nike SB Dunk Low × Stüssy "Black/Sky Blue" — independent custom-designed homage concept blending the iconic Nike SB Dunk Low silhouette with signature Stüssy branding.
+const STUSSY_DESCRIPTION = `Nike SB Dunk Low × Stüssy "Black/Sky Blue" - independent custom-designed homage concept blending the iconic Nike SB Dunk Low silhouette with signature Stüssy branding.
 
 • Upper: deep black nubuck/suede base with crisp white contrast accent stitching around the paneling
 • Swoosh: light sky blue Nike Swoosh on the lateral side, plus a custom miniature Swoosh embroidered near the front mudguard
@@ -56,7 +56,7 @@ const STUSSY_DESCRIPTION = `Nike SB Dunk Low × Stüssy "Black/Sky Blue" — ind
 • Extras: detachable chrome Stüssy interlocking "S" keychain tag
 • Sole: black midsole over a light sky blue rubber outsole
 
-Sizing: unisex sizing, true to size — the padded SB tongue and collar make wide feet prefer half a size up.`
+Sizing: unisex sizing, true to size - the padded SB tongue and collar make wide feet prefer half a size up.`
 
 export default async function seedGaya({ container }: ExecArgs) {
   const query = container.resolve("query") as any
@@ -137,7 +137,7 @@ export default async function seedGaya({ container }: ExecArgs) {
           email: SELLER_EMAIL,
           currency_code: "xaf",
           description:
-            "Gaya Shopping — verified footwear & fashion seller in Buea, Cameroon.",
+            "Gaya Shopping - verified footwear & fashion seller in Buea, Cameroon.",
           logo: `https://api.dicebear.com/9.x/initials/svg?seed=Gaya%20Shopping`,
           metadata: { verified: true },
         },
@@ -332,7 +332,7 @@ export default async function seedGaya({ container }: ExecArgs) {
 
   const PRODUCTS = [
     {
-      title: "Spiked Suede Low-Top Sneakers — Red Sole",
+      title: "Spiked Suede Low-Top Sneakers - Red Sole",
       handle: "gaya-spiked-suede-sneakers",
       subtitle:
         "Black Veau Velours · Matte black spikes · Red lacquered sole",
@@ -354,7 +354,7 @@ export default async function seedGaya({ container }: ExecArgs) {
       },
     },
     {
-      title: `Nike SB Dunk Low Pro QS "Girls Don't Cry" — Coming Back Home`,
+      title: `Nike SB Dunk Low Pro QS "Girls Don't Cry" - Coming Back Home`,
       handle: "nike-sb-dunk-girls-dont-cry",
       subtitle:
         "University Red suede · Verdy butterfly motif · Japan exclusive QS",

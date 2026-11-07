@@ -4,7 +4,7 @@ import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 
 /**
- * Pull-to-refresh for mobile pages — pull down from the top reveals a loader
+ * Pull-to-refresh for mobile pages - pull down from the top reveals a loader
  * strip that stretches in-flow, release triggers a soft router.refresh().
  */
 export const PullToRefresh = ({ children }: { children: React.ReactNode }) => {
@@ -46,7 +46,7 @@ export const PullToRefresh = ({ children }: { children: React.ReactNode }) => {
       onTouchEnd={onPullEnd}
       onTouchCancel={onPullEnd}
     >
-      {/* loader strip — stretches in-flow at the top, mobile only */}
+      {/* loader strip - stretches in-flow at the top, mobile only */}
       <div
         aria-hidden={!(pullY > 0 || refreshing)}
         className="lg:hidden flex items-center justify-center overflow-hidden"

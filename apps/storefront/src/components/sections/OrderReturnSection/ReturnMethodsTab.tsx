@@ -1,4 +1,4 @@
-import { Card, Checkbox } from "@/components/atoms"
+import { Card, Checkbox, VerifiedBadge } from "@/components/atoms"
 
 export const ReturnMethodsTab = ({
   shippingMethods,
@@ -45,7 +45,7 @@ export const ReturnMethodsTab = ({
           <p className="label-lg uppercase">Shipping address</p>
         </Card>
         <Card className="p-4">
-          <p className="label-lg">{seller.name}</p>
+          <p className="label-lg inline-flex items-center gap-1.5"><VerifiedBadge size={16} />{seller.name}</p>
           <p className="label-md">{seller.address_line}</p>
           <p className="label-md">
             {seller.city}, {seller.state}

@@ -1,69 +1,71 @@
 import { Suspense } from 'react';
 
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 
-import PaymentWrapper from '@/components/organisms/PaymentContainer/PaymentWrapper';
-import { CartAddressSection } from '@/components/sections/CartAddressSection/CartAddressSection';
-import CartPaymentSection from '@/components/sections/CartPaymentSection/CartPaymentSection';
-import CartReview from '@/components/sections/CartReview/CartReview';
-import CartShippingMethodsSection from '@/components/sections/CartShippingMethodsSection/CartShippingMethodsSection';
-import { retrieveCart } from '@/lib/data/cart';
+import { getOrSetCart } from '@/lib/data/cart';
 import { retrieveCustomer } from '@/lib/data/customer';
+import { getRegion } from '@/lib/data/regions';
 import { listCartShippingMethods } from '@/lib/data/fulfillment';
 import { listCartPaymentMethods } from '@/lib/data/payment';
+import { MobileCheckoutClient } from './MobileCheckoutClient';
 
 export const metadata: Metadata = {
   title: 'Checkout',
-  description: 'My cart page - Checkout',
+  description: 'Checkout',
   robots: { index: false, follow: false }
 };
 
-export default async function CheckoutPage({}) {
+export default async function CheckoutPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const region = await getRegion(locale);
+
   return (
     <Suspense
-      fallback={<div className="container flex items-center justify-center" data-testid="checkout-page-loading">Loading...</div>}
+      fallback={
+        <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center text-[#6B6B76]">
+          Loading checkout…
+        </div>
+      }
     >
-      <CheckoutPageContent />
+      <CheckoutPageContent locale={locale} regionId={region?.id} currencyCode={region?.currency_code?.toUpperCase() || 'XAF'} />
     </Suspense>
   );
 }
 
-async function CheckoutPageContent({}) {
-  const cart = await retrieveCart();
+async function CheckoutPageContent({
+  locale,
+  regionId,
+  currencyCode,
+}: {
+  locale: string;
+  regionId?: string;
+  currencyCode: string;
+}) {
+  const cart = await getOrSetCart(locale).catch(() => null);
 
-  if (!cart) {
-    return notFound();
+  if (!cart || !(cart.items?.length ?? 0)) {
+    redirect(`/${locale}/cart`);
   }
 
-  const shippingMethods = await listCartShippingMethods(cart.id, false);
-  const paymentMethods = await listCartPaymentMethods(cart.region?.id ?? '');
-  const customer = await retrieveCustomer();
+  const [shippingMethods, paymentMethods, customer] = await Promise.all([
+    listCartShippingMethods(cart.id, false).catch(() => null),
+    listCartPaymentMethods(cart.region?.id ?? regionId ?? '').catch(() => null),
+    retrieveCustomer().catch(() => null),
+  ]);
 
   return (
-    <PaymentWrapper cart={cart}>
-      <main className="container" data-testid="checkout-page">
-        <div className="grid gap-8 lg:grid-cols-11">
-          <div className="flex flex-col gap-4 lg:col-span-6" data-testid="checkout-steps-container">
-            <CartAddressSection
-              cart={cart}
-              customer={customer}
-            />
-            <CartShippingMethodsSection
-              cart={cart}
-              availableShippingMethods={shippingMethods as any}
-            />
-            <CartPaymentSection
-              cart={cart}
-              availablePaymentMethods={paymentMethods}
-            />
-          </div>
-
-          <div className="lg:col-span-5" data-testid="checkout-review-container">
-            <CartReview cart={cart} />
-          </div>
-        </div>
-      </main>
-    </PaymentWrapper>
+    <MobileCheckoutClient
+      cart={cart as any}
+      customer={customer as any}
+      shippingMethods={shippingMethods}
+      paymentMethods={paymentMethods}
+      currencyCode={currencyCode}
+      locale={locale}
+    />
   );
 }

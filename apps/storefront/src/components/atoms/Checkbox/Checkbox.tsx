@@ -6,6 +6,10 @@ interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   indeterminate?: boolean
   error?: boolean
   label?: string
+  /** Extra classes applied to the wrapper only while checked/indeterminate. */
+  checkedClassName?: string
+  /** Extra classes applied to the wrapper (e.g. icon color overrides). */
+  iconClassName?: string
   "data-testid"?: string
 }
 
@@ -14,6 +18,8 @@ export function Checkbox({
   indeterminate,
   error,
   className,
+  checkedClassName,
+  iconClassName,
   checked,
   "data-testid": dataTestId,
   ...props
@@ -23,9 +29,10 @@ export function Checkbox({
       <span
         className={cn(
           "checkbox-wrapper",
-          checked && "!bg-action",
+          checked && (checkedClassName ?? "!bg-action"),
           error && "!border-negative",
-          indeterminate && "!bg-action",
+          indeterminate && (checkedClassName ?? "!bg-action"),
+          iconClassName,
           props.disabled && "!bg-disabled !border-disabled !cursor-default",
           className
         )}

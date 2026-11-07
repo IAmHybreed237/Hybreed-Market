@@ -8,7 +8,7 @@ const Bid = model.define("bid", {
   }),
   // Medusa customer id of the bidder.
   bidder_id: model.text(),
-  // The bidder's maximum amount — proxy bidding semantics: the engine only
+  // The bidder's maximum amount - proxy bidding semantics: the engine only
   // ever charges the standing price, never this ceiling.
   amount: model.bigNumber(),
   // The amount this bid currently represents on the auction.

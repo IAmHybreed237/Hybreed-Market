@@ -96,7 +96,7 @@ export const MobileBottomNav = () => {
                 <Icon />
                 {badge > 0 && (
                   <span
-                    className="absolute flex items-center justify-center rounded-full bg-[#EF4444] text-white text-[11px] font-bold"
+                    className="absolute flex items-center justify-center rounded-full bg-[#EF4444] text-white text-[12px] font-semibold"
                     style={{
                       minWidth: 18,
                       height: 18,

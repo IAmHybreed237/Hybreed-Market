@@ -20,7 +20,7 @@ export default async function ImageSearchResults({
     <main className="container py-6">
       <h1 className="text-2xl font-semibold text-[#1F1F23] mb-4">Matches for your photo</h1>
       {sorted.length === 0 ? (
-        <p className="text-[#8A8A96]">No similar items found yet — try a clearer photo or check back as sellers add more.</p>
+        <p className="text-[#8A8A96]">No similar items found yet - try a clearer photo or check back as sellers add more.</p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {sorted.map((p: any) => (

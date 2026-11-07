@@ -13,14 +13,33 @@ export const ForYouShelf = ({ locale }: { locale: string }) => {
   useEffect(() => {
     const cats = getTopCategories(3)
     if (!cats.length) return
-    fetch(
-      `${API}/store/products?limit=10&fields=title,handle,thumbnail,*variants.calculated_price,*variants.prices&${cats
-        .map((c) => `category_id[]=${c}`)
-        .join("&")}`,
-      { headers: { "x-publishable-api-key": KEY } }
-    )
-      .then((r) => r.json())
-      .then((d) => setProducts(d.products || []))
+    const headers = { "x-publishable-api-key": KEY }
+    Promise.all([
+      fetch(
+        `${API}/store/products?limit=10&fields=title,handle,thumbnail,*variants.calculated_price,*variants.prices&${cats
+          .map((c) => `category_id[]=${c}`)
+          .join("&")}`,
+        { headers }
+      ).then((r) => r.json()),
+      fetch(`${API}/store/offers?limit=200`, { headers }).then((r) => r.json()),
+    ])
+      .then(([d, od]) => {
+        const sellerByProduct = new Map<string, any>()
+        for (const o of od?.offers || []) {
+          const pid = o?.product_id
+          if (pid && o?.seller?.name && !sellerByProduct.has(pid)) {
+            sellerByProduct.set(pid, o.seller)
+          }
+        }
+        const list = d.products || []
+        setProducts(
+          list.map((p: any) =>
+            sellerByProduct.has(p.id)
+              ? { ...p, seller: sellerByProduct.get(p.id) }
+              : p
+          )
+        )
+      })
       .catch(() => setProducts([]))
   }, [])
 

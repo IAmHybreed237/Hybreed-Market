@@ -4,7 +4,7 @@ import { AUCTION_MODULE } from "../../../modules/auction/service"
 const PUBLIC_STATUSES = ["scheduled", "live", "ended"]
 
 /**
- * GET /store/auctions — list auctions visible to buyers.
+ * GET /store/auctions - list auctions visible to buyers.
  * Query: status (scheduled|live|ended), limit, offset.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {

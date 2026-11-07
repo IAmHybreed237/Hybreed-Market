@@ -3,7 +3,7 @@ import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedL
 import { VENDOR_URL } from "@/lib/vendor"
 
 export const metadata: Metadata = {
-  title: "Hybreed Partners — Start selling",
+  title: "Hybreed Partners - Start selling",
   description:
     "Sign up to start selling on Hybreed, Cameroon's trusted marketplace.",
 }
@@ -103,7 +103,7 @@ const HeroArt = () => (
 export default function PartnersPage() {
   return (
     <main className="w-full max-w-[1440px] mx-auto px-4 lg:px-6">
-      {/* ===== SECTION 2 — welcome hero ===== */}
+      {/* ===== SECTION 2 - welcome hero ===== */}
       <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10 pt-8 pb-14 lg:pt-16 lg:pb-20">
         <HeroArt />
         <div className="lg:order-first max-w-[680px]">
@@ -151,7 +151,7 @@ export default function PartnersPage() {
         </div>
       </section>
 
-      {/* ===== SECTION 3 — seller tools grid ===== */}
+      {/* ===== SECTION 3 - seller tools grid ===== */}
       <section id="tools" className="scroll-mt-[76px] pb-16 lg:pb-24">
         <h2 className="text-[26px] lg:text-[32px] font-extrabold tracking-[-0.02em] text-[#1F1F23]">
           Seller tools

@@ -166,7 +166,11 @@ class NotchPayProviderService extends AbstractPaymentProvider<NotchPayOptions> {
         description: `Hybreed order payment ${reference}`,
         reference,
         callback: this.options_.callbackUrl,
-        lockedChannel: this.options_.lockedChannel,
+        // Per-session channel override (e.g. "cm.mtn" / "cm.orange") sent by
+        // the storefront tile picker; falls back to the module-level option.
+        lockedChannel:
+          (data?.notchpay_channel as string | undefined) ??
+          this.options_.lockedChannel,
         lockedCountry: this.options_.lockedCountry ?? "CM",
       });
     } catch (e) {
@@ -201,7 +205,7 @@ class NotchPayProviderService extends AbstractPaymentProvider<NotchPayOptions> {
 
   /**
    * Verifies the payment directly with Notch Pay. We never trust the
-   * amount/status stored locally alone — MoMo is a push payment, so
+   * amount/status stored locally alone - MoMo is a push payment, so
    * "complete" means funds were actually collected.
    */
   private async fetchVerifiedTransaction(
@@ -456,7 +460,7 @@ class NotchPayProviderService extends AbstractPaymentProvider<NotchPayOptions> {
     switch (eventType) {
       case "payment.complete":
         // Final confirmation: always re-fetch the transaction so a spoofed
-        // or replayed webhook cannot mark an unpaid session as paid —
+        // or replayed webhook cannot mark an unpaid session as paid -
         // the embedded payload's status is never trusted.
         try {
           const fresh = await this.client_.getPayment(

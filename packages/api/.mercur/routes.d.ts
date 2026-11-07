@@ -511,6 +511,11 @@ export type Routes = {
         };
         auctions: typeof import("../src/api/admin/auctions/route");
         custom: typeof import("../src/api/admin/custom/route");
+        wallet: {
+            topups: typeof import("../src/api/admin/wallet/topups/route") & {
+                $id: typeof import("../src/api/admin/wallet/topups/[id]/route");
+            };
+        };
     };
     auth: {
         $actorType: {
@@ -645,6 +650,9 @@ export type Routes = {
             };
         };
         custom: typeof import("../src/api/store/custom/route");
+        wallet: typeof import("../src/api/store/wallet/route") & {
+            topups: typeof import("../src/api/store/wallet/topups/route");
+        };
     };
     vendor: {
         campaigns: typeof import("@mercurjs/core/api/vendor/campaigns/route") & {

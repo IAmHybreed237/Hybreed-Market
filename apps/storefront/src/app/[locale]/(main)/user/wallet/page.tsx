@@ -1,4 +1,5 @@
 import { retrieveCustomer } from "@/lib/data/customer"
+import { getWalletStatement } from "@/lib/data/wallet"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { TopUpButton } from "@/components/cells/TopUpSheet/TopUpSheet"
 import { redirect } from "next/navigation"
@@ -42,17 +43,23 @@ const tabs = [
   "Favorites", "Hybreed Wallet", "Reviews & questions", "More sections",
 ]
 
-const balances = [
-  { value: "0 XAF", label: "Hybreed Wallet", href: "/user/wallet", tint: "#fff", icon: <SparkIcon />, active: true },
-  { value: "100,000 XAF", label: "Pay in installments", href: "/user", tint: "#DBEAFE", icon: <CloverIcon /> },
-  { value: "100 HB", label: "Cashback", href: "/user", tint: "#E0F2FE", icon: <CoinIcon /> },
-  { value: "0 XAF", label: "Certificates", href: "/user", tint: "#E0E7FF", icon: <TicketIcon /> },
-  { value: "0 XAF", label: "Gift funds", href: "/user", tint: "#DBEAFE", icon: <GiftIcon /> },
-]
+const fmt = (n: number) =>
+  `${Math.round(n).toLocaleString("en-US").replace(/,/g, " ")} XAF`
 
 export default async function WalletPage() {
   const user = await retrieveCustomer().catch(() => null)
   if (!user) redirect("/login")
+
+  const wallet = await getWalletStatement().catch(() => null)
+  const balance = wallet?.balance ?? 0
+  const points = wallet?.points ?? 0
+  const balances = [
+    { value: fmt(balance), label: "Hybreed Wallet", href: "/user/wallet", tint: "#fff", icon: <SparkIcon />, active: true },
+    { value: "100,000 XAF", label: "Pay in installments", href: "/user", tint: "#DBEAFE", icon: <CloverIcon /> },
+    { value: `${Math.round(points).toLocaleString("en-US")} HB`, label: "Cashback", href: "/user", tint: "#E0F2FE", icon: <CoinIcon /> },
+    { value: "0 XAF", label: "Certificates", href: "/user", tint: "#E0E7FF", icon: <TicketIcon /> },
+    { value: "0 XAF", label: "Gift funds", href: "/user", tint: "#DBEAFE", icon: <GiftIcon /> },
+  ]
 
   return (
     <main
@@ -68,7 +75,7 @@ export default async function WalletPage() {
       }
     >
       {/* ===== MOBILE (<768px) ===== */}
-      <WalletMobile />
+      <WalletMobile balance={balance} points={points} />
 
       {/* ===== TABLET (768-1023) ===== */}
       <div className="hidden md:block lg:hidden">
@@ -78,7 +85,7 @@ export default async function WalletPage() {
             <Chevron size={18} />
           </div>
           <div className="flex items-baseline gap-3 mt-3 flex-wrap">
-            <p className="text-4xl font-extrabold text-[#1F1F23]">0 XAF</p>
+            <p className="text-4xl font-extrabold text-[#1F1F23]">{fmt(balance)}</p>
             <p className="text-sm text-[#8A8A96]">
               Installments up to <span className="font-semibold text-[#1F1F23]">100,000 XAF</span>
             </p>
@@ -120,7 +127,7 @@ export default async function WalletPage() {
 
         {/* 2) three-column grid */}
         <div className="grid grid-cols-[290px_minmax(0,1fr)_330px] items-start" style={{ columnGap: 40 }}>
-          {/* 3) left — balances */}
+          {/* 3) left - balances */}
           <div className="flex flex-col h-[350px]">
             {balances.map((b) => (
               <LocalizedClientLink
@@ -161,7 +168,7 @@ export default async function WalletPage() {
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-[#1F1F23]"><polyline points="9 18 15 12 9 6" /></svg>
                 </LocalizedClientLink>
               </div>
-              <WalletBalance />
+              <WalletBalance balance={balance} />
               <p className="text-sm mt-1" style={{ color: "#5B6B8A" }}>
                 Total for purchases
               </p>
@@ -171,7 +178,7 @@ export default async function WalletPage() {
                   <WalletIcon />
                 </span>
                 <span>
-                  <span className="block text-[15px] font-medium text-[#1F1F23]">0 XAF</span>
+                  <span className="block text-[15px] font-medium text-[#1F1F23]">{fmt(balance)}</span>
                   <span className="block text-[16px]" style={{ color: "var(--muted)" }}>Main funds</span>
                 </span>
               </div>
@@ -204,7 +211,28 @@ export default async function WalletPage() {
               />
             </div>
 
-            {/* 4c. transaction history */}
+            {/* 4c. pending top-ups */}
+            {(wallet?.topups ?? []).some((t) => t.status === "pending") && (
+              <div className={`${card} mt-4 p-[18px] max-w-[650px] mx-auto`}>
+                <h2 className="text-xl font-semibold text-[#1F1F23]">Pending top-ups</h2>
+                <div className="mt-3 flex flex-col gap-2">
+                  {wallet!.topups
+                    .filter((t) => t.status === "pending")
+                    .map((t) => (
+                      <div key={t.id} className="flex items-center justify-between text-[15px]">
+                        <span className="text-[#1F1F23]">
+                          Top-up · {new Date(t.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                        </span>
+                        <span className="font-semibold text-[#F59E0B]">
+                          +{Math.round(Number((t.amount as any)?.numeric ?? t.amount)).toLocaleString("en-US").replace(/,/g, " ")} XAF · pending
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* 4d. transaction history */}
             <div className={`${card} mt-4 p-[18px] max-w-[650px] mx-auto`}>
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-[#1F1F23]">Transaction history</h2>
@@ -212,11 +240,47 @@ export default async function WalletPage() {
                   All <Chevron />
                 </LocalizedClientLink>
               </div>
-              {/* empty state */}
-              <div className="py-6 flex flex-col items-center gap-2" style={{ color: "var(--muted)" }}>
-                <ListIcon />
-                <p className="text-[15px]">No transactions yet</p>
-              </div>
+              {(wallet?.entries ?? []).length === 0 ? (
+                <div className="py-6 flex flex-col items-center gap-2" style={{ color: "var(--muted)" }}>
+                  <ListIcon />
+                  <p className="text-[15px]">No transactions yet</p>
+                </div>
+              ) : (
+                <div className="mt-3 flex flex-col">
+                  {wallet!.entries.map((e) => {
+                    const v = Number((e.amount as any)?.numeric ?? e.amount)
+                    const credit = v >= 0
+                    const isPoints = e.type === "points_earn" || e.type === "points_redeem"
+                    const pts = Number((e.metadata as any)?.points ?? Math.abs(Math.round(v)))
+                    return (
+                      <div key={e.id} className="flex items-center justify-between py-2.5 border-b border-[#F0F0F3] last:border-0">
+                        <div className="min-w-0">
+                          <p className="text-[15px] font-medium text-[#1F1F23] truncate">
+                            {e.description ||
+                              (e.type === "points_earn"
+                                ? "HB points earned"
+                                : e.type === "topup"
+                                  ? "Wallet top-up"
+                                  : e.type === "purchase"
+                                    ? "Order payment"
+                                    : e.type === "refund"
+                                      ? "Refund"
+                                      : e.type)}
+                          </p>
+                          <p className="text-[13px] text-[#8A8A96]">
+                            {new Date(e.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                          </p>
+                        </div>
+                        <span className={`text-[15px] font-semibold shrink-0 ml-3 ${credit ? "text-[#16A34A]" : "text-[#1F1F23]"}`}>
+                          {isPoints
+                            ? `${credit ? "+" : "−"}${pts.toLocaleString("en-US")} HB`
+                            : `${credit ? "+" : "−"}${Math.abs(Math.round(v)).toLocaleString("en-US").replace(/,/g, " ")} XAF`}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           </div>
 

@@ -64,7 +64,7 @@ export const getCategoryByHandle = async (categoryHandle: string) => {
     .then(({ product_categories }) => product_categories[0]);
 };
 
-// Medusa's `/store/products?category_id=` filters by the exact category only —
+// Medusa's `/store/products?category_id=` filters by the exact category only -
 // it does not walk into descendants. To make a parent category page list every
 // product beneath it, collect the whole subtree of ids and pass them all.
 export const collectCategorySubtreeIds = (

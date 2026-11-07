@@ -1,4 +1,4 @@
-import { StarRating } from "@/components/atoms"
+import { StarRating, VerifiedBadge } from "@/components/atoms"
 import { SellerAvatar } from "@/components/cells/SellerAvatar/SellerAvatar"
 import { CollapseIcon } from "@/icons"
 import clsx from "clsx"
@@ -30,7 +30,10 @@ export const SellerInfoHeader = ({
       <SellerAvatar photo={photo} size={56} alt={name} />
     </div>
     <div className="flex flex-col gap-1">
-      <h3 className="heading-sm text-primary">{name}</h3>
+      <h3 className="heading-sm text-primary flex items-center gap-1.5">
+        <VerifiedBadge size={18} />
+        {name}
+      </h3>
       {showReviews && (
         <div className="flex items-center gap-2">
           <StarRating starSize={14} rate={rating || 0} />

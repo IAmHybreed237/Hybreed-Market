@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { PayoutStep } from "@/components/sections/Partners/steps/PayoutStep"
 
 export const metadata: Metadata = {
-  title: "Getting paid — Hybreed Partners",
+  title: "Getting paid - Hybreed Partners",
   robots: { index: false, follow: false },
 }
 

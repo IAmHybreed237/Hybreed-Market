@@ -5,7 +5,7 @@ import { createAuctionWorkflow } from "../../../workflows/auction/create-auction
 import { CreateAuctionInput } from "../../../workflows/auction/steps/create-auction"
 
 /**
- * GET /admin/auctions — list auctions (operator view).
+ * GET /admin/auctions - list auctions (operator view).
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const service = req.scope.resolve(AUCTION_MODULE)
@@ -23,7 +23,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 }
 
 /**
- * POST /admin/auctions — create an auction for a seller's offer.
+ * POST /admin/auctions - create an auction for a seller's offer.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const body = req.body as Partial<CreateAuctionInput>
