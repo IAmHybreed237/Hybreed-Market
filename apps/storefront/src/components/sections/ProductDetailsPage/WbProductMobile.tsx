@@ -90,6 +90,7 @@ export const WbProductMobile = ({
   reviewSummary,
   reviewMedia,
   wishlisted,
+  followedIds,
   locale,
 }: {
   product: any
@@ -99,6 +100,7 @@ export const WbProductMobile = ({
   reviewSummary?: { average: number | null; count: number }
   reviewMedia?: { url: string; thumbnail_url: string | null; type: string }[]
   wishlisted?: boolean
+  followedIds?: string[]
   locale: string
 }) => {
   const router = useRouter()
@@ -110,6 +112,7 @@ export const WbProductMobile = ({
   const [fav, setFav] = useState(!!wishlisted)
   const [favBusy, setFavBusy] = useState(false)
   const [followed, setFollowed] = useState(false)
+  const [followBusy, setFollowBusy] = useState(false)
   const [added, setAdded] = useState(false)
   const [shake, setShake] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -124,6 +127,36 @@ export const WbProductMobile = ({
   const sizesRef = useRef<HTMLDivElement>(null)
   const sheetScrollRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<number | null>(null)
+
+  const sellerId = product?.seller?.id ?? offers?.[0]?.seller?.id ?? null
+
+  useEffect(() => {
+    if (sellerId && followedIds?.includes(sellerId)) setFollowed(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sellerId])
+
+  const toggleFollow = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (followBusy || !sellerId) return
+    const next = !followed
+    setFollowed(next)
+    setFollowBusy(true)
+    try {
+      const res = await fetch(`/api/wishlist/seller-follow/${sellerId}`, { method: "POST" })
+      if (res.status === 401) {
+        setFollowed(!next)
+        router.push(`/${locale}/login`)
+        return
+      }
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || typeof data.following !== "boolean") setFollowed(!next)
+      else setFollowed(data.following)
+    } catch {
+      setFollowed(!next)
+    } finally {
+      setFollowBusy(false)
+    }
+  }
 
   const toggleFav = async () => {
     if (favBusy || !product?.id) return
@@ -781,7 +814,7 @@ export const WbProductMobile = ({
           </span>
           <span
             role="button"
-            onClick={(e) => { e.preventDefault(); setFollowed(!followed) }}
+            onClick={toggleFollow}
             className="w-9 h-9 rounded-xl bg-[#E4E4EA] flex items-center justify-center shrink-0"
           >
             <HeartIcon size={20} filled={followed} color="#2563EB" />

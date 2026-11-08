@@ -5,7 +5,7 @@ import { listProducts } from "@/lib/data/products"
 import { listOffers } from "@/lib/data/offers"
 import { getTrends } from "@/lib/data/trending"
 import { getProductReviews } from "@/lib/data/reviews"
-import { getWishlistProductIds } from "@/lib/data/wishlist"
+import { getWishlistProductIds, getFollowedIds } from "@/lib/data/wishlist"
 import { StoreOffer } from "@/lib/helpers/buybox"
 import { HomeProductSection } from "../HomeProductSection/HomeProductSection"
 import NotFound from "@/app/not-found"
@@ -38,10 +38,11 @@ export const ProductDetailsPage = async ({
   const prodCatIds: string[] = ((prod as any).categories || [])
     .map((c: any) => c?.id)
     .filter(Boolean)
-  const [trends, reviewsData, wishlistIds] = await Promise.all([
+  const [trends, reviewsData, wishlistIds, followedIds] = await Promise.all([
     getTrends(30),
     getProductReviews(prod.id, { limit: 1 }),
     getWishlistProductIds(),
+    getFollowedIds(),
   ])
   const wishlisted = wishlistIds.includes(prod.id)
   const reviewSummary = reviewsData.summary
@@ -114,6 +115,7 @@ export const ProductDetailsPage = async ({
         reviewSummary={reviewSummary}
         reviewMedia={reviewsData.media}
         wishlisted={wishlisted}
+        followedIds={followedIds}
         locale={locale}
       />
       <div className="hidden md:block">

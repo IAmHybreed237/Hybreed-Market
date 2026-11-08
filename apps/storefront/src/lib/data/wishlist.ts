@@ -34,13 +34,29 @@ export const getWishlistProducts = async (): Promise<any[]> => {
   return data?.products ?? []
 }
 
+/** Ids the customer follows (sellers and review authors share the follow store). */
+export const getFollowedIds = async (): Promise<string[]> => {
+  const headers = await auth()
+  if (!headers) return []
+  const res = await fetch(`${BACKEND_URL}/store/seller-follows`, {
+    headers: {
+      'x-publishable-api-key': PUBLISHABLE_KEY,
+      ...headers,
+    },
+    cache: 'no-store',
+  }).catch(() => null)
+  if (!res?.ok) return []
+  const data = await res.json().catch(() => ({}))
+  return data?.ids ?? []
+}
+
 /** Just the product ids in the customer's wishlist. */
 export const getWishlistProductIds = async (): Promise<string[]> => {
   const headers = await auth()
   if (!headers) return []
   const rq = await regionQuery()
   const res = await fetch(
-    `${BACKEND_URL}/store/wishlist?limit=100&fields=id${rq ? `&${rq}` : ''}`,
+    `${BACKEND_URL}/store/wishlist?limit=100${rq ? `&${rq}` : ''}`,
     {
       headers: {
         'x-publishable-api-key': PUBLISHABLE_KEY,

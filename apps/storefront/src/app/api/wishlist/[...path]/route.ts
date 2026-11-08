@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic"
 const BACKEND_URL = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
 const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY as string
 
-const ALLOWED = ["wishlist"]
+const ALLOWED = ["wishlist", "seller-follow", "seller-follows"]
 
 const forward = async (req: Request, path: string[], method: "GET" | "POST" | "DELETE") => {
   if (!ALLOWED.includes(path[0]) || path.some((p) => !/^[\w-]+$/.test(p))) {
