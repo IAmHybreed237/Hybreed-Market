@@ -117,7 +117,7 @@ export const WbProductReviews = ({ images }: { images: string[] }) => {
               <p className="text-[#1F1F23] text-[36px] font-bold leading-none">4.8</p>
               <div>
                 <Stars n={5} />
-                <p className="text-[13px] text-[#8A8A96] mt-0.5">128 ratings</p>
+                <p className="text-[13px] text-[#8A8A96] mt-0.5">128 reviews</p>
               </div>
             </div>
             <span className="inline-flex items-center gap-1.5 bg-[#2563EB]/10 text-[#2563EB] rounded-lg px-3 py-1.5 text-[13px] font-semibold">

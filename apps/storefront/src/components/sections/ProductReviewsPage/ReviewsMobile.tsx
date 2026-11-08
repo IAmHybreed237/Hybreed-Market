@@ -912,7 +912,7 @@ export const ReviewsMobile = ({
           <span className="text-[44px] leading-none font-bold text-[#1F1F23]">{summary.average != null ? summary.average.toFixed(1) : "–"}</span>
           <span>
             <Stars value={summary.average ?? 0} s={22} />
-            <span className="block text-[15px] text-[#8A8A96] mt-0.5">{num(summary.count)} {summary.count === 1 ? "rating" : "ratings"}</span>
+            <span className="block text-[15px] text-[#8A8A96] mt-0.5">{num(summary.count)} {summary.count === 1 ? "review" : "reviews"}</span>
           </span>
         </div>
         {["5", "4", "3", "2", "1"].map((k) => (

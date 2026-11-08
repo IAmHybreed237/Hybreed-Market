@@ -180,7 +180,7 @@ export const ProductCard = ({
             {brand} / {categoryName}
           </p>
           <p className="flex items-center gap-1 text-[13px] text-[#8A8A96] mt-1">
-            <StarIcon /> 4.8 · 128 ratings
+            <StarIcon /> 4.8 · 128 reviews
           </p>
           {stockShown != null && (
             <>

@@ -283,7 +283,7 @@ export const MobileProductCard = ({ p }: { p: any }) => {
             <StarIcon />
             <span className="font-medium text-[#1f2937]">{rating}</span>
             <span>·</span>
-            <span className="truncate">{reviews} ratings</span>
+            <span className="truncate">{reviews} reviews</span>
           </div>
         )}
       </div>

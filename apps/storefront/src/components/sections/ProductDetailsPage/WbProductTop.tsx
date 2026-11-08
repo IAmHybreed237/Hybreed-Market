@@ -344,7 +344,7 @@ export const WbProductTop = ({
               4.8
             </span>
             <span className="text-[#8A8A96]">·</span>
-            <a href="#reviews" className="text-[#2563EB]">128 ratings</a>
+            <a href="#reviews" className="text-[#2563EB]">128 reviews</a>
             <span className="text-[#8A8A96]">·</span>
             <span className="text-[#8A8A96]">14 questions</span>
           </div>

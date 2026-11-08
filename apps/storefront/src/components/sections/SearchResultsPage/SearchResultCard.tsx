@@ -319,7 +319,7 @@ export const SearchResultCard = ({ p }: { p: any }) => {
               <>
                 <span className="text-[15px] text-[#6B6B76]"> · </span>
                 <span className="text-[15px] text-[#6B6B76] truncate">
-                  {ratingCount} ratings
+                  {ratingCount} reviews
                 </span>
               </>
             )}

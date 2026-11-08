@@ -713,14 +713,14 @@ export const WbProductMobile = ({
       </button>
       )}
 
-      {/* 4. ratings + questions tiles */}
+      {/* 4. reviews + questions tiles */}
       <div className="grid gap-2 mb-1" style={{ gridTemplateColumns: "6.5fr 3.5fr" }}>
         <button
           onClick={() => router.push(`/products/${product?.handle}/reviews${selectedVariant ? `?variant=${selectedVariant.id}` : ""}`)}
           className="bg-white rounded-[20px] pl-3 pr-2.5 py-2 text-left active:scale-[0.99] transition-transform flex items-center gap-2 min-w-0"
         >
           <span className="min-w-0">
-            <span className="block text-[13px] font-semibold text-[#1F1F23]">Ratings</span>
+            <span className="block text-[13px] font-semibold text-[#1F1F23]">Reviews</span>
             <span className="flex items-center gap-1.5 mt-0.5">
               <StarIcon />
               <span className="text-[18px] font-semibold text-[#1F1F23]">
@@ -728,7 +728,7 @@ export const WbProductMobile = ({
               </span>
             </span>
             <span className="block text-[12px] text-[#8A8A96] mt-0.5 truncate">
-              {reviewSummary?.count ? `${reviewSummary.count} ratings` : "No ratings yet"}
+              {reviewSummary?.count ? `${reviewSummary.count} reviews` : "No reviews yet"}
             </span>
           </span>
           {(() => {
