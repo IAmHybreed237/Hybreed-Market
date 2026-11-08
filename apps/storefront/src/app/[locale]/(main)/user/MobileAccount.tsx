@@ -116,6 +116,8 @@ export const MobileAccount = ({
         } as React.CSSProperties
       }
     >
+      {/* hide the footer on mobile for this page */}
+      <style>{`@media (max-width:767.98px){[data-testid="footer"]{display:none}}`}</style>
       {/* 1) TOP BAR */}
       <div className="bg-white rounded-b-[24px] h-16 flex items-center gap-3 px-3 -mx-2">
         <LocalizedClientLink
