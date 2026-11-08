@@ -717,7 +717,7 @@ export const WbProductMobile = ({
       <div className="grid gap-2 mb-1" style={{ gridTemplateColumns: "6.5fr 3.5fr" }}>
         <button
           onClick={() => router.push(`/products/${product?.handle}/reviews${selectedVariant ? `?variant=${selectedVariant.id}` : ""}`)}
-          className="bg-white rounded-[20px] pl-3 pr-2.5 py-2.5 text-left active:scale-[0.99] transition-transform flex items-center gap-2 min-w-0"
+          className="bg-white rounded-[20px] pl-3 pr-2.5 py-2 text-left active:scale-[0.99] transition-transform flex items-center gap-2 min-w-0"
         >
           <span className="min-w-0">
             <span className="block text-[13px] font-semibold text-[#1F1F23]">Ratings</span>
@@ -738,7 +738,7 @@ export const WbProductMobile = ({
             const pics = [...imgs, ...rest]
             if (!pics.length) return null
             return (
-              <span className="relative shrink-0 ml-auto" style={{ width: 52 + (pics.length - 1) * 20, height: 64 }}>
+              <span className="relative shrink-0 ml-auto" style={{ width: 46 + (pics.length - 1) * 18, height: 56 }}>
                 {pics.map((m, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -747,7 +747,7 @@ export const WbProductMobile = ({
                     alt=""
                     loading="lazy"
                     className="absolute top-0 rounded-[10px] border-2 border-white object-cover bg-[#F0F0F3]"
-                    style={{ left: i * 20, width: 52, height: 64, zIndex: pics.length - i }}
+                    style={{ left: i * 18, width: 46, height: 56, zIndex: pics.length - i }}
                   />
                 ))}
               </span>
@@ -756,7 +756,7 @@ export const WbProductMobile = ({
         </button>
         <button
           onClick={() => setAskOpen(true)}
-          className="bg-white rounded-[20px] px-3 py-2.5 text-left active:scale-[0.99] transition-transform flex flex-col justify-center"
+          className="bg-white rounded-[20px] px-3 py-2 text-left active:scale-[0.99] transition-transform flex flex-col justify-center"
         >
           <span className="flex items-center gap-1.5">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -765,7 +765,7 @@ export const WbProductMobile = ({
             <span className="text-[16px] font-semibold text-[#1F1F23]">Ask</span>
           </span>
           <span className="block text-[12px] text-[#8A8A96] mt-0.5 leading-tight">
-            Questions? We ask the seller for you
+            Send Questions To The Seller
           </span>
         </button>
       </div>
