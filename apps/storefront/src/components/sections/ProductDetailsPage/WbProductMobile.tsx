@@ -329,7 +329,7 @@ export const WbProductMobile = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product])
 
-  const buy = async (go: boolean) => {
+  const buy = async (go: boolean, dest = "/cart") => {
     if (sizes.length && !size) {
       setShake(true)
       setToast("Select a size")
@@ -348,8 +348,23 @@ export const WbProductMobile = ({
     }
     if (!offer?.id) return
     await addToCart({ offerId: offer.id, quantity: 1, countryCode: locale })
-    if (go) router.push("/cart")
+    if (go) router.push(dest)
     else setAdded(true)
+  }
+
+  // Pay Small Small plan: part 1 at checkout (wallet), the rest every interval.
+  // Part 1 absorbs rounding so the parts always sum to the exact price.
+  const pipPart = amount != null && pipParts > 0 ? Math.ceil(amount / pipParts) : null
+  const pipFirst = amount != null && pipPart != null ? amount - pipPart * (pipParts - 1) : null
+  const pipEvery =
+    pipIntervalDays % 7 === 0
+      ? pipIntervalDays === 7 ? "Every week" : `Every ${pipIntervalDays / 7} weeks`
+      : `Every ${pipIntervalDays} days`
+  const pipWeeks = Math.round(((pipParts - 1) * pipIntervalDays) / 7)
+
+  const checkoutFromParts = () => {
+    closeSheet()
+    setTimeout(() => buy(true, "/checkout?step=address"), 240)
   }
 
   const scrollToId = (id: string) =>
@@ -797,7 +812,7 @@ export const WbProductMobile = ({
           <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
           <div className="fixed inset-0 bg-black/40 z-[55]" onClick={closeSheet} />
           <div
-            className="fixed bottom-0 left-0 right-0 z-[56] bg-[#F5F5F7] rounded-t-[24px] max-h-[80vh] flex flex-col overflow-hidden"
+            className={`fixed bottom-0 left-0 right-0 z-[56] bg-[#F5F5F7] rounded-t-[24px] ${sheet === "parts" ? "max-h-[88vh]" : "max-h-[80vh]"} flex flex-col overflow-hidden`}
             style={{
               transform: sheetClosing ? "translateY(105%)" : `translateY(${dragY}px)`,
               transition:
@@ -815,7 +830,7 @@ export const WbProductMobile = ({
             </div>
             <div
               ref={sheetScrollRef}
-              className="overflow-y-auto px-5 pb-8 min-h-0 overscroll-contain"
+              className={`overflow-y-auto min-h-0 overscroll-contain ${sheet === "parts" ? "px-2 pb-2" : "px-5 pb-8"}`}
             >
             {sheet === "sizes" && (
               <>
@@ -839,16 +854,91 @@ export const WbProductMobile = ({
               </>
             )}
             {sheet === "parts" && (
-              <>
-                <h3 className="text-[20px] font-semibold text-[#1F1F23] mb-3">Pay Small Small</h3>
-                <p className="text-[15px] text-[#1F1F23]/80 leading-[22px]">
-                  Split your payment into {pipParts} interest-free parts.
-                  {amount != null ? ` That's about ${num(Math.ceil(amount / pipParts))} XAF every ${pipIntervalDays >= 14 ? `${Math.round(pipIntervalDays / 7)} weeks` : "week"}.` : ""}
-                </p>
-                <p className="text-[14px] text-[#6B6B76] leading-[20px] mt-2">
-                  Pay with Hybreed Wallet at checkout — whatever your balance doesn't cover becomes your Pay Small Small balance. Top up with MoMo or Orange Money each week to clear it.
-                </p>
-              </>
+              <div className="flex flex-col gap-2">
+                {/* plan card */}
+                <div className="relative bg-white rounded-[24px] px-4 pt-4 pb-5">
+                  {displayImages[0] && (
+                    <img
+                      src={displayImages[0]}
+                      alt=""
+                      className="absolute top-4 right-4 w-[64px] h-[76px] rounded-[12px] object-cover bg-[#F6F6F9]"
+                    />
+                  )}
+                  <h3 className="text-[20px] font-semibold text-[#1F1F23] leading-[26px] pr-[76px]">
+                    Pay Small Small{pipPart != null ? ` ${num(pipPart)} XAF × ${pipParts}` : ""}
+                  </h3>
+
+                  <div className="relative mt-4 pl-[40px]">
+                    {/* timeline rail */}
+                    <span aria-hidden className="absolute left-[11px] top-[12px] h-[40px] w-[2px] bg-[#22C55E]" />
+                    <span aria-hidden className="absolute left-[11px] top-[60px] bottom-0 w-[2px] bg-gradient-to-b from-[#C7C7D1] to-transparent" />
+                    <span aria-hidden className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#22C55E] flex items-center justify-center">
+                      <span className="w-2 h-2 rounded-full bg-white" />
+                    </span>
+                    <span aria-hidden className="absolute left-[8px] top-[52px] w-2 h-2 rounded-full bg-[#A1A1AA]" />
+
+                    <p className="h-6 leading-6 text-[16px] font-medium text-[#16A34A] pr-[60px]">
+                      First payment: {pipFirst != null ? `${num(pipFirst)} XAF` : "-"}
+                    </p>
+                    <div className="mt-[22px]">
+                      <p className="text-[16px] leading-5 text-[#1F1F23]">
+                        Then {pipParts - 1} payments{pipPart != null ? ` ${num(pipPart)} XAF each` : ""}
+                      </p>
+                      <p className="text-[14px] leading-5 text-[#8A8A96] mt-1">{pipEvery}</p>
+                      <p className="text-[14px] leading-5 text-[#8A8A96]">
+                        Track your balance anytime in your HB Wallet
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* explainer card */}
+                <div className="bg-white rounded-[24px] px-4 pt-4 pb-5">
+                  <h3 className="text-[19px] font-semibold text-[#1F1F23] leading-[25px]">
+                    What does it mean to pay small small
+                  </h3>
+                  <ul className="mt-4 flex flex-col gap-4">
+                    {[
+                      {
+                        t: "Pay part 1 from your HB Wallet",
+                        s: "Whatever your balance doesn't cover becomes your Pay Small Small balance",
+                        icon: (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="#1F1F23" aria-hidden>
+                            <path d="M5 4h11a2 2 0 0 1 2 2v1H5.5a.5.5 0 0 0 0 1H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3Zm11.5 9a1.5 1.5 0 1 0 0 3h2v-3h-2Z" />
+                          </svg>
+                        ),
+                      },
+                      {
+                        t: pipWeeks > 0 ? `Spread over ${pipWeeks} ${pipWeeks === 1 ? "week" : "weeks"}` : "Flexible plan",
+                        s: "Top up with MoMo or Orange Money at a pace that fits your budget",
+                        icon: (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="#1F1F23" aria-hidden>
+                            <path d="M8 2a1 1 0 0 1 1 1v1h6V3a1 1 0 1 1 2 0v1h1a3 3 0 0 1 3 3v1H3V7a3 3 0 0 1 3-3h1V3a1 1 0 0 1 1-1ZM3 10h18v8a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-8Z" />
+                          </svg>
+                        ),
+                      },
+                      {
+                        t: "No interest, no hidden fees",
+                        s: "You pay exactly the product price - nothing more",
+                        icon: (
+                          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+                            <circle cx="12" cy="12" r="10" fill="#1F1F23" />
+                            <text x="12" y="16.2" textAnchor="middle" fontSize="11" fontWeight="700" fill="#fff" fontFamily="inherit">F</text>
+                          </svg>
+                        ),
+                      },
+                    ].map((r) => (
+                      <li key={r.t} className="flex gap-4">
+                        <span className="shrink-0 w-6 h-6 mt-[1px]">{r.icon}</span>
+                        <span className="min-w-0">
+                          <span className="block text-[16px] leading-[22px] text-[#1F1F23]">{r.t}</span>
+                          <span className="block text-[14px] leading-5 text-[#8A8A96] mt-0.5">{r.s}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             )}
             {sheet === "price" && (
               <>
@@ -917,6 +1007,20 @@ export const WbProductMobile = ({
               </>
             )}
             </div>
+            {sheet === "parts" && (
+              <div
+                className="shrink-0 bg-white rounded-t-[24px] px-3 pt-3"
+                style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}
+              >
+                <button
+                  onClick={checkoutFromParts}
+                  disabled={isAddingItem || outOfStock}
+                  className="w-full h-[56px] rounded-[20px] bg-[#2563EB] text-white text-[18px] font-semibold active:scale-[0.98] transition-transform disabled:opacity-60"
+                >
+                  {outOfStock ? "Out of stock" : "To Checkout"}
+                </button>
+              </div>
+            )}
           </div>
         </>
       )}
