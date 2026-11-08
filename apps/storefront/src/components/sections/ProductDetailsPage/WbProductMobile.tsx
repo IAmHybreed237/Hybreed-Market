@@ -877,7 +877,7 @@ export const WbProductMobile = ({
                     <style>{`@keyframes pssPulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}70%{box-shadow:0 0 0 7px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}`}</style>
                     <span aria-hidden className="absolute left-[13px] top-[14px] h-[40px] w-[3px] bg-[#22C55E] rounded-full" />
                     <span aria-hidden className="absolute left-[13px] top-[64px] bottom-0 w-[3px] bg-gradient-to-b from-[#C7C7D1] to-transparent rounded-full" />
-                    <span aria-hidden className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#22C55E] flex items-center justify-center" style={{ animation: "pssPulse 2.2s ease-out infinite" }}>
+                    <span aria-hidden className="absolute left-[3px] top-0 w-6 h-6 rounded-full bg-[#22C55E] flex items-center justify-center" style={{ animation: "pssPulse 2.2s ease-out infinite" }}>
                       <span className="w-2 h-2 rounded-full bg-white" />
                     </span>
                     <span aria-hidden className="absolute left-[9px] top-[54px] w-2.5 h-2.5 rounded-full bg-[#A1A1AA]" />
