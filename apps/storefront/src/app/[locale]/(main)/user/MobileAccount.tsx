@@ -388,7 +388,10 @@ export const MobileAccount = ({
 
         {/* 6b) ORDERS HUB */}
         {hub && (
-          <div className={`${card} overflow-hidden`}>
+          <div
+            className={`${card} overflow-hidden`}
+            style={{ marginLeft: -13, marginRight: -13, borderRadius: 0 }}
+          >
             {/* featured: orders + pickup */}
             <LocalizedClientLink href="/user/orders" className="block px-4 pt-4 pb-3">
               <div className="flex items-start justify-between gap-3">
