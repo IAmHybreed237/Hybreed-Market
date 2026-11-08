@@ -3,6 +3,7 @@ import { WbProductReviews } from "./WbProductReviews"
 import { WbProductMobile } from "./WbProductMobile"
 import { listProducts } from "@/lib/data/products"
 import { listOffers } from "@/lib/data/offers"
+import { getTrends } from "@/lib/data/trending"
 import { StoreOffer } from "@/lib/helpers/buybox"
 import { HomeProductSection } from "../HomeProductSection/HomeProductSection"
 import NotFound from "@/app/not-found"
@@ -31,6 +32,47 @@ export const ProductDetailsPage = async ({
     countryCode: locale,
   })
 
+  // --- recommendations: recent search/view trends + this product's categories
+  const prodCatIds: string[] = ((prod as any).categories || [])
+    .map((c: any) => c?.id)
+    .filter(Boolean)
+  const trends = await getTrends(30)
+  const trendCatIds = trends.category_ids.map((c) => c.key).slice(0, 5)
+  const trendProductIds = new Set(trends.product_ids.map((p) => p.key))
+  const trendTerms = trends.terms.map((t) => t.key).filter((t) => t.length >= 2)
+
+  const poolCatIds = [...new Set([...prodCatIds, ...trendCatIds])]
+  const { response: poolRes } = poolCatIds.length
+    ? await listProducts({
+        countryCode: locale,
+        category_id: poolCatIds,
+        queryParams: { limit: 60 },
+      })
+    : { response: { products: [] as any[], count: 0 } }
+
+  const scored = (poolRes.products || [])
+    .filter((p: any) => p.handle !== handle)
+    .map((p: any) => {
+      let score = 0
+      if (trendProductIds.has(p.id)) score += 4
+      const hay = `${p.title || ""} ${p.handle || ""}`.toLowerCase()
+      if (trendTerms.some((t) => hay.includes(t.toLowerCase()))) score += 3
+      const pCats = ((p as any).categories || []).map((c: any) => c?.id)
+      if (pCats.some((c: string) => prodCatIds.includes(c))) score += 2
+      return { p, score }
+    })
+    .sort((a, b) => b.score - a.score)
+
+  const likeList = scored.slice(0, 8).map((s) => s.p)
+  const sellerProducts = ((prod as any).seller?.products || []).filter(
+    (p: any) => p.handle !== handle
+  )
+  const likeHandles = new Set(likeList.map((p: any) => p.handle))
+  const buyList = [
+    ...sellerProducts.filter((p: any) => !likeHandles.has(p.handle)),
+    ...scored.filter((s) => !likeHandles.has(s.p.handle)).map((s) => s.p),
+  ].slice(0, 8)
+
   return (
     <>
       <TrackView
@@ -58,7 +100,8 @@ export const ProductDetailsPage = async ({
       <WbProductMobile
         product={prod}
         offers={offers as StoreOffer[]}
-        similar={(prod as any).seller?.products || []}
+        similar={likeList}
+        alsoBuy={buyList}
         locale={locale}
       />
       <div className="hidden md:block">
@@ -69,7 +112,7 @@ export const ProductDetailsPage = async ({
       <div className="my-8 hidden md:block">
         <HomeProductSection
           heading="Similar items"
-          products={prod.seller?.products}
+          products={sellerProducts}
           locale={locale}
         />
       </div>

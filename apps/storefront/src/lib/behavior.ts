@@ -4,6 +4,19 @@ const KEY = "hb_behavior"
 const MAX_VIEWS = 24
 const MAX_SEARCHES = 20
 
+/** Fire-and-forget server-side tracking for trend aggregation. */
+function beacon(payload: Record<string, unknown>) {
+  if (typeof window === "undefined") return
+  try {
+    fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => {})
+  } catch {}
+}
+
 export type ViewInfo = { title: string; handle: string; image?: string; price?: number | null }
 type View = { id: string; cats: string[]; at: number; info?: ViewInfo }
 type Behavior = { views: View[]; searches: string[]; cats: Record<string, number> }
@@ -39,6 +52,11 @@ export function trackView(
   ].slice(0, MAX_VIEWS)
   for (const c of categoryIds) b.cats[c] = (b.cats[c] || 0) + 1
   write(b)
+  beacon({
+    type: "view",
+    product_id: productId,
+    category_ids: categoryIds.slice(0, 10),
+  })
 }
 
 export function trackSearch(term: string) {
@@ -46,6 +64,7 @@ export function trackSearch(term: string) {
   const b = read()
   b.searches = [term, ...b.searches.filter((s) => s !== term)].slice(0, MAX_SEARCHES)
   write(b)
+  beacon({ type: "search", term: term.trim() })
 }
 
 export function getSearches(n = 10): string[] {

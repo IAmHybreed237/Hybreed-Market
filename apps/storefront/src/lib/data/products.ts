@@ -12,7 +12,7 @@ import { getRegion, retrieveRegion } from './regions';
 import { getProductSellerMap } from './offers';
 
 const PRODUCT_LIST_FIELDS =
-  '*variants.calculated_price,+variants.inventory_quantity,*variants.prices,*variants.options,*attribute_values,*attribute_values.attribute';
+  '*variants.calculated_price,+variants.inventory_quantity,*variants.prices,*variants.options,*attribute_values,*attribute_values.attribute,*categories';
 
 const attachSellers = async (
   products: HttpTypes.StoreProduct[],

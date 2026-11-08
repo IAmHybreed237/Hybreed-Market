@@ -87,6 +87,9 @@ module.exports = withMercur({
       resolve: './src/modules/push-notifications',
     },
     {
+      resolve: './src/modules/trending',
+    },
+    {
       resolve: '@medusajs/medusa/file',
       options: {
         providers: [

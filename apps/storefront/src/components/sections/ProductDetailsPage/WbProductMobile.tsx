@@ -86,11 +86,13 @@ export const WbProductMobile = ({
   product,
   offers,
   similar,
+  alsoBuy,
   locale,
 }: {
   product: any
   offers: any[]
   similar: any[]
+  alsoBuy?: any[]
   locale: string
 }) => {
   const router = useRouter()
@@ -353,7 +355,9 @@ export const WbProductMobile = ({
   const scrollToId = (id: string) =>
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
 
-  const similarList = (similar || []).slice(0, 12)
+  const likeList = (similar || []).slice(0, 8)
+  const buyList = (alsoBuy || []).slice(0, 8)
+  const activeList = tab === "like" ? likeList : buyList
 
   return (
     <div className="bg-[#F5F5F7] -mx-4 md:hidden" style={{ paddingBottom: "calc(56px + 8px + 52px + 16px + env(safe-area-inset-bottom,0px))" }}>
@@ -715,17 +719,30 @@ export const WbProductMobile = ({
           ))}
         </div>
         <div className="grid grid-cols-2 gap-x-2 gap-y-4 px-4 mt-4">
-          {similarList.length > 0 ? (
-            similarList.map((p: any) => (
-              <LocalizedClientLink key={p.id} href={`/products/${p.handle}`} className="block">
-                <div className="aspect-[3/4] rounded-[16px] overflow-hidden bg-[#F6F6F9]">
-                  <img src={p.thumbnail || p.images?.[0]?.url} alt={p.title} loading="lazy" className="w-full h-full object-cover" />
-                </div>
-                <p className="text-[14px] text-[#1F1F23] mt-2 line-clamp-2 leading-snug">{p.title}</p>
-              </LocalizedClientLink>
-            ))
+          {activeList.length > 0 ? (
+            activeList.map((p: any) => {
+              const price =
+                p?.variants?.[0]?.calculated_price?.calculated_amount ??
+                p?.variants?.[0]?.prices?.find(
+                  (pr: any) => String(pr.currency_code || "").toLowerCase() === "xaf"
+                )?.amount ??
+                null
+              return (
+                <LocalizedClientLink key={p.id} href={`/products/${p.handle}`} className="block">
+                  <div className="aspect-[3/4] rounded-[16px] overflow-hidden bg-[#F6F6F9]">
+                    <img src={p.thumbnail || p.images?.[0]?.url} alt={p.title} loading="lazy" className="w-full h-full object-cover" />
+                  </div>
+                  <p className="text-[14px] text-[#1F1F23] mt-2 line-clamp-2 leading-snug">{p.title}</p>
+                  {price != null && (
+                    <p className="text-[13px] font-semibold text-[#FA1F4B] mt-0.5">{num(price)} XAF</p>
+                  )}
+                </LocalizedClientLink>
+              )
+            })
           ) : (
-            <p className="col-span-2 text-[15px] text-[#8A8A96] py-6 text-center">No similar items yet</p>
+            <p className="col-span-2 text-[15px] text-[#8A8A96] py-6 text-center">
+              {tab === "like" ? "No similar items yet" : "Nothing else from this seller yet"}
+            </p>
           )}
         </div>
       </div>
