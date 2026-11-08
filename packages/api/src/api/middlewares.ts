@@ -75,6 +75,11 @@ export default defineMiddlewares({
       middlewares: [authenticate("customer", ["session", "bearer"])],
     },
     {
+      matcher: "/store/product-questions*",
+      method: ["POST"],
+      middlewares: [authenticate("customer", ["session", "bearer"])],
+    },
+    {
       matcher: "/store/wallet*",
       method: ["GET", "POST"],
       middlewares: [authenticate("customer", ["session", "bearer"])],

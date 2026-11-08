@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react"
 import { useRouter } from "next/navigation"
 import { requestGuestSignup } from "@/components/organisms/GuestSignup/GuestSignupSheet"
+import { AskQuestionSheet } from "@/components/cells/AskQuestionSheet/AskQuestionSheet"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { useCartContext } from "@/components/providers"
 import { VerifiedBadge } from "@/components/atoms/VerifiedBadge/VerifiedBadge"
@@ -107,6 +108,7 @@ export const WbProductMobile = ({
   const router = useRouter()
   const { addToCart, isAddingItem } = useCartContext() as any
   const [imgIdx, setImgIdx] = useState(0)
+  const [askOpen, setAskOpen] = useState(false)
   const [size, setSize] = useState<string | null>(null)
   const [color, setColor] = useState<string | null>(null)
   const [extraSel, setExtraSel] = useState<Record<string, string>>({})
@@ -712,7 +714,7 @@ export const WbProductMobile = ({
       )}
 
       {/* 4. ratings + questions tiles */}
-      <div className="grid grid-cols-1 gap-1 mb-1">
+      <div className="grid grid-cols-2 gap-2 mb-1">
         <button
           onClick={() => router.push(`/products/${product?.handle}/reviews${selectedVariant ? `?variant=${selectedVariant.id}` : ""}`)}
           className="bg-white rounded-[20px] pl-3 pr-2.5 py-2.5 text-left active:scale-[0.99] transition-transform flex items-center gap-2"
@@ -728,30 +730,21 @@ export const WbProductMobile = ({
               {reviewSummary?.count ? `${reviewSummary.count} ratings` : "No ratings yet"}
             </span>
           </span>
-          {(() => {
-            const all = reviewMedia ?? []
-            const imgs = all.filter((m) => m.type === "image").slice(0, 3)
-            const rest = imgs.length < 3 ? all.filter((m) => m.thumbnail_url && !imgs.includes(m)).slice(0, 3 - imgs.length) : []
-            const pics = [...imgs, ...rest]
-            if (!pics.length) return null
-            return (
-              <span className="relative shrink-0 ml-auto" style={{ width: 44 + (pics.length - 1) * 16, height: 54 }}>
-                {pics.map((m, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={m.url + i}
-                    src={m.type === "image" ? m.url : m.thumbnail_url ?? m.url}
-                    alt=""
-                    loading="lazy"
-                    className="absolute top-0 rounded-[12px] border-2 border-white object-cover bg-[#F0F0F3]"
-                    style={{ left: i * 16, width: 44, height: 54, zIndex: pics.length - i }}
-                  />
-                ))}
-              </span>
-            )
-          })()}
         </button>
-
+        <button
+          onClick={() => setAskOpen(true)}
+          className="bg-white rounded-[20px] px-3 py-2.5 text-left active:scale-[0.99] transition-transform flex flex-col justify-center"
+        >
+          <span className="flex items-center gap-1.5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <span className="text-[16px] font-semibold text-[#1F1F23]">Ask</span>
+          </span>
+          <span className="block text-[12px] text-[#8A8A96] mt-0.5 leading-tight">
+            Questions? We ask the seller for you
+          </span>
+        </button>
       </div>
 
       {/* 5. delivery card */}
@@ -1119,6 +1112,14 @@ export const WbProductMobile = ({
             )}
           </div>
         </>
+      )}
+      {product?.id && (
+        <AskQuestionSheet
+          open={askOpen}
+          onClose={() => setAskOpen(false)}
+          productId={product.id}
+          productTitle={product?.title}
+        />
       )}
     </div>
   )
