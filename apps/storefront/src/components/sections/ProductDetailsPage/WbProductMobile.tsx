@@ -720,7 +720,7 @@ export const WbProductMobile = ({
           className="bg-white rounded-[20px] pl-3 pr-2.5 py-2.5 text-left active:scale-[0.99] transition-transform flex items-center gap-2 min-w-0"
         >
           <span className="min-w-0">
-            <span className="block text-[11px] font-semibold uppercase tracking-wide text-[#8A8A96]">Ratings</span>
+            <span className="block text-[13px] font-semibold text-[#1F1F23]">Ratings</span>
             <span className="flex items-center gap-1.5 mt-0.5">
               <StarIcon />
               <span className="text-[18px] font-semibold text-[#1F1F23]">
@@ -738,7 +738,7 @@ export const WbProductMobile = ({
             const pics = [...imgs, ...rest]
             if (!pics.length) return null
             return (
-              <span className="relative shrink-0 ml-auto" style={{ width: 40 + (pics.length - 1) * 14, height: 50 }}>
+              <span className="relative shrink-0 ml-auto" style={{ width: 52 + (pics.length - 1) * 20, height: 64 }}>
                 {pics.map((m, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -747,7 +747,7 @@ export const WbProductMobile = ({
                     alt=""
                     loading="lazy"
                     className="absolute top-0 rounded-[10px] border-2 border-white object-cover bg-[#F0F0F3]"
-                    style={{ left: i * 14, width: 40, height: 50, zIndex: pics.length - i }}
+                    style={{ left: i * 20, width: 52, height: 64, zIndex: pics.length - i }}
                   />
                 ))}
               </span>
