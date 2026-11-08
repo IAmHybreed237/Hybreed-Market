@@ -165,11 +165,9 @@ type FeedProduct = { title: string; image: string | null; price: { amount: numbe
 const fmtPrice = (n: number) => `${Math.round(n).toLocaleString("fr-FR")} F`
 
 const RailBtn = ({ children, label, onClick, badge }: { children: React.ReactNode; label: string; onClick: () => void; badge?: number }) => (
-  <button aria-label={label} onClick={onClick} className="relative flex flex-col items-center gap-1 text-white">
-    <span className="w-[46px] h-[46px] rounded-full bg-white/15 backdrop-blur flex items-center justify-center active:scale-90 transition-transform">
-      {children}
-    </span>
-    {badge != null && badge > 0 && <span className="text-[12px] font-semibold tabular-nums">{badge}</span>}
+  <button aria-label={label} onClick={onClick} className="flex flex-col items-center gap-1.5">
+    <span className="w-11 h-11 flex items-center justify-center active:scale-90 transition-transform">{children}</span>
+    {badge != null && badge > 0 && <span className="text-[14px] font-semibold text-white/95 tabular-nums">{badge}</span>}
   </button>
 )
 
@@ -192,12 +190,13 @@ const LaurelSmall = () => (
   </svg>
 )
 
-/** TikTok/Ozon-style vertical feed of a product's review photos and videos. */
+/** Full-screen vertical review media feed (TikTok Shop style). */
 const MediaViewer = ({
   items,
   start,
   onClose,
   product,
+  handle,
   onReact,
   onFollow,
   onShare,
@@ -207,12 +206,14 @@ const MediaViewer = ({
   start: number
   onClose: () => void
   product: FeedProduct
+  handle: string
   onReact: (reviewId: string) => void
   onFollow: (review: NonNullable<ReviewMediaItem["review"]>) => void
   onShare: (review: NonNullable<ReviewMediaItem["review"]>, text: string) => void
   onReport: (reviewId: string) => void
 }) => {
   useBodyScrollLock(true)
+  const router = useRouter()
   const scroller = useRef<HTMLDivElement>(null)
   const [idx, setIdx] = useState(start)
   const [liked, setLiked] = useState<Record<string, boolean>>(() =>
@@ -223,7 +224,9 @@ const MediaViewer = ({
     Object.fromEntries(items.filter((m) => m.review?.following).map((m) => [m.review_id, true]))
   )
   const [muted, setMuted] = useState<Record<string, boolean>>({})
+  const [paused, setPaused] = useState<Record<string, boolean>>({})
   const [added, setAdded] = useState(false)
+  const tapStart = useRef<{ x: number; y: number; t: number } | null>(null)
   const last = items.length - 1
 
   useEffect(() => {
@@ -254,27 +257,48 @@ const MediaViewer = ({
     onFollow(rv)
   }
 
-  const addToCart = () => {
+  const addToCart = (e: React.MouseEvent) => {
+    e.stopPropagation()
     setAdded(true)
     setTimeout(() => setAdded(false), 1500)
     onClose()
   }
 
+  const openProduct = () => {
+    onClose()
+    router.push(`/products/${handle}`)
+  }
+
+  // tap on media toggles play/pause; a real swipe scrolls instead
+  const onMediaDown = (e: React.PointerEvent) => {
+    tapStart.current = { x: e.clientX, y: e.clientY, t: Date.now() }
+  }
+  const onMediaUp = (e: React.PointerEvent, id: string) => {
+    const st = tapStart.current
+    tapStart.current = null
+    if (!st) return
+    if (Math.hypot(e.clientX - st.x, e.clientY - st.y) > 12 || Date.now() - st.t > 400) return
+    if (items.find((m) => m.id === id)?.type !== "video") return
+    setPaused((s) => ({ ...s, [id]: !s[id] }))
+  }
+
+  const railIcon = "rgba(255,255,255,0.95)"
+
   return (
-    <div className="fixed inset-0 z-[80] bg-black flex flex-col md:max-w-[520px] md:mx-auto md:left-1/2 md:-translate-x-1/2">
-      {/* top bar */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 pt-3" style={{ paddingTop: "max(env(safe-area-inset-top), 12px)" }}>
-        <div className="flex items-center gap-2">
-          <button aria-label="Back" onClick={onClose} className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-          </button>
-          <button aria-label="Info" className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><line x1="12" y1="11" x2="12" y2="16" /><circle cx="12" cy="8" r="0.6" fill="#fff" /></svg>
+    <div className="fixed inset-0 z-[80] bg-black md:left-1/2 md:right-auto md:w-[520px] md:-translate-x-1/2">
+      {/* header */}
+      <div className="absolute top-0 left-0 right-0 z-10 pointer-events-none" style={{ top: "max(56px, calc(env(safe-area-inset-top) + 20px))" }}>
+        <div className="absolute left-6 top-0">
+          <button aria-label="Back" onClick={onClose} className="pointer-events-auto w-11 h-11 flex items-center justify-center">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
           </button>
         </div>
-        <span className="text-white/80 text-[13px] font-medium tabular-nums">
-          {idx + 1}/{items.length}
-        </span>
+        <div
+          className="absolute left-1/2 -translate-x-1/2 top-[-36px] h-[42px] min-w-[150px] px-6 rounded-full flex items-center justify-center"
+          style={{ background: BLUE }}
+        >
+          <span className="text-white text-[16px] font-bold tracking-tight">Hybreed</span>
+        </div>
       </div>
 
       {/* vertical feed */}
@@ -284,120 +308,134 @@ const MediaViewer = ({
           const el = e.currentTarget
           setIdx(clamp(Math.round(el.scrollTop / el.clientHeight), 0, last))
         }}
-        className="flex-1 overflow-y-auto snap-y snap-mandatory"
+        className="h-full overflow-y-auto snap-y snap-mandatory"
         style={{ overscrollBehavior: "contain" }}
       >
         {items.map((m, i) => {
           const r = m.review ?? null
           const isMuted = !!muted[m.id]
+          const isPaused = !!paused[m.id]
           const isLiked = !!liked[m.review_id]
           const total = likeCount(m)
           return (
-            <div key={m.id} className="h-full w-full snap-start snap-always p-2.5">
-              <div className="relative h-full w-full rounded-[22px] overflow-hidden bg-[#14141A]">
+            <div key={m.id} className="h-full w-full snap-start snap-always" style={{ padding: "80px 16px 60px" }}>
+              <div
+                className="relative h-full w-full rounded-[32px] overflow-hidden bg-black"
+                onPointerDown={onMediaDown}
+                onPointerUp={(e) => onMediaUp(e, m.id)}
+              >
                 {m.type === "video" ? (
                   <video
                     src={m.url}
                     poster={m.thumbnail_url ?? undefined}
-                    controls={!isMuted}
-                    autoPlay={i === idx}
+                    controls={false}
+                    autoPlay={i === idx && !isPaused}
                     muted={isMuted}
                     loop
                     playsInline
-                    className="absolute inset-0 w-full h-full object-contain"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={m.url} alt="" draggable={false} className="absolute inset-0 w-full h-full object-contain" />
+                  <img src={m.url} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover" />
                 )}
 
-                {/* right action rail */}
-                <div className="absolute right-2.5 bottom-40 flex flex-col items-center gap-4 z-10">
+                {/* bottom gradient */}
+                <div
+                  className="absolute left-0 right-0 bottom-0 h-[280px] pointer-events-none"
+                  style={{ background: "linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0))" }}
+                />
+
+                {/* right action bar */}
+                <div className="absolute right-[18px] bottom-[240px] flex flex-col items-center gap-7 z-10">
                   {r && (
                     <RailBtn label="Like review" onClick={() => { if (i !== idx) setIdx(i); like() }} badge={total}>
-                      <svg width="26" height="26" viewBox="0 0 24 24" fill={isLiked ? "#FA1F4B" : "none"} stroke={isLiked ? "#FA1F4B" : "#fff"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="36" height="36" viewBox="0 0 24 24" fill={isLiked ? "#FA1F4B" : "none"} stroke={isLiked ? "#FA1F4B" : railIcon} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M7 22V11L11.5 2.8c.6-.9 1.9-.4 1.9.7v5.5h5.6a2 2 0 0 1 2 2.4l-1.3 6.5a2 2 0 0 1-2 1.6H7z" />
                         <path d="M7 11H4a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3" />
                       </svg>
                     </RailBtn>
                   )}
-                  <RailBtn label="Share review" onClick={() => r && onShare(r, m.url)}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12 14 5v4c-5 0-8 3-10 8 2-4 5-5 10-5v4z" /></svg>
-                  </RailBtn>
                   <RailBtn label="Report review" onClick={() => r && onReport(m.review_id)}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 21V4" /><path d="M4 4h11l-2 4 2 4H4" /></svg>
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={railIcon} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3 2.5 20h19z" /><line x1="12" y1="10" x2="12" y2="14" /><circle cx="12" cy="17" r="0.6" fill={railIcon} /></svg>
                   </RailBtn>
-                  <RailBtn label="More" onClick={() => {}}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><circle cx="5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="19" cy="12" r="1.6" /></svg>
+                  <RailBtn label="Share review" onClick={() => r && onShare(r, m.url)}>
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={railIcon} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12 14 5v4c-5 0-8 3-10 8 2-4 5-5 10-5v4z" /></svg>
                   </RailBtn>
-                  {m.type === "video" && (
-                    <RailBtn label={isMuted ? "Unmute" : "Mute"} onClick={() => setMuted((s) => ({ ...s, [m.id]: !isMuted }))}>
-                      {isMuted ? (
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" /><line x1="16" y1="9" x2="22" y2="15" /><line x1="22" y1="9" x2="16" y2="15" /></svg>
-                      ) : (
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" /><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" /></svg>
-                      )}
-                    </RailBtn>
-                  )}
+                  <RailBtn label={isMuted ? "Unmute" : "Sound"} onClick={() => setMuted((s) => ({ ...s, [m.id]: !isMuted }))}>
+                    {isMuted ? (
+                      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={railIcon} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" /><line x1="16" y1="9" x2="22" y2="15" /><line x1="22" y1="9" x2="16" y2="15" /></svg>
+                    ) : (
+                      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={railIcon} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" /><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" /></svg>
+                    )}
+                  </RailBtn>
                 </div>
 
-                {/* bottom info */}
+                {/* creator + review + product */}
                 {r && (
-                  <div className="absolute left-3 right-3 bottom-3 z-10 flex flex-col gap-2.5">
-                    <div className="flex items-center gap-2.5">
-                      <span className="relative w-[42px] h-[42px] rounded-full bg-[#2A2A33] flex items-center justify-center text-white text-[17px] font-semibold shrink-0">
+                  <div className="absolute left-5 right-20 bottom-[170px] z-10 flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="relative w-11 h-11 rounded-full bg-[#2A2A33] flex items-center justify-center text-white text-[16px] font-semibold shrink-0 overflow-visible">
                         {r.author.top && <LaurelSmall />}
                         {r.author.initial}
                       </span>
-                      <span className="text-white text-[15px] font-semibold truncate">{r.author.name}</span>
+                      <span className="text-white text-[18px] font-semibold truncate">{r.author.name}</span>
                       {!r.is_own && (
                         <button
                           onClick={follow}
-                          className="ml-auto shrink-0 h-[32px] px-3.5 rounded-full text-[13px] font-semibold"
-                          style={{ background: following[cur.review_id] ? "rgba(255,255,255,.18)" : "#fff", color: following[cur.review_id] ? "#fff" : "#1F1F23" }}
+                          className="ml-auto shrink-0 text-white text-[16px] font-semibold"
                         >
                           {following[cur.review_id] ? "Subscribed" : "Subscribe"}
                         </button>
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5 text-white/90">
-                      <Star s={16} />
-                      <span className="text-[14px] font-semibold">{r.rating}</span>
-                      {r.text && <span className="text-[14px] truncate">• {r.text}</span>}
-                      <Chevron s={16} c="#fff" />
+                    <div className="text-white">
+                      <p className="text-[22px] font-bold leading-[1.2] line-clamp-2">
+                        <span className="text-[#FFD34D]">★</span> {r.rating}
+                        {r.text ? ` • ${r.text}` : ""}
+                      </p>
                     </div>
 
                     {/* product card */}
-                    <button onClick={addToCart} className="w-full rounded-[16px] bg-black/55 backdrop-blur-md border border-white/10 p-2 flex items-center gap-2.5 text-left active:scale-[0.99] transition-transform">
-                      {product.image && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={product.image} alt="" className="w-[54px] h-[54px] rounded-[10px] object-cover shrink-0" />
-                      )}
-                      <span className="flex-1 min-w-0">
-                        <span className="flex items-baseline gap-1.5">
-                          {product.price && <span className="text-[16px] font-bold text-white">{fmtPrice(product.price.amount)}</span>}
-                          {product.price?.orig != null && product.price.orig > product.price.amount && (
-                            <>
-                              <span className="text-[12px] text-white/50 line-through">{fmtPrice(product.price.orig)}</span>
-                              <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: "#FA1F4B" }}>
-                                -{Math.round((1 - product.price.amount / product.price.orig) * 100)}%
-                              </span>
-                            </>
-                          )}
-                        </span>
-                        <span className="block text-[13px] text-white/85 truncate">{product.title}</span>
-                      </span>
-                      <span
-                        className="shrink-0 w-[42px] h-[42px] rounded-full flex items-center justify-center"
-                        style={{ background: added ? "#16A34A" : BLUE }}
+                    <div className="absolute left-0 right-0" style={{ bottom: -158 }}>
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={openProduct}
+                        onKeyDown={(e) => e.key === "Enter" && openProduct()}
+                        className="w-full h-[84px] rounded-[22px] flex items-center overflow-hidden cursor-pointer active:scale-[0.99] transition-transform"
+                        style={{ background: "rgba(0,0,0,0.82)", backdropFilter: "blur(18px)", marginLeft: 12, marginRight: 12, width: "calc(100% - 24px)" }}
                       >
-                        {added ? (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="5 12.5 10 17 19 7" /></svg>
-                        ) : (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="20" r="1.4" /><circle cx="18" cy="20" r="1.4" /><path d="M2 3h3l2.5 12.5a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.2L21 8H6" /></svg>
+                        {product.image && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={product.image} alt="" className="w-14 h-14 rounded-[12px] object-cover shrink-0 ml-3" />
                         )}
-                      </span>
-                    </button>
+                        <span className="flex-1 min-w-0 px-3">
+                          <span className="flex items-baseline gap-1.5">
+                            {product.price && <span className="text-[18px] font-bold text-white">{fmtPrice(product.price.amount)}</span>}
+                            {product.price?.orig != null && product.price.orig > product.price.amount && (
+                              <>
+                                <span className="text-[13px] text-white/50 line-through">{fmtPrice(product.price.orig)}</span>
+                                <span className="text-[12px] font-semibold text-white">-{Math.round((1 - product.price.amount / product.price.orig) * 100)}%</span>
+                              </>
+                            )}
+                          </span>
+                          <span className="block text-[16px] text-white truncate">{product.title}</span>
+                        </span>
+                        <button
+                          aria-label="Add to cart"
+                          onClick={addToCart}
+                          className="shrink-0 w-[60px] h-[60px] rounded-[18px] flex items-center justify-center mr-3"
+                          style={{ background: added ? "#16A34A" : BLUE }}
+                        >
+                          {added ? (
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="5 12.5 10 17 19 7" /></svg>
+                          ) : (
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="20" r="1.4" /><circle cx="18" cy="20" r="1.4" /><path d="M2 3h3l2.5 12.5a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.2L21 8H6" /></svg>
+                          )}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -925,6 +963,7 @@ export const ReviewsMobile = ({
           start={lightbox.start}
           onClose={() => setLightbox(null)}
           product={viewerProduct}
+          handle={handle}
           onReact={viewerReact}
           onFollow={viewerFollow}
           onShare={viewerShare}
