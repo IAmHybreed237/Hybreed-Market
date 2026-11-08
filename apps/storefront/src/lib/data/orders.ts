@@ -102,20 +102,43 @@ export const listOrders = async (
   offset: number = 0,
   filters?: Record<string, unknown>
 ) => {
+  const headers = { ...(await getAuthHeaders()) };
   const next = {
     ...(await getCacheOptions('orders'))
   };
 
-  return (
+  // Mercur marketplace orders live under order groups. The store orders
+  // endpoint does not reliably populate the `order_group` link (and we
+  // filter it out below), so fetch the groups first and attach them to
+  // each order by id. If /store/orders comes back empty we fall back to
+  // the orders nested inside the groups.
+  const { order_groups = [] } = (await (
+    sdk.store.orderGroups.query({
+      limit: 100,
+      order: '-created_at',
+      fetchOptions: { headers, next, cache: 'no-cache' }
+    } as never) as unknown as Promise<{ order_groups?: any[] }>
+  ).catch(() => ({ order_groups: [] as any[] })));
+
+  const groupByOrderId = new Map<string, any>();
+  const ordersFromGroups: any[] = [];
+  for (const group of order_groups) {
+    for (const order of group.orders ?? []) {
+      groupByOrderId.set(order.id, group);
+      ordersFromGroups.push(order);
+    }
+  }
+
+  const orders = await (
     sdk.store.orders.query({
-      limit,
-      offset,
+      limit: 100,
+      offset: 0,
       order: '-created_at',
       fields:
         '*items,+items.metadata,*items.variant,*items.product,*seller,*order_group,shipping_total,total,created_at,status',
       ...filters,
       fetchOptions: {
-        headers: { ...(await getAuthHeaders()) },
+        headers,
         next,
         cache: 'no-cache'
       }
@@ -128,8 +151,22 @@ export const listOrders = async (
       >;
     }>
   )
-    .then(({ orders }) => orders.filter(order => order.order_group))
-    .catch(err => medusaError(err));
+    .then(({ orders }) => orders)
+    .catch(() => [] as any[]);
+
+  const source = orders.length ? orders : ordersFromGroups;
+
+  return source
+    .map((order: any) => ({
+      ...order,
+      order_group:
+        order.order_group ??
+        groupByOrderId.get(order.id) ??
+        order_groups.find((g: any) => g.id === order.order_group_id) ??
+        null
+    }))
+    .filter((order: any) => order.order_group)
+    .slice(offset, offset + limit);
 };
 
 export const createTransferRequest = async (
