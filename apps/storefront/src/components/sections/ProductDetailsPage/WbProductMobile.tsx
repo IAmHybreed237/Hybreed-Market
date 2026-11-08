@@ -515,8 +515,8 @@ export const WbProductMobile = ({
 
         {pipParts > 0 && (
           <button onClick={() => scrollToId("installments")} className="mt-1.5 h-[22px] px-2.5 rounded-full bg-[#DBEAFE] inline-flex items-center gap-1.5">
-            <img src="/images/installments.png" alt="" className="w-4 h-4 object-contain" />
-            <span className="text-[13px] font-medium text-[#2563EB] uppercase tracking-wide">Pay in parts</span>
+            <img src="/images/pay-small-small.png" alt="" className="w-4 h-4 object-contain" />
+            <span className="text-[13px] font-medium text-[#2563EB] uppercase tracking-wide">Pay Small Small</span>
           </button>
         )}
 
@@ -611,15 +611,17 @@ export const WbProductMobile = ({
 
       {/* 3. installments card */}
       {pipParts > 0 && (
-      <button id="installments" onClick={() => openSheet("parts")} className="w-full bg-white rounded-[28px] px-4 py-4 mb-1 flex items-center gap-3.5 text-left active:scale-[0.99] transition-transform">
-        <img src="/images/installments.png" alt="" className="w-[35px] h-[35px] object-contain" />
+      <button id="installments" onClick={() => openSheet("parts")} className="w-full bg-white rounded-[24px] px-4 py-3 mb-1 flex items-center gap-3 text-left active:scale-[0.99] transition-transform">
+        <img src="/images/pay-small-small.png" alt="" className="w-[30px] h-[30px] object-contain" />
         <span className="flex-1 min-w-0">
-          <span className="block text-[17px] font-semibold text-[#1F1F23] leading-snug">
-            Pay in Parts {amount != null ? `${num(Math.ceil(amount / pipParts))} XAF × ${pipParts}` : ""}
+          <span className="block text-[16px] font-semibold text-[#1F1F23] leading-snug">
+            Pay Small Small
           </span>
-          <span className="block text-[15px] text-[#8A8A96]">First payment: 0 XAF</span>
+          <span className="block text-[14px] text-[#8A8A96]">
+            {amount != null ? `~${num(Math.ceil(amount / pipParts))} XAF/week · interest-free` : "Interest-free weekly payments"}
+          </span>
         </span>
-        <Chevron size={22} />
+        <Chevron size={20} />
       </button>
       )}
 
@@ -838,13 +840,13 @@ export const WbProductMobile = ({
             )}
             {sheet === "parts" && (
               <>
-                <h3 className="text-[20px] font-semibold text-[#1F1F23] mb-3">Pay in Parts</h3>
+                <h3 className="text-[20px] font-semibold text-[#1F1F23] mb-3">Pay Small Small</h3>
                 <p className="text-[15px] text-[#1F1F23]/80 leading-[22px]">
                   Split your payment into {pipParts} interest-free parts.
                   {amount != null ? ` That's about ${num(Math.ceil(amount / pipParts))} XAF every ${pipIntervalDays >= 14 ? `${Math.round(pipIntervalDays / 7)} weeks` : "week"}.` : ""}
                 </p>
                 <p className="text-[14px] text-[#6B6B76] leading-[20px] mt-2">
-                  Pay with Hybreed Wallet at checkout — whatever your balance doesn't cover stays on your wallet as an installment balance. Top up with MoMo or Orange Money each week to clear it.
+                  Pay with Hybreed Wallet at checkout — whatever your balance doesn't cover becomes your Pay Small Small balance. Top up with MoMo or Orange Money each week to clear it.
                 </p>
               </>
             )}

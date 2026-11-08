@@ -246,9 +246,9 @@ export default async function UserPage({
           >
             <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/installments.png" alt="" className="w-8 h-8 object-contain" />
+              <img src="/images/pay-small-small.png" alt="" className="w-8 h-8 object-contain" />
               <div>
-                <p style={cardTitleStyle}>Installments</p>
+                <p style={cardTitleStyle}>Pay Small Small</p>
                 <p className="text-[17px] font-[350]" style={{ color: "var(--muted)" }}>
                   Nothing here yet
                 </p>

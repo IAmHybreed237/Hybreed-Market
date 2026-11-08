@@ -55,7 +55,7 @@ export default async function WalletPage() {
   const points = wallet?.points ?? 0
   const balances = [
     { value: fmt(balance), label: "Hybreed Wallet", href: "/user/wallet", tint: "#fff", icon: <SparkIcon />, active: true },
-    { value: "100,000 XAF", label: "Pay in installments", href: "/user", tint: "#DBEAFE", icon: <CloverIcon /> },
+    { value: "100,000 XAF", label: "Pay Small Small", href: "/user", tint: "#DBEAFE", icon: <CloverIcon /> },
     { value: `${Math.round(points).toLocaleString("en-US")} HB`, label: "Cashback", href: "/user", tint: "#E0F2FE", icon: <CoinIcon /> },
     { value: "0 XAF", label: "Certificates", href: "/user", tint: "#E0E7FF", icon: <TicketIcon /> },
     { value: "0 XAF", label: "Gift funds", href: "/user", tint: "#DBEAFE", icon: <GiftIcon /> },

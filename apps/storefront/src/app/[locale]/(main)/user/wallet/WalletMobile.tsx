@@ -46,7 +46,7 @@ const allProducts = [
   { label: "Hybreed Cash", icon: ic.wallet },
   { label: "Savings", icon: ic.chest },
   { label: "Loans", icon: ic.loan },
-  { label: "Pay in Parts", icon: ic.clover },
+  { label: "Pay Small Small", icon: ic.clover },
   { label: "Hybreed bonus points", icon: ic.pie },
   { label: "Certificates", icon: ic.ticket },
 ]
@@ -271,10 +271,10 @@ export const WalletMobile = ({ balance = 0, points = 0 }: { balance?: number; po
         {balance < 0 && (
           <div className="mx-4 mt-4 rounded-[20px] bg-[#FEF2F2] border border-[#FECACA] px-4 py-3">
             <p className="text-[15px] font-semibold text-[#B91C1C]">
-              Installment balance due: {fmt(Math.abs(balance))}
+              Pay Small Small balance due: {fmt(Math.abs(balance))}
             </p>
             <p className="text-[13px] text-[#7F1D1D]/80 mt-0.5">
-              Top up your wallet to clear your Pay in Parts balance.
+              Top up your wallet to clear your Pay Small Small balance.
             </p>
             <button
               onClick={() => topUp.open()}
@@ -350,7 +350,7 @@ export const WalletMobile = ({ balance = 0, points = 0 }: { balance?: number; po
           { t: "Hybreed Cash", v: "+100 000 XAF", sub: null, icon: null, apply: true, bag: true },
           { t: "Savings", v: "0 XAF", sub: "Accounts, deposits, and investments", icon: ic.chest, green: true },
           { t: "Loans", v: null, sub: "For any purpose", icon: ic.loan },
-          { t: "Pay in Parts", v: "100 000 XAF", sub: "You can use Pay in Parts to purchase your orders", icon: ic.clover },
+          { t: "Pay Small Small", v: "100 000 XAF", sub: "Buy now, pay small small over time", icon: ic.clover },
           { t: "Hybreed bonus points", v: `${Math.round(points).toLocaleString("en-US")} HB`, sub: "Cashback on your purchases", icon: null, hbPill: true },
           { t: "Certificates", v: null, sub: "To shop on Hybreed", icon: ic.ticket },
         ].map((c) => (

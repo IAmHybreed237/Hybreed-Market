@@ -69,7 +69,7 @@ export default async function debitWalletForOrderGroup({
         orderId: orderGroupId,
         description:
           credit > 0
-            ? `Order payment · Pay in Parts · ${orderGroupId}`
+            ? `Order payment · Pay Small Small · ${orderGroupId}`
             : `Order payment · ${orderGroupId}`,
         allowNegativeUpTo: credit,
       })

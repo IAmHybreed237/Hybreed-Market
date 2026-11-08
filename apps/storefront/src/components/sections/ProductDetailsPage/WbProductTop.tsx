@@ -481,9 +481,9 @@ export const WbProductTop = ({
             </p>
             {pipParts > 0 && (
               <p className="text-[14px] text-[#8A8A96] mt-1.5 flex items-center gap-1.5">
-                <img src="/images/installments.png" alt="" className="w-4 h-4 object-contain" />
+                <img src="/images/pay-small-small.png" alt="" className="w-4 h-4 object-contain" />
                 From {amount != null ? fmt(Math.round(amount / pipParts), currency) : "-"}{" "}
-                × {pipParts} with installments
+                × {pipParts} · Pay Small Small
               </p>
             )}
             <span className="inline-block mt-3 text-[14px] font-semibold text-[#16A34A] bg-[#16A34A]/10 rounded-lg px-3 py-1.5">

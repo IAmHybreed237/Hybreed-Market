@@ -44,7 +44,7 @@ const slides: Slide[] = [
   },
   {
     heading: "Pay small small",
-    sub: "Can't pay at once? Reserve the item and pay in installments - no interest.",
+    sub: "Can't pay at once? Buy now and pay small small - no interest.",
     cta: "See how it works",
     href: "/categories",
     bg: "linear-gradient(120deg, #1e40af 0%, #3b82f6 55%, #60a5fa 100%)",

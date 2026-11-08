@@ -354,7 +354,7 @@ const MobilePaymentCard = ({ cart, paymentMethods }: { cart: any; paymentMethods
             </span>
             {canFinance && (
               <span className="block text-[12px] font-medium text-[#2563EB] mt-0.5">
-                Pay in {pipParts} parts · repay via top-ups
+                Pay Small Small · repay via top-ups
               </span>
             )}
           </span>
