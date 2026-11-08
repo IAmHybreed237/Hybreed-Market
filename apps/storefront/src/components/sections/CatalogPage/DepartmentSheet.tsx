@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
-import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 export type DepartmentChild = {
   id: string
@@ -50,7 +49,6 @@ export const DepartmentSheet = ({
   onClose: () => void
 }) => {
   const [mounted, setMounted] = useState(false)
-  useBodyScrollLock(!!dept)
 
   useEffect(() => {
     if (dept) {
