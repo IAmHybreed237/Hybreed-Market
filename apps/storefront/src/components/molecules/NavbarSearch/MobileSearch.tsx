@@ -13,7 +13,6 @@ import {
   ViewInfo,
 } from "@/lib/behavior"
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
-import { ImageSearchModal } from "./ImageSearchModal"
 
 const imageSearchEnabled = process.env.NEXT_PUBLIC_IMAGE_SEARCH_ENABLED === "true"
 const RETRACT_MS = 160
@@ -51,7 +50,7 @@ export const MobileSearch = ({
   const [searches, setSearches] = useState<string[]>([])
   const [recents, setRecents] = useState<ViewInfo[]>([])
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
-  const [showImageSearch, setShowImageSearch] = useState(false)
+  const goImageSearch = () => router.push(`/${loc}/image-search/capture`)
 
   const headerInputRef = useRef<HTMLInputElement>(null)
   const overlayInputRef = useRef<HTMLInputElement>(null)
@@ -183,7 +182,7 @@ export const MobileSearch = ({
         <button
           type="button"
           disabled={!imageSearchEnabled}
-          onClick={() => setShowImageSearch(true)}
+          onClick={goImageSearch}
           aria-label={imageSearchEnabled ? "Search by image" : "Image search coming soon"}
           className="absolute right-2 top-1/2 -translate-y-1/2 h-9 px-1.5 rounded-lg flex items-center justify-center transition-transform enabled:hover:scale-105 enabled:active:scale-95 disabled:cursor-default"
         >
@@ -231,7 +230,7 @@ export const MobileSearch = ({
               <button
                 type="button"
                 disabled={!imageSearchEnabled}
-                onClick={() => setShowImageSearch(true)}
+                onClick={goImageSearch}
                 aria-label={imageSearchEnabled ? "Search by image" : "Image search coming soon"}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center enabled:active:bg-[#E4E4EA] disabled:cursor-default"
               >
@@ -373,9 +372,6 @@ export const MobileSearch = ({
         </div>
       )}
 
-      {imageSearchEnabled && showImageSearch && (
-        <ImageSearchModal onClose={() => setShowImageSearch(false)} />
-      )}
     </div>
   )
 }

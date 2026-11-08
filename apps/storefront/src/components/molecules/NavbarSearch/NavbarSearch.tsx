@@ -1,9 +1,8 @@
 "use client"
 
-import { useSearchParams } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { trackSearch } from "@/lib/behavior"
 import { SearchIcon } from "@/icons"
-import { ImageSearchModal } from "./ImageSearchModal"
 import { useState } from "react"
 import { redirect } from "next/navigation"
 import clsx from "clsx"
@@ -28,8 +27,9 @@ interface Props {
 
 export const NavbarSearch = ({ className, placeholder = "Search" }: Props) => {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const { locale } = useParams() as { locale?: string }
   const [search, setSearch] = useState(searchParams.get("query") || "")
-  const [showImageSearch, setShowImageSearch] = useState(false)
 
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -57,7 +57,7 @@ export const NavbarSearch = ({ className, placeholder = "Search" }: Props) => {
       <button
         type="button"
         disabled={!imageSearchEnabled}
-        onClick={() => setShowImageSearch(true)}
+        onClick={() => router.push(`/${locale || "en"}/image-search/capture`)}
         aria-label={imageSearchEnabled ? "Search by image" : "Image search coming soon"}
         title={imageSearchEnabled ? "Search by image" : "Image search coming soon"}
         className="absolute right-2 lg:right-3 top-1/2 -translate-y-1/2 h-9 lg:h-11 px-1.5 rounded-lg flex items-center justify-center transition-transform enabled:hover:scale-105 enabled:active:scale-95 disabled:cursor-default"
@@ -65,7 +65,6 @@ export const NavbarSearch = ({ className, placeholder = "Search" }: Props) => {
         <CameraIcon />
       </button>
       <input type="submit" className="hidden" />
-      {imageSearchEnabled && showImageSearch && <ImageSearchModal onClose={() => setShowImageSearch(false)} />}
     </form>
   )
 }
