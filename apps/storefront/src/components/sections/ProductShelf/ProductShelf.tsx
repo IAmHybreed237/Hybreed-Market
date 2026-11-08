@@ -12,6 +12,7 @@ export const ProductShelf = async ({
   offset = 0,
   withLocation = false,
   perRow = 6,
+  flushTop = false,
 }: {
   heading?: string
   locale?: string
@@ -19,6 +20,7 @@ export const ProductShelf = async ({
   offset?: number
   withLocation?: boolean
   perRow?: number
+  flushTop?: boolean
 }) => {
   const user = await retrieveCustomer().catch(() => null)
   const savedCity = (user as any)?.addresses?.[0]?.city as
@@ -42,7 +44,7 @@ export const ProductShelf = async ({
 
   return (
     <section
-      className="w-full px-3 lg:px-10 -mt-14 lg:mt-0"
+      className={`w-full px-3 lg:px-10 ${flushTop ? "" : "-mt-14 lg:mt-0"}`}
       data-testid="product-shelf"
     >
       <div className="max-w-[1400px] mx-auto">

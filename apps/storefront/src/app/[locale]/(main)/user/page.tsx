@@ -413,6 +413,7 @@ export default async function UserPage({
           locale={locale}
           limit={5}
           perRow={5}
+          flushTop
         />
       </div>
     </main>
