@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { useTopUpSheet } from "@/components/cells/TopUpSheet/TopUpSheet"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { HbMark } from "@/components/atoms"
@@ -85,14 +85,6 @@ export const MobileAccount = ({
       setClosing(false)
     }, 260)
   }
-
-  useEffect(() => {
-    if (!open) return
-    document.body.style.overflow = "hidden"
-    return () => {
-      document.body.style.overflow = ""
-    }
-  }, [open])
 
   const onDragStart = (e: React.TouchEvent) => {
     dragStart.current = e.touches[0].clientY

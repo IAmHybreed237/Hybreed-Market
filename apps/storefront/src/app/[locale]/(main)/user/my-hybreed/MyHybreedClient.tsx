@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { HbMark } from "@/components/atoms"
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 /* ---------- icons ---------- */
 const BackIcon = () => (
@@ -170,14 +171,7 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
   const [refreshing, setRefreshing] = useState(false)
   const [dailyOpen, setDailyOpen] = useState(false)
 
-  useEffect(() => {
-    if (!dailyOpen) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-    return () => {
-      document.body.style.overflow = prev
-    }
-  }, [dailyOpen])
+  useBodyScrollLock(dailyOpen)
   const pullStart = useRef<{ y: number; edge: "top" | "bottom" } | null>(null)
 
   const onPullStart = (e: React.TouchEvent) => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { HttpTypes } from '@medusajs/types';
 
@@ -9,6 +9,7 @@ import { HeaderCategoryNavbar } from '@/components/molecules';
 import { CloseIcon, HamburgerMenuIcon } from '@/icons';
 
 import { MobileCategoryNavbar } from './components';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 export const MobileNavbar = ({
   categories,
@@ -23,17 +24,7 @@ export const MobileNavbar = ({
     setIsOpen(false);
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  useBodyScrollLock(isOpen);
 
   return (
     <div
