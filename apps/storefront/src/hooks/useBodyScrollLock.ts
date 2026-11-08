@@ -20,16 +20,21 @@ export const useBodyScrollLock = (
     if (!active || typeof document === "undefined") return
 
     const body = document.body
+    const docEl = document.documentElement
     const scrollY = window.scrollY
     const prev = {
       overflow: body.style.overflow,
+      docOverflow: docEl.style.overflow,
       position: body.style.position,
       top: body.style.top,
       width: body.style.width,
     }
 
     body.style.overflow = "hidden"
-    document.documentElement.style.overscrollBehavior = "none"
+    // iOS scrolls the documentElement, not body - hiding only body is not
+    // enough when pin is off (e.g. overlays that must keep keyboard focus)
+    docEl.style.overflow = "hidden"
+    docEl.style.overscrollBehavior = "none"
 
     if (pin && isIOS()) {
       body.style.position = "fixed"
@@ -39,7 +44,8 @@ export const useBodyScrollLock = (
 
     return () => {
       body.style.overflow = prev.overflow
-      document.documentElement.style.overscrollBehavior = ""
+      docEl.style.overflow = prev.docOverflow
+      docEl.style.overscrollBehavior = ""
       if (pin && isIOS()) {
         body.style.position = prev.position
         body.style.top = prev.top
