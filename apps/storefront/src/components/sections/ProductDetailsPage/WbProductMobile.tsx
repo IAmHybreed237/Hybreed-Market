@@ -653,7 +653,7 @@ export const WbProductMobile = ({
       <div className="grid grid-cols-[65fr_35fr] gap-1 mb-1">
         <button
           onClick={() => router.push(`/products/${product?.handle}/reviews${selectedVariant ? `?variant=${selectedVariant.id}` : ""}`)}
-          className="bg-white rounded-[20px] px-3 py-2.5 text-left active:scale-[0.99] transition-transform flex items-center justify-between gap-2"
+          className="bg-white rounded-[20px] pl-3 pr-2.5 py-2.5 text-left active:scale-[0.99] transition-transform flex items-center gap-2"
         >
           <span className="min-w-0">
             <span className="flex items-center gap-1.5">
@@ -673,7 +673,7 @@ export const WbProductMobile = ({
             const pics = [...imgs, ...rest]
             if (!pics.length) return null
             return (
-              <span className="relative shrink-0" style={{ width: 78 + (pics.length - 1) * 20, height: 54 }}>
+              <span className="relative shrink-0 ml-auto" style={{ width: 44 + (pics.length - 1) * 16, height: 54 }}>
                 {pics.map((m, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -682,7 +682,7 @@ export const WbProductMobile = ({
                     alt=""
                     loading="lazy"
                     className="absolute top-0 rounded-[12px] border-2 border-white object-cover bg-[#F0F0F3]"
-                    style={{ left: i * 20, width: 58, height: 54, zIndex: pics.length - i }}
+                    style={{ left: i * 16, width: 44, height: 54, zIndex: pics.length - i }}
                   />
                 ))}
               </span>
