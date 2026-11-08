@@ -106,6 +106,77 @@ export async function signup(formData: FormData) {
   }
 }
 
+/**
+ * Phone-first signup: WhatsApp number becomes the account anchor.
+ * Uses a deterministic synthetic email so the same number always maps to
+ * the same account (re-login by phone works later without OTP).
+ */
+export async function signupWithPhone(input: {
+  name: string;
+  phone: string;
+}): Promise<HttpTypes.StoreCustomer | string> {
+  const digits = input.phone.replace(/\D/g, '');
+  const local = digits.startsWith('237') ? digits.slice(3) : digits;
+  if (!/^6\d{8}$/.test(local)) {
+    return 'Enter a valid Cameroon phone number (6XX XXX XXX)';
+  }
+  const phone = `+237${local}`;
+  const email = `${local}@hb.customer`;
+  const password = `Hb${local}!k9`;
+
+  const authHeaders = async () => ({
+    ...(await getAuthHeaders())
+  });
+
+  try {
+    // try register; if the number already has an account, fall through to login
+    let token: string | null = null;
+    try {
+      token = await (sdk.auth.$actorType.$authProvider.register.mutate({
+        $actorType: 'customer',
+        $authProvider: 'emailpass',
+        email,
+        password
+      } as never) as unknown as Promise<{ token: string }>).then(({ token }) => token);
+    } catch {
+      token = await (sdk.auth.$actorType.$authProvider.mutate({
+        $actorType: 'customer',
+        $authProvider: 'emailpass',
+        email,
+        password
+      } as never) as unknown as Promise<{ token: string }>).then(({ token }) => token);
+    }
+    if (!token) return 'Signup failed';
+
+    await setAuthToken(token);
+
+    const headers = await authHeaders();
+    const { customer } = await (sdk.store.customers.mutate({
+      email,
+      first_name: input.name.trim(),
+      last_name: '',
+      phone,
+      fetchOptions: { headers }
+    } as never) as unknown as Promise<{ customer: HttpTypes.StoreCustomer }>);
+
+    const loginToken = await (sdk.auth.$actorType.$authProvider.mutate({
+      $actorType: 'customer',
+      $authProvider: 'emailpass',
+      email,
+      password
+    } as never) as unknown as Promise<{ token: string }>).then(({ token }) => token);
+    await setAuthToken(loginToken);
+
+    const customerCacheTag = await getCacheTag('customers');
+    revalidateTag(customerCacheTag);
+    await transferCart();
+
+    return customer;
+  } catch (error: any) {
+    return error?.toString?.() || 'Signup failed';
+  }
+}
+
 export async function login(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;

@@ -4,6 +4,7 @@ import { Footer, Header } from '@/components/organisms';
 import { ConditionalFooter } from '@/components/cells/ConditionalFooter/ConditionalFooter';
 import { MobileBottomNav } from '@/components/organisms/MobileBottomNav/MobileBottomNav';
 import { TopUpSheetProvider } from '@/components/cells/TopUpSheet/TopUpSheet';
+import { GuestSignupSheet } from '@/components/organisms/GuestSignup/GuestSignupSheet';
 import { TalkJsProvider } from '@/components/providers';
 import { retrieveCustomer } from '@/lib/data/customer';
 import { checkRegion } from '@/lib/helpers/check-region';
@@ -29,7 +30,7 @@ export default async function RootLayout({
     return (
       <>
         <Header locale={locale} />
-        <TopUpSheetProvider>{children}</TopUpSheetProvider>
+        <TopUpSheetProvider>{children}<GuestSignupSheet /></TopUpSheetProvider>
         <ConditionalFooter><Footer /></ConditionalFooter>
         <a
           href="https://wa.me/"
@@ -55,7 +56,7 @@ export default async function RootLayout({
       userEmail={user.email}
     >
       <Header locale={locale} />
-      <TopUpSheetProvider>{children}</TopUpSheetProvider>
+      <TopUpSheetProvider>{children}<GuestSignupSheet /></TopUpSheetProvider>
       <ConditionalFooter><Footer /></ConditionalFooter>
       <a
         href="https://wa.me/"

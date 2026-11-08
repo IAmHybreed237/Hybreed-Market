@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { requestGuestSignup } from "@/components/organisms/GuestSignup/GuestSignupSheet"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { useCartContext } from "@/components/providers"
 import { VerifiedBadge } from "@/components/atoms/VerifiedBadge/VerifiedBadge"
@@ -68,7 +69,7 @@ export const WbProductTop = ({
         : await fetch(`/api/wishlist/product/${product.id}`, { method: "DELETE" })
       if (res.status === 401) {
         setFav(!next)
-        router.push(`/${locale}/login`)
+        requestGuestSignup(() => toggleFav())
         return
       }
       if (!res.ok) setFav(!next)

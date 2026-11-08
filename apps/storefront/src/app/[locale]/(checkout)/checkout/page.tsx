@@ -8,6 +8,7 @@ import { retrieveCustomer } from '@/lib/data/customer';
 import { getRegion } from '@/lib/data/regions';
 import { listCartShippingMethods } from '@/lib/data/fulfillment';
 import { listCartPaymentMethods } from '@/lib/data/payment';
+import { CheckoutSignupGate } from '@/components/organisms/GuestSignup/CheckoutSignupGate'
 import { MobileCheckoutClient } from './MobileCheckoutClient';
 
 export const metadata: Metadata = {
@@ -57,6 +58,10 @@ async function CheckoutPageContent({
     listCartPaymentMethods(cart.region?.id ?? regionId ?? '').catch(() => null),
     retrieveCustomer().catch(() => null),
   ]);
+
+  if (!customer) {
+    return <CheckoutSignupGate locale={locale} />
+  }
 
   return (
     <MobileCheckoutClient

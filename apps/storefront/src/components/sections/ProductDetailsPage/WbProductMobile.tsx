@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react"
 import { useRouter } from "next/navigation"
+import { requestGuestSignup } from "@/components/organisms/GuestSignup/GuestSignupSheet"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { useCartContext } from "@/components/providers"
 import { VerifiedBadge } from "@/components/atoms/VerifiedBadge/VerifiedBadge"
@@ -145,7 +146,7 @@ export const WbProductMobile = ({
       const res = await fetch(`/api/wishlist/seller-follow/${sellerId}`, { method: "POST" })
       if (res.status === 401) {
         setFollowed(!next)
-        router.push(`/${locale}/login`)
+        requestGuestSignup(() => toggleFollow(e))
         return
       }
       const data = await res.json().catch(() => ({}))
@@ -173,7 +174,7 @@ export const WbProductMobile = ({
         : await fetch(`/api/wishlist/product/${product.id}`, { method: "DELETE" })
       if (res.status === 401) {
         setFav(!next)
-        router.push(`/${locale}/login`)
+        requestGuestSignup(() => toggleFav())
         return
       }
       if (!res.ok) setFav(!next)
