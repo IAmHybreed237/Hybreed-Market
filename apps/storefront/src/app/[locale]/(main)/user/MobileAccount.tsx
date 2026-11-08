@@ -390,7 +390,7 @@ export const MobileAccount = ({
         {hub && (
           <div
             className={`${card} overflow-hidden`}
-            style={{ marginLeft: -13, marginRight: -13, borderRadius: 0 }}
+            style={{ marginLeft: -13, marginRight: -13 }}
           >
             {/* featured: orders + pickup */}
             <LocalizedClientLink href="/user/orders" className="block px-4 pt-4 pb-3">
