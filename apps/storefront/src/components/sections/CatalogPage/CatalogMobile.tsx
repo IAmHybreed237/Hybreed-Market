@@ -101,6 +101,17 @@ export const CatalogMobile = ({
     }
   }, [router])
 
+  // The sheet is an overlay, not a route - push a history entry so the
+  // browser back button / swipe-back gesture closes it instead of
+  // navigating away from the catalog page.
+  useEffect(() => {
+    if (!dept) return
+    window.history.pushState({ hybreedDept: dept.id }, "")
+    const onPop = () => setDept(null)
+    window.addEventListener("popstate", onPop)
+    return () => window.removeEventListener("popstate", onPop)
+  }, [dept?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "")
   const findDept = (label: string) => {
     const needle = norm(label)
@@ -127,6 +138,18 @@ export const CatalogMobile = ({
       const locale = window.location.pathname.split("/")[1] || ""
       router.push(`/${locale}${href}`)
     } else if (soon) setSheet(name || "this section")
+  }
+
+  // Back arrow / backdrop: consume the history entry pushed on open so
+  // the URL stack stays clean. Subcategory links use plain setDept(null)
+  // instead - the pushed entry then acts as the "back to catalog" step
+  // when the user returns from a listing page.
+  const closeDept = () => {
+    if (dept && (window.history.state as any)?.hybreedDept === dept.id) {
+      window.history.back()
+    } else {
+      setDept(null)
+    }
   }
 
   return (
@@ -293,7 +316,7 @@ export const CatalogMobile = ({
       </div>
 
       {/* department slide-over */}
-      <DepartmentSheet dept={dept} onClose={() => setDept(null)} />
+      <DepartmentSheet dept={dept} onClose={closeDept} onNavigate={() => setDept(null)} />
 
       {/* coming soon sheet */}
       {sheet && (

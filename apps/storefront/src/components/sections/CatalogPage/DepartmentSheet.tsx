@@ -21,7 +21,7 @@ const Thumb = ({ child }: { child: DepartmentChild }) => {
   const [failed, setFailed] = useState(false)
   const src = child.image
   return (
-    <span className="w-[60px] h-[60px] rounded-[18px] bg-white shrink-0 flex items-center justify-center overflow-hidden">
+    <span className="w-14 h-14 rounded-2xl bg-white shrink-0 flex items-center justify-center overflow-hidden border border-[#ECECF1]">
       {src && !failed ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -32,7 +32,7 @@ const Thumb = ({ child }: { child: DepartmentChild }) => {
           className="w-full h-full object-contain p-1"
         />
       ) : (
-        <span className="text-[22px] font-bold text-[#C05BFF]">
+        <span className="text-[20px] font-bold text-[#2563EB]">
           {child.name.charAt(0).toUpperCase()}
         </span>
       )}
@@ -40,13 +40,15 @@ const Thumb = ({ child }: { child: DepartmentChild }) => {
   )
 }
 
-/** Slide-in-from-right department screen (dark, Wildberries-style). */
+/** Slide-in-from-right department screen. */
 export const DepartmentSheet = ({
   dept,
   onClose,
+  onNavigate,
 }: {
   dept: Department | null
   onClose: () => void
+  onNavigate: () => void
 }) => {
   const [mounted, setMounted] = useState(false)
 
@@ -64,7 +66,7 @@ export const DepartmentSheet = ({
   return (
     <div className="fixed inset-0 z-[70] md:hidden" role="dialog" aria-label={dept.name}>
       <div
-        className={`absolute inset-0 bg-black/60 transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
           mounted ? "opacity-100" : "opacity-0"
         }`}
         onClick={onClose}
@@ -73,58 +75,55 @@ export const DepartmentSheet = ({
         className="absolute inset-y-0 right-0 w-full max-w-[430px] flex flex-col transition-transform duration-300 ease-out"
         style={{
           transform: mounted ? "translateX(0)" : "translateX(100%)",
-          background: "#0B0B14",
+          background: "#F5F5F7",
           paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
-        {/* header panel */}
-        <div
-          className="bg-[#11111A] px-6 pt-4 pb-5"
-          style={{ borderBottomLeftRadius: 30, borderBottomRightRadius: 30 }}
-        >
-          <div className="flex items-center min-h-[44px]">
+        {/* header */}
+        <div className="bg-white px-4 pt-2 pb-3" style={{ borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}>
+          <div className="flex items-center min-h-[40px]">
             <button
               onClick={onClose}
               aria-label="Back"
-              className="w-11 h-11 -ml-2.5 flex items-center justify-center"
+              className="w-10 h-10 -ml-2 flex items-center justify-center"
             >
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#B356FF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <line x1="19" y1="12" x2="5" y2="12" />
                 <polyline points="12 19 5 12 12 5" />
               </svg>
             </button>
-            <h1 className="flex-1 text-center text-[22px] font-semibold text-white pr-11">
+            <h1 className="flex-1 text-center text-[18px] font-medium text-[#1F1F23] pr-10">
               {dept.name}
             </h1>
           </div>
         </div>
 
         {/* category list */}
-        <div className="flex-1 overflow-y-auto overscroll-contain px-5 pt-4 pb-8">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-4 pt-3 pb-8">
           <LocalizedClientLink
             href={`/categories/${dept.handle}`}
-            onClick={onClose}
-            className="flex items-center gap-5 h-[88px] rounded-[20px] px-2 active:opacity-90 transition-opacity"
+            onClick={onNavigate}
+            className="flex items-center gap-4 h-[68px] rounded-2xl px-2 active:bg-black/5 transition-colors"
           >
             <Thumb child={{ id: dept.id, name: dept.name, handle: dept.handle }} />
-            <span className="text-[20px] font-normal text-white">All {dept.name}</span>
+            <span className="text-[17px] font-normal text-[#1F1F23]">All {dept.name}</span>
           </LocalizedClientLink>
           {dept.children.map((child) => (
             <LocalizedClientLink
               key={child.id}
               href={`/categories/${child.handle}`}
-              onClick={onClose}
-              className="flex items-center gap-5 h-[88px] rounded-[20px] px-2 active:opacity-90 transition-opacity"
+              onClick={onNavigate}
+              className="flex items-center gap-4 h-[68px] rounded-2xl px-2 active:bg-black/5 transition-colors"
             >
               <Thumb child={child} />
-              <span className="text-[20px] font-normal text-white truncate">
+              <span className="text-[17px] font-normal text-[#1F1F23] truncate">
                 {child.name}
               </span>
             </LocalizedClientLink>
           ))}
           {!dept.children.length && (
-            <p className="text-center text-white/50 text-[15px] mt-10">
+            <p className="text-center text-[#8A8A96] text-[15px] mt-10">
               No subcategories yet
             </p>
           )}
