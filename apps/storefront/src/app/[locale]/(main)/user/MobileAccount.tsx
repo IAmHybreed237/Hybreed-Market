@@ -279,7 +279,11 @@ export const MobileAccount = ({
         <LocalizedClientLink
           href="/user/my-hybreed"
           className={`${card} relative overflow-hidden h-[140px] p-4 block`}
-          style={{ background: "linear-gradient(135deg,#DBEAFE,#BFDBFE)" }}
+          style={{
+            background: "linear-gradient(135deg,#DBEAFE,#BFDBFE)",
+            marginLeft: -13,
+            marginRight: -13,
+          }}
         >
           <div className="absolute top-3 right-3 flex items-center gap-1">
             <span
@@ -320,7 +324,7 @@ export const MobileAccount = ({
         </LocalizedClientLink>
 
         {/* 4) GIVEAWAY */}
-        <div className={`${card} px-4 py-3`}>
+        <div className={`${card} px-4 py-3`} style={{ marginLeft: -13, marginRight: -13 }}>
           <LocalizedClientLink href="/categories" className="flex items-center gap-1 text-[18px] font-bold text-[#1F1F23]">
             Big giveaway <Chevron size={16} />
           </LocalizedClientLink>
@@ -339,7 +343,7 @@ export const MobileAccount = ({
         </div>
 
         {/* 5) SERVICES */}
-        <div className="bg-white rounded-[24px] p-4 pr-0">
+        <div className="bg-white rounded-[24px] p-4 pr-0" style={{ marginLeft: -13, marginRight: -13 }}>
           <h3 className="text-[22px] font-bold text-[#1F1F23]">Services</h3>
           <div
             className="flex gap-3 overflow-x-auto overscroll-x-contain mt-3 pb-1 pr-4"
@@ -374,7 +378,11 @@ export const MobileAccount = ({
         {/* 6) PROMO BANNER */}
         <div
           className="rounded-[24px] h-[150px] relative overflow-hidden"
-          style={{ background: "linear-gradient(120deg,#2563EB,#60A5FA)" }}
+          style={{
+            background: "linear-gradient(120deg,#2563EB,#60A5FA)",
+            marginLeft: -13,
+            marginRight: -13,
+          }}
         >
           <div className="absolute left-5 top-5">
             <p className="text-white text-xl font-extrabold leading-tight">
