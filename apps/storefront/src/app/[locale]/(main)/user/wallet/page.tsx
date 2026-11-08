@@ -75,7 +75,7 @@ export default async function WalletPage() {
       }
     >
       {/* ===== MOBILE (<768px) ===== */}
-      <WalletMobile balance={balance} points={points} />
+      <WalletMobile balance={balance} points={points} customerId={user.id} userName={[user.first_name, user.last_name].filter(Boolean).join(" ") || "Hybreed user"} />
 
       {/* ===== TABLET (768-1023) ===== */}
       <div className="hidden md:block lg:hidden">

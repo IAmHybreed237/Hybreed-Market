@@ -20,7 +20,7 @@ import {
   TOPUP_NUMBER_RAW,
   WHATSAPP_NUMBER,
 } from "./topup.config"
-import { requestWalletTopUp, uploadTopUpReceipt } from "@/lib/data/wallet"
+import { requestWalletTopUp, uploadTopUpReceipt, getWalletStatement, type FundingSource } from "@/lib/data/wallet"
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 const TopUpCtx = createContext<{ open: () => void; close: () => void }>({
@@ -61,6 +61,7 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
   const [tuRef, setTuRef] = useState("")
   const [tuBusy, setTuBusy] = useState(false)
   const [tuError, setTuError] = useState<string | null>(null)
+  const [fundingSources, setFundingSources] = useState<FundingSource[]>([])
   const [flow, setFlow] = useState<"idle" | "mtn-amount" | "mtn-details">("idle")
   const [receiptFile, setReceiptFile] = useState<File | null>(null)
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null)
@@ -84,6 +85,26 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
     setToast(msg)
     setTimeout(() => setToast(null), 1600)
   }, [])
+
+  // Load verified funding sources once per sheet open; prefill the
+  // most recently used MoMo number so repeat top-ups are one tap.
+  useEffect(() => {
+    if (!open) return
+    let cancelled = false
+    getWalletStatement().then((st) => {
+      if (cancelled || !st) return
+      const sources = [...st.funding_sources].sort((a, b) =>
+        b.last_used_at.localeCompare(a.last_used_at)
+      )
+      setFundingSources(sources)
+      if (sources.length && !tuPhone.trim()) {
+        const local = sources[0].phone.replace(/\D/g, "").replace(/^237/, "")
+        setTuPhone(local)
+      }
+    })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   const openSheet = useCallback(() => {
     if (typeof window === "undefined") return
@@ -531,6 +552,28 @@ export const TopUpSheetProvider = ({ children }: { children: React.ReactNode }) 
                       <span className="text-[14px] font-medium text-[#1F1F23]">
                         MoMo number you sent from
                       </span>
+                      {fundingSources.length > 0 && (
+                        <span className="flex gap-2 flex-wrap">
+                          {fundingSources.map((s) => {
+                            const local = s.phone.replace(/\D/g, "").replace(/^237/, "")
+                            const active = tuPhone.replace(/\D/g, "") === local
+                            return (
+                              <button
+                                key={s.phone}
+                                type="button"
+                                onClick={() => setTuPhone(local)}
+                                className={`text-[13px] font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                                  active
+                                    ? "bg-[#2563EB] text-white border-[#2563EB]"
+                                    : "bg-white text-[#1F1F23] border-[#E5E5EA]"
+                                }`}
+                              >
+                                {local} {s.verified && "✓"}
+                              </button>
+                            )
+                          })}
+                        </span>
+                      )}
                       <input
                         type="tel"
                         inputMode="tel"

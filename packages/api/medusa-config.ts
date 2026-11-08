@@ -96,6 +96,9 @@ module.exports = withMercur({
       resolve: './src/modules/wishlist',
     },
     {
+      resolve: './src/modules/pickup',
+    },
+    {
       resolve: '@medusajs/medusa/file',
       options: {
         providers: [

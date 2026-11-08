@@ -16,6 +16,7 @@ const WalletEntry = model.define("wallet_entry", {
       "refund",
       "points_earn",
       "points_redeem",
+      "transfer",
       "adjustment",
     ])
     .default("adjustment"),

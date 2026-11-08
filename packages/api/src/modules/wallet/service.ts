@@ -15,6 +15,19 @@ const toNum = (v: unknown): number => {
 
 const bn = (n: number) => MathBN.convert(n)
 
+// Normalize a Cameroon MoMo number to its 9-digit local form for dedupe.
+const localPhone = (phone: string): string => {
+  const digits = phone.replace(/\D/g, "")
+  return digits.startsWith("237") ? digits.slice(3) : digits
+}
+
+interface FundingSource {
+  phone: string
+  verified: boolean
+  uses: number
+  last_used_at: string
+}
+
 // Generated MedusaService methods may return a single entity or an array
 // depending on version - normalize to the first result.
 const first = <T>(v: T | T[]): T => (Array.isArray(v) ? v[0] : v) as T
@@ -233,7 +246,43 @@ class WalletModuleService extends MedusaService({
         entry_id: entry.id,
       })
     )
+    await this.recordFundingSource(account, topup.sender_phone)
     return updated
+  }
+
+  /**
+   * Records a MoMo number as a verified funding source once a top-up from it
+   * is approved. Funding sources live on the wallet account metadata -
+   * deposits are open to any SIM, the number is just a payment rail.
+   */
+  async recordFundingSource(
+    account: { id: string; metadata?: Record<string, unknown> | null },
+    phone: string
+  ) {
+    const local = localPhone(phone)
+    if (!/^6\d{8}$/.test(local)) return
+    const normalized = `+237${local}`
+    const meta = (account.metadata ?? {}) as Record<string, unknown>
+    const existing = Array.isArray(meta.funding_sources)
+      ? (meta.funding_sources as FundingSource[])
+      : []
+    const now = new Date().toISOString()
+    const idx = existing.findIndex((s) => s.phone === normalized)
+    const sources =
+      idx >= 0
+        ? existing.map((s, i) =>
+            i === idx
+              ? { ...s, verified: true, uses: s.uses + 1, last_used_at: now }
+              : s
+          )
+        : [
+            ...existing,
+            { phone: normalized, verified: true, uses: 1, last_used_at: now },
+          ]
+    await this.updateWalletAccounts({
+      id: account.id,
+      metadata: { ...meta, funding_sources: sources.slice(-10) },
+    })
   }
 
   async rejectTopUp(input: {
@@ -260,6 +309,88 @@ class WalletModuleService extends MedusaService({
   }
 
   /** Full wallet statement for the customer-facing page. */
+  /**
+   * Wallet-to-wallet transfer between two customers. Atomic: both ledger
+   * entries and both balance updates happen together; idempotent on
+   * `reference` per account so a retried request can't double-pay.
+   */
+  async transfer(input: {
+    fromCustomerId: string
+    toCustomerId: string
+    amount: number
+    currencyCode?: string
+    reference?: string
+    note?: string
+  }) {
+    if (input.fromCustomerId === input.toCustomerId) {
+      const err = new Error("Cannot transfer to yourself") as Error & { status?: number }
+      err.status = 400
+      throw err
+    }
+    if (!Number.isFinite(input.amount) || input.amount <= 0) {
+      const err = new Error("amount must be positive") as Error & { status?: number }
+      err.status = 400
+      throw err
+    }
+
+    const currency = input.currencyCode ?? "xaf"
+    const from = await this.getOrCreateAccount(input.fromCustomerId, currency)
+    const to = await this.getOrCreateAccount(input.toCustomerId, currency)
+    const amount = toNum(input.amount)
+
+    // Idempotency: same reference already applied to the sender = replay.
+    if (input.reference) {
+      const existing = await this.listWalletEntries({
+        account_id: from.id,
+        reference: input.reference,
+      })
+      if (existing.length) return { replayed: true, entries: existing }
+    }
+
+    const fromBalance = toNum(from.balance)
+    if (fromBalance < amount) {
+      const err = new Error("Insufficient wallet balance") as Error & { status?: number }
+      err.status = 402
+      throw err
+    }
+    const toBalance = toNum(to.balance)
+    const reference = input.reference ?? `xfer_${from.id}_${Date.now()}`
+
+    const [outEntry, inEntry] = await Promise.all([
+      this.createWalletEntries({
+        account_id: from.id,
+        amount: bn(-amount),
+        currency_code: currency,
+        type: "transfer",
+        status: "completed",
+        reference,
+        description: input.note ?? "Wallet transfer sent",
+        metadata: { to_customer_id: input.toCustomerId },
+      }),
+      this.createWalletEntries({
+        account_id: to.id,
+        amount: bn(amount),
+        currency_code: currency,
+        type: "transfer",
+        status: "completed",
+        reference,
+        description: input.note ?? "Wallet transfer received",
+        metadata: { from_customer_id: input.fromCustomerId },
+      }),
+    ])
+
+    await this.updateWalletAccounts({
+      id: from.id,
+      balance: bn(fromBalance - amount),
+    })
+    await this.updateWalletAccounts({
+      id: to.id,
+      balance: bn(toBalance + amount),
+    })
+
+    return { replayed: false, entries: [first(outEntry), first(inEntry)] }
+  }
+
   async getStatement(customerId: string) {
     const account = await this.getOrCreateAccount(customerId)
     const [entries, topups] = await Promise.all([

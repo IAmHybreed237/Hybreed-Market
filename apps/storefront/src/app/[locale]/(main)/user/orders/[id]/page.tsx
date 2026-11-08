@@ -7,6 +7,7 @@ import { redirect } from "next/navigation"
 import { format } from "date-fns"
 import { retrieveOrderGroup } from "@/lib/data/orders"
 import { OrderDetailsSection } from "@/components/sections/OrderDetailsSection/OrderDetailsSection"
+import { PickupQrCard } from "@/components/organisms/PickupQrCard/PickupQrCard"
 
 export default async function UserPage({
   params,
@@ -46,6 +47,9 @@ export default async function UserPage({
             </p>
           </div>
           <OrderDetailsSection orderGroup={orderGroup} />
+          {orderGroup?.id && (
+            <PickupQrCard orderGroupId={orderGroup.id} displayId={orderGroup.display_id} />
+          )}
         </div>
       </div>
     </main>

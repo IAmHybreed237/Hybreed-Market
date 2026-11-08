@@ -5,6 +5,7 @@ import { useTopUpSheet } from "@/components/cells/TopUpSheet/TopUpSheet"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { HbMark } from "@/components/atoms"
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
+import { QrPaymentsSheet } from "@/components/cells/QrPaymentsSheet/QrPaymentsSheet"
 
 /* ---------- icons ---------- */
 const I = ({ d, s = 20, c = "currentColor" }: { d: string; s?: number; c?: string }) => (
@@ -56,12 +57,13 @@ const promos = [
   { t: "Hybreed+ membership", s: "Extra cashback and free delivery", bg: "#DBEAFE", fg: "#1E3A8A" },
 ]
 
-export const WalletMobile = ({ balance = 0, points = 0 }: { balance?: number; points?: number }) => {
+export const WalletMobile = ({ balance = 0, points = 0, customerId, userName }: { balance?: number; points?: number; customerId?: string; userName?: string }) => {
   const fmt = (n: number) => `${Math.round(n).toLocaleString("en-US").replace(/,/g, " ")} XAF`
   const topUp = useTopUpSheet()
   const [scrolled, setScrolled] = useState(false)
   const [tick, setTick] = useState(0)
   const [sheet, setSheet] = useState<"none" | "more" | "soon" | "all">("none")
+  const [qrOpen, setQrOpen] = useState(false)
   useBodyScrollLock(sheet !== "none")
   const sentinel = useRef<HTMLDivElement>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
@@ -250,9 +252,9 @@ export const WalletMobile = ({ balance = 0, points = 0 }: { balance?: number; po
               </div>
             </LocalizedClientLink>
             <div className="grid grid-cols-2 gap-2">
-              <button className={`${tile} h-[77px] flex flex-col items-center justify-center gap-1 p-1.5 relative`}>
+              <button onClick={() => setQrOpen(true)} className={`${tile} h-[77px] flex flex-col items-center justify-center gap-1 p-1.5 relative`}>
                 <I d={ic.qr} s={28} c="var(--text)" />
-                <span className="text-[13px] leading-[1.3] text-center" style={{ color: "var(--muted)" }}>Pay with QR Code</span>
+                <span className="text-[13px] leading-[1.3] text-center" style={{ color: "var(--muted)" }}>QR Payments</span>
               </button>
               <button className={`${tile} h-[77px] flex flex-col items-center justify-center gap-1 p-1.5 relative`}>
                 <span className="absolute top-2 right-2 w-4 h-4 rounded-full bg-[#22C55E]" />
@@ -401,6 +403,15 @@ export const WalletMobile = ({ balance = 0, points = 0 }: { balance?: number; po
       {sheet === "more" && <Sheet title="Wallet" rows={sheetRows} />}
       {sheet === "all" && <Sheet title="All products" rows={allProducts} />}
       {sheet === "soon" && <Sheet title="Coming soon" />}
+      {customerId && (
+        <QrPaymentsSheet
+          open={qrOpen}
+          onClose={() => setQrOpen(false)}
+          customerId={customerId}
+          userName={userName || "Hybreed user"}
+          balance={balance}
+        />
+      )}
     </div>
   )
 }
