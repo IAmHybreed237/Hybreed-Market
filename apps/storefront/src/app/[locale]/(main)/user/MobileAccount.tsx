@@ -482,28 +482,6 @@ export const MobileAccount = ({
           </div>
         )}
 
-        {/* 7) SHORTCUTS */}
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { label: "Favorites", sub: "0 items", href: "/user/favorites", icon: paths.heart },
-            { label: "Purchases", sub: "View", href: "/user/orders", icon: paths.cart },
-          ].map((t) => (
-            <LocalizedClientLink
-              key={t.label}
-              href={t.href}
-              className={`${card} h-[88px] p-4 flex items-center justify-between`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-[#2563EB]"><OutlineIcon path={t.icon} /></span>
-                <div>
-                  <p className="text-base font-semibold text-[#1F1F23]">{t.label}</p>
-                  <p className="text-sm" style={{ color: "var(--muted)" }}>{t.sub}</p>
-                </div>
-              </div>
-              <Chevron />
-            </LocalizedClientLink>
-          ))}
-        </div>
       </div>
     </div>
   )
