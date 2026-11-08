@@ -367,8 +367,13 @@ export const WbProductMobile = ({
     setTimeout(() => buy(true, "/checkout?step=address"), 240)
   }
 
-  const scrollToId = (id: string) =>
+  const scrollToId = (id: string) => {
+    if (id === "installments") {
+      openSheet("parts")
+      return
+    }
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
 
   const likeList = (similar || []).slice(0, 8)
   const buyList = (alsoBuy || []).slice(0, 8)
@@ -870,12 +875,13 @@ export const WbProductMobile = ({
 
                   <div className="relative mt-4 pl-[40px]">
                     {/* timeline rail */}
-                    <span aria-hidden className="absolute left-[11px] top-[12px] h-[40px] w-[2px] bg-[#22C55E]" />
-                    <span aria-hidden className="absolute left-[11px] top-[60px] bottom-0 w-[2px] bg-gradient-to-b from-[#C7C7D1] to-transparent" />
-                    <span aria-hidden className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#22C55E] flex items-center justify-center">
+                    <style>{`@keyframes pssPulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}70%{box-shadow:0 0 0 7px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}`}</style>
+                    <span aria-hidden className="absolute left-[13px] top-[14px] h-[40px] w-[3px] bg-[#22C55E] rounded-full" />
+                    <span aria-hidden className="absolute left-[13px] top-[64px] bottom-0 w-[3px] bg-gradient-to-b from-[#C7C7D1] to-transparent rounded-full" />
+                    <span aria-hidden className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#22C55E] flex items-center justify-center" style={{ animation: "pssPulse 2.2s ease-out infinite" }}>
                       <span className="w-2 h-2 rounded-full bg-white" />
                     </span>
-                    <span aria-hidden className="absolute left-[8px] top-[52px] w-2 h-2 rounded-full bg-[#A1A1AA]" />
+                    <span aria-hidden className="absolute left-[9px] top-[54px] w-2.5 h-2.5 rounded-full bg-[#A1A1AA]" />
 
                     <p className="h-6 leading-6 text-[16px] font-medium text-[#16A34A] pr-[60px]">
                       First payment: {pipFirst != null ? `${num(pipFirst)} XAF` : "-"}
