@@ -157,44 +157,158 @@ const Sheet = ({ open, onClose, children }: { open: boolean; onClose: () => void
   )
 }
 
-/* ---------- media lightbox ---------- */
-const Lightbox = ({ items, start, onClose }: { items: ReviewMediaItem[]; start: number; onClose: () => void }) => {
+/* ---------- full-screen media viewer (vertical scroll, pinch zoom) ---------- */
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
+
+const ZoomImage = ({ src, alt }: { src: string; alt: string }) => {
+  const [z, setZ] = useState({ s: 1, x: 0, y: 0 })
+  const pts = useRef(new Map<number, { x: number; y: number }>())
+  const drag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null)
+  const pinch = useRef<{ d: number; s: number; cx: number; cy: number } | null>(null)
+  const moved = useRef(0)
+
+  const onDown = (e: React.PointerEvent) => {
+    e.currentTarget.setPointerCapture?.(e.pointerId)
+    pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    if (pts.current.size === 2) {
+      const [a, b] = [...pts.current.values()]
+      pinch.current = { d: Math.hypot(a.x - b.x, a.y - b.y), s: z.s, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 }
+      drag.current = null
+    } else {
+      drag.current = { x: e.clientX, y: e.clientY, ox: z.x, oy: z.y }
+      moved.current = 0
+    }
+  }
+  const onMove = (e: React.PointerEvent) => {
+    if (!pts.current.has(e.pointerId)) return
+    pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    if (pts.current.size === 2 && pinch.current) {
+      const [a, b] = [...pts.current.values()]
+      const d = Math.hypot(a.x - b.x, a.y - b.y)
+      const ns = clamp(pinch.current.s * (d / pinch.current.d), 1, 4)
+      const k = ns / pinch.current.s
+      setZ({
+        s: ns,
+        x: clamp(pinch.current.cx + (z.x - pinch.current.cx) * k - e.clientX * (k - 1), -400, 400),
+        y: clamp(pinch.current.cy + (z.y - pinch.current.cy) * k - e.clientY * (k - 1), -400, 400),
+      })
+      return
+    }
+    if (drag.current && z.s > 1) {
+      moved.current += Math.abs(e.clientX - drag.current.x) + Math.abs(e.clientY - drag.current.y)
+      setZ((p) => ({ ...p, x: clamp(drag.current!.ox + e.clientX - drag.current!.x, -300, 300), y: clamp(drag.current!.oy + e.clientY - drag.current!.y, -500, 500) }))
+    }
+  }
+  const onUp = (e: React.PointerEvent) => {
+    pts.current.delete(e.pointerId)
+    if (pts.current.size < 2) pinch.current = null
+    if (pts.current.size === 0) drag.current = null
+    if (z.s === 1) setZ({ s: 1, x: 0, y: 0 })
+  }
+  const onClick = () => {
+    if (z.s > 1 || moved.current > 8) return
+    setZ((p) => (p.s > 1 ? { s: 1, x: 0, y: 0 } : { s: 2, x: 0, y: 0 }))
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      draggable={false}
+      onPointerDown={onDown}
+      onPointerMove={onMove}
+      onPointerUp={onUp}
+      onPointerCancel={onUp}
+      onClick={onClick}
+      className="max-w-full max-h-full object-contain touch-none select-none"
+      style={{ transform: `translate(${z.x}px, ${z.y}px) scale(${z.s})`, transition: pinch.current ? "none" : "transform .18s ease-out", transformOrigin: "center" }}
+    />
+  )
+}
+
+const MediaViewer = ({ items, start, onClose }: { items: ReviewMediaItem[]; start: number; onClose: () => void }) => {
   useBodyScrollLock(true)
-  const ref = useRef<HTMLDivElement>(null)
+  const scroller = useRef<HTMLDivElement>(null)
   const [idx, setIdx] = useState(start)
+  const last = items.length - 1
+
   useEffect(() => {
-    const el = ref.current
-    if (el) el.scrollLeft = start * el.clientWidth
+    const el = scroller.current
+    if (el) el.scrollTop = start * el.clientHeight
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const go = (i: number) => {
+    const el = scroller.current
+    if (!el) return
+    el.scrollTo({ top: i * el.clientHeight, behavior: "smooth" })
+  }
+
   return (
     <div className="fixed inset-0 z-[80] bg-black flex flex-col">
       <div className="flex items-center justify-between px-4 text-white shrink-0" style={{ paddingTop: "max(env(safe-area-inset-top), 12px)", height: 56 }}>
-        <span className="text-[15px] font-medium">{idx + 1} / {items.length}</span>
+        <span className="text-[15px] font-medium tabular-nums">{idx + 1} / {items.length}</span>
         <button aria-label="Close" onClick={onClose} className="w-10 h-10 flex items-center justify-center">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
         </button>
       </div>
+
       <div
-        ref={ref}
-        onScroll={(e) => setIdx(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
-        className="flex-1 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        ref={scroller}
+        onScroll={(e) => {
+          const el = e.currentTarget
+          setIdx(clamp(Math.round(el.scrollTop / el.clientHeight), 0, last))
+        }}
+        className="flex-1 overflow-y-auto snap-y snap-mandatory"
+        style={{ overscrollBehavior: "contain" }}
       >
         {items.map((m, i) => (
-          <div key={m.id} className="shrink-0 w-full h-full snap-center flex items-center justify-center">
+          <div key={m.id} className="h-full w-full snap-start snap-always flex items-center justify-center">
             {m.type === "video" ? (
               i === idx ? (
                 <video src={m.url} poster={m.thumbnail_url ?? undefined} controls autoPlay playsInline className="max-w-full max-h-full" />
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={m.thumbnail_url ?? ""} alt="" className="max-w-full max-h-full object-contain" />
+                <img src={m.thumbnail_url ?? ""} alt="" className="max-w-full max-h-full object-contain opacity-60" />
               )
             ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={m.url} alt="" className="max-w-full max-h-full object-contain" />
+              <ZoomImage src={m.url} alt="" />
             )}
           </div>
         ))}
+      </div>
+
+      <div className="shrink-0" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}>
+        {items.length > 1 && (
+          <div className="flex gap-1.5 overflow-x-auto px-4 pb-3 scrollbar-hide" style={{ scrollbarWidth: "none" }}>
+            {items.map((m, i) => (
+              <button
+                key={m.id}
+                aria-label={`Open item ${i + 1}`}
+                onClick={() => go(i)}
+                className={`relative shrink-0 w-[54px] h-[54px] rounded-[10px] overflow-hidden transition-opacity ${i === idx ? "opacity-100 ring-2 ring-white" : "opacity-50"}`}
+              >
+                {m.type === "video" ? (
+                  m.thumbnail_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={m.thumbnail_url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                  ) : (
+                    <video src={`${m.url}#t=0.5`} muted playsInline preload="metadata" className="w-full h-full object-cover" />
+                  )
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={m.url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                )}
+                {m.type === "video" && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <PlayBadge s={18} />
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -247,7 +361,7 @@ export const ReviewsMobile = ({
   const [loading, setLoading] = useState(false)
   const [sheet, setSheet] = useState<null | "sort" | "dist" | "variant" | "variant-cart" | "media">(null)
   const [reportFor, setReportFor] = useState<string | null>(null)
-  const [lightbox, setLightbox] = useState<{ items: ReviewMediaItem[]; start: number } | null>(null)
+  const [lightbox, setMediaViewer] = useState<{ items: ReviewMediaItem[]; start: number } | null>(null)
   const [translated, setTranslated] = useState<Record<string, { text?: string; on: boolean; busy?: boolean }>>({})
   const [toast, setToast] = useState<string | null>(null)
   const [added, setAdded] = useState(false)
@@ -447,7 +561,7 @@ export const ReviewsMobile = ({
           <>
             <div className="flex gap-1.5 overflow-x-auto scrollbar-hide px-4 mt-3">
               {strip.map((m, i) => (
-                <MediaThumb key={m.id} m={m} className="w-[96px] h-[116px] rounded-[14px]" onClick={() => setLightbox({ items: strip, start: i })} />
+                <MediaThumb key={m.id} m={m} className="w-[96px] h-[116px] rounded-[14px]" onClick={() => setMediaViewer({ items: strip, start: i })} />
               ))}
             </div>
             <button onClick={() => setSheet("media")} className="px-4 mt-3 text-[17px] font-medium" style={{ color: BLUE }}>
@@ -542,7 +656,7 @@ export const ReviewsMobile = ({
             {n > 0 && (
               <div className="flex gap-1.5 overflow-x-auto scrollbar-hide mt-4">
                 {r.media.map((m, i) => (
-                  <MediaThumb key={m.id} m={m} className={`${tileW} h-[200px] rounded-[16px]`} onClick={() => setLightbox({ items: r.media, start: i })} />
+                  <MediaThumb key={m.id} m={m} className={`${tileW} h-[200px] rounded-[16px]`} onClick={() => setMediaViewer({ items: r.media, start: i })} />
                 ))}
               </div>
             )}
@@ -672,12 +786,12 @@ export const ReviewsMobile = ({
         <h3 className="text-[20px] font-semibold text-[#1F1F23] mb-3">Photos & videos</h3>
         <div className="grid grid-cols-3 gap-1.5">
           {strip.map((m, i) => (
-            <MediaThumb key={m.id} m={m} className="w-full aspect-[4/5] rounded-[12px]" onClick={() => { setSheet(null); setLightbox({ items: strip, start: i }) }} />
+            <MediaThumb key={m.id} m={m} className="w-full aspect-[4/5] rounded-[12px]" onClick={() => { setSheet(null); setMediaViewer({ items: strip, start: i }) }} />
           ))}
         </div>
       </Sheet>
 
-      {lightbox && <Lightbox items={lightbox.items} start={lightbox.start} onClose={() => setLightbox(null)} />}
+      {lightbox && <MediaViewer items={lightbox.items} start={lightbox.start} onClose={() => setMediaViewer(null)} />}
     </div>
   )
 }
