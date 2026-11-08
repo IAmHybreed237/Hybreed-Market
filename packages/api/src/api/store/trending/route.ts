@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { TRENDING_MODULE } from "../../../../modules/trending/service"
+import { TRENDING_MODULE } from "../../../modules/trending/service"
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const minutes = Math.min(
