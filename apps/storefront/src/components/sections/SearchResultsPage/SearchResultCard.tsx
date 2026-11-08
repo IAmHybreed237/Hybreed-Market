@@ -185,7 +185,8 @@ export const SearchResultCard = ({ p }: { p: any }) => {
   if (onSale) badges.push({ label: "SALE", cls: "bg-[#E11D48] text-white" })
   else if (discounted && discountPct)
     badges.push({ label: `-${discountPct}%`, cls: "bg-[#EFF6FF] text-[#2563EB]" })
-  else badges.push({ label: "GOOD PRICE", cls: "bg-[#EFF6FF] text-[#2563EB]" })
+  else if ((p as any).best_price)
+    badges.push({ label: "BEST PRICE", cls: "bg-[#ECFDF5] text-[#059669]" })
 
   return (
     <LocalizedClientLink

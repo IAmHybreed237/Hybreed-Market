@@ -117,6 +117,83 @@ export const getProductSellerMap = async ({
   return map;
 };
 
+/**
+ * Flags products whose displayed (buybox) price is the lowest purchasable
+ * offer for that product across sellers. Requires at least 2 competing
+ * sellers - with a single seller "best price" is meaningless.
+ */
+export const getBestPriceProductIds = async ({
+  products,
+  countryCode,
+  regionId,
+}: {
+  products: any[];
+  countryCode?: string;
+  regionId?: string;
+}): Promise<Set<string>> => {
+  const ids = (products || []).map((p) => p?.id).filter(Boolean);
+  if (!ids.length) return new Set();
+
+  const region = regionId
+    ? { id: regionId }
+    : countryCode
+      ? await getRegion(countryCode)
+      : null;
+
+  const { offers } = await (
+    sdk.store.offers.query({
+      product_id: ids,
+      region_id: region?.id,
+      country_code: countryCode,
+      limit: Math.min(500, Math.max(50, ids.length * 10)),
+      fields:
+        '+calculated_price,+product.id,+variant_id,+inventory_quantity,+seller.id',
+      fetchOptions: {
+        headers: { ...(await getAuthHeaders()) },
+        cache: 'force-cache',
+        next: getGlobalCacheOptions(CACHE_TAGS.offers),
+      },
+    } as never) as unknown as Promise<{ offers: any[]; count: number }>
+  ).catch(() => ({ offers: [], count: 0 }));
+
+  const byProduct = new Map<string, any[]>();
+  for (const o of offers || []) {
+    const pid = o?.product_id ?? o?.product?.id;
+    if (!pid) continue;
+    const list = byProduct.get(pid) ?? [];
+    list.push(o);
+    byProduct.set(pid, list);
+  }
+
+  const best = new Set<string>();
+  for (const p of products || []) {
+    const pOffers = byProduct.get(p?.id) ?? [];
+    if (pOffers.length < 2) continue;
+
+    const variantId = p?.variants?.[0]?.id;
+    const cardPrice =
+      p?.variants?.[0]?.calculated_price?.calculated_amount ??
+      p?.variants?.[0]?.prices?.find(
+        (pr: any) => String(pr.currency_code || '').toLowerCase() === 'xaf'
+      )?.amount ??
+      null;
+    if (cardPrice == null) continue;
+
+    const sellers = new Set<string>();
+    let min = Infinity;
+    for (const o of pOffers) {
+      if (variantId && o?.variant_id && o.variant_id !== variantId) continue;
+      const amt = o?.calculated_price?.calculated_amount;
+      const stock = o?.inventory_quantity ?? 0;
+      if (amt == null || stock <= 0) continue;
+      sellers.add(String(o?.seller_id ?? o?.seller?.id ?? ""));
+      if (amt < min) min = amt;
+    }
+    if (sellers.size >= 2 && cardPrice <= min + 0.5) best.add(p.id);
+  }
+  return best;
+};
+
 export const retrieveOffer = async (
   id: string,
   { countryCode, regionId }: { countryCode?: string; regionId?: string } = {}

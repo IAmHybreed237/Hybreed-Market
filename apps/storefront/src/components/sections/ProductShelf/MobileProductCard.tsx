@@ -84,7 +84,8 @@ export const MobileProductCard = ({ p }: { p: any }) => {
   if (onSale) badges.push({ label: "SALE", cls: "bg-[#E11D48] text-white" })
   else if (discounted && discountPct)
     badges.push({ label: `-${discountPct}%`, cls: "bg-[#EFF6FF] text-[#2563EB]" })
-  else badges.push({ label: "GOOD PRICE", cls: "bg-[#DBEAFE] text-[#2563EB]" })
+  else if (p.best_price)
+    badges.push({ label: "BEST PRICE", cls: "bg-[#ECFDF5] text-[#059669]" })
   if (
     p.metadata?.badge &&
     String(p.metadata.badge).trim().toUpperCase() !== "SALE"

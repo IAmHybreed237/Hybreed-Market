@@ -9,7 +9,7 @@ import { sdk } from '../client';
 import { getAuthHeaders } from './cookies';
 import { CACHE_TAGS, getGlobalCacheOptions } from './cache-tags';
 import { getRegion, retrieveRegion } from './regions';
-import { getProductSellerMap } from './offers';
+import { getProductSellerMap, getBestPriceProductIds } from './offers';
 
 const PRODUCT_LIST_FIELDS =
   '*variants.calculated_price,+variants.inventory_quantity,*variants.prices,*variants.options,*attribute_values,*attribute_values.attribute,*categories';
@@ -20,9 +20,17 @@ const attachSellers = async (
 ): Promise<HttpTypes.StoreProduct[]> => {
   if (!products?.length) return products;
   const sellerMap = await getProductSellerMap({ countryCode }).catch(() => ({}));
+  const bestPriceIds = await getBestPriceProductIds({
+    products,
+    countryCode,
+  }).catch(() => new Set<string>());
   return products.map(product =>
-    sellerMap[product.id]
-      ? ({ ...product, seller: sellerMap[product.id] } as HttpTypes.StoreProduct)
+    sellerMap[product.id] || bestPriceIds.has(product.id)
+      ? ({
+          ...product,
+          ...(sellerMap[product.id] ? { seller: sellerMap[product.id] } : {}),
+          ...(bestPriceIds.has(product.id) ? { best_price: true } : {}),
+        } as HttpTypes.StoreProduct)
       : product
   );
 };
