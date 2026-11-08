@@ -105,6 +105,7 @@ export const ProductDetailsPage = async ({
         similar={likeList}
         alsoBuy={buyList}
         reviewSummary={reviewSummary}
+        reviewMedia={reviewsData.media}
         locale={locale}
       />
       <div className="hidden md:block">

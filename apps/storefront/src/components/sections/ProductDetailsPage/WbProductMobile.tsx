@@ -88,6 +88,7 @@ export const WbProductMobile = ({
   similar,
   alsoBuy,
   reviewSummary,
+  reviewMedia,
   locale,
 }: {
   product: any
@@ -95,6 +96,7 @@ export const WbProductMobile = ({
   similar: any[]
   alsoBuy?: any[]
   reviewSummary?: { average: number | null; count: number }
+  reviewMedia?: { url: string; thumbnail_url: string | null; type: string }[]
   locale: string
 }) => {
   const router = useRouter()
@@ -651,17 +653,41 @@ export const WbProductMobile = ({
       <div className="grid grid-cols-[65fr_35fr] gap-1 mb-1">
         <button
           onClick={() => router.push(`/products/${product?.handle}/reviews${selectedVariant ? `?variant=${selectedVariant.id}` : ""}`)}
-          className="bg-white rounded-[20px] px-3 py-2.5 text-left active:scale-[0.99] transition-transform"
+          className="bg-white rounded-[20px] px-3 py-2.5 text-left active:scale-[0.99] transition-transform flex items-center justify-between gap-2"
         >
-          <span className="flex items-center gap-1.5">
-            <StarIcon />
-            <span className="text-[18px] font-semibold text-[#1F1F23]">
-              {reviewSummary?.average != null ? reviewSummary.average.toFixed(1) : "–"}
+          <span className="min-w-0">
+            <span className="flex items-center gap-1.5">
+              <StarIcon />
+              <span className="text-[18px] font-semibold text-[#1F1F23]">
+                {reviewSummary?.average != null ? reviewSummary.average.toFixed(1) : "–"}
+              </span>
+            </span>
+            <span className="block text-[13px] text-[#8A8A96] mt-0.5">
+              {reviewSummary?.count ? `${reviewSummary.count} ratings` : "No ratings yet"}
             </span>
           </span>
-          <span className="block text-[13px] text-[#8A8A96] mt-0.5">
-            {reviewSummary?.count ? `${reviewSummary.count} ratings` : "No ratings yet"}
-          </span>
+          {(() => {
+            const all = reviewMedia ?? []
+            const imgs = all.filter((m) => m.type === "image").slice(0, 3)
+            const rest = imgs.length < 3 ? all.filter((m) => m.thumbnail_url && !imgs.includes(m)).slice(0, 3 - imgs.length) : []
+            const pics = [...imgs, ...rest]
+            if (!pics.length) return null
+            return (
+              <span className="relative shrink-0" style={{ width: 78 + (pics.length - 1) * 20, height: 54 }}>
+                {pics.map((m, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={m.url + i}
+                    src={m.type === "image" ? m.url : m.thumbnail_url ?? m.url}
+                    alt=""
+                    loading="lazy"
+                    className="absolute top-0 rounded-[12px] border-2 border-white object-cover bg-[#F0F0F3]"
+                    style={{ left: i * 20, width: 58, height: 54, zIndex: pics.length - i }}
+                  />
+                ))}
+              </span>
+            )
+          })()}
         </button>
         <button
           onClick={() => router.push(`/products/${product?.handle}/reviews${selectedVariant ? `?variant=${selectedVariant.id}` : ""}`)}
