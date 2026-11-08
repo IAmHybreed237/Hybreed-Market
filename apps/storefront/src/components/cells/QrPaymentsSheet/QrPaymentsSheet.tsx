@@ -66,7 +66,7 @@ export const QrPaymentsSheet = ({
       streamRef.current = null
       return
     }
-    QRCode.toDataURL(`${PAY_PREFIX}${customerId}`, { width: 480, margin: 1 })
+    QRCode.toDataURL(`${PAY_PREFIX_C}${customerId}`, { width: 480, margin: 1 })
       .then(setQrDataUrl)
       .catch(() => setQrDataUrl(null))
   }, [open, customerId, reset])
