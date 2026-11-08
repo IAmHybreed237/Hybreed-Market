@@ -5,7 +5,7 @@ import {
   ReviewMedia,
   ReviewReaction,
   ReviewReport,
-} from "./models"
+} from "./models/review-extras"
 
 export const REVIEW_EXTRAS_MODULE = "reviewExtras"
 
