@@ -5,12 +5,22 @@ import { getAuthHeaders } from './cookies'
 const BACKEND_URL = process.env.MEDUSA_BACKEND_URL || 'http://localhost:9000'
 const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY as string
 
+export type ViewerReview = {
+  rating: number
+  text: string
+  author: ProductReview['author']
+  reactions: { like: number; liked: boolean }
+  following: boolean
+  is_own: boolean
+}
+
 export type ReviewMediaItem = {
   id: string
   type: 'image' | 'video'
   url: string
   thumbnail_url: string | null
   review_id: string
+  review?: ViewerReview | null
 }
 
 export type ProductReview = {

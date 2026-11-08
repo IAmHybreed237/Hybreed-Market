@@ -10,7 +10,8 @@ import type {
   ReviewMediaItem,
 } from "@/lib/data/reviews"
 
-type Variant = { id: string; label: string; offerId: string | null }
+type Variant = { id: string; label: string; offerId: string | null; price?: { amount: number; orig: number | null } | null }
+type ProductInfo = { title: string; image: string | null; price: { amount: number; orig: number | null } | null }
 type Lang = "en" | "fr"
 type Reaction = "like" | "heart" | "clap"
 
@@ -157,80 +158,40 @@ const Sheet = ({ open, onClose, children }: { open: boolean; onClose: () => void
   )
 }
 
-/* ---------- full-screen media viewer (vertical scroll, pinch zoom) ---------- */
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
 
-const ZoomImage = ({ src, alt }: { src: string; alt: string }) => {
-  const [z, setZ] = useState({ s: 1, x: 0, y: 0 })
-  const pts = useRef(new Map<number, { x: number; y: number }>())
-  const drag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null)
-  const pinch = useRef<{ d: number; s: number; cx: number; cy: number } | null>(null)
-  const moved = useRef(0)
-
-  const onDown = (e: React.PointerEvent) => {
-    e.currentTarget.setPointerCapture?.(e.pointerId)
-    pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
-    if (pts.current.size === 2) {
-      const [a, b] = [...pts.current.values()]
-      pinch.current = { d: Math.hypot(a.x - b.x, a.y - b.y), s: z.s, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 }
-      drag.current = null
-    } else {
-      drag.current = { x: e.clientX, y: e.clientY, ox: z.x, oy: z.y }
-      moved.current = 0
-    }
-  }
-  const onMove = (e: React.PointerEvent) => {
-    if (!pts.current.has(e.pointerId)) return
-    pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
-    if (pts.current.size === 2 && pinch.current) {
-      const [a, b] = [...pts.current.values()]
-      const d = Math.hypot(a.x - b.x, a.y - b.y)
-      const ns = clamp(pinch.current.s * (d / pinch.current.d), 1, 4)
-      const k = ns / pinch.current.s
-      setZ({
-        s: ns,
-        x: clamp(pinch.current.cx + (z.x - pinch.current.cx) * k - e.clientX * (k - 1), -400, 400),
-        y: clamp(pinch.current.cy + (z.y - pinch.current.cy) * k - e.clientY * (k - 1), -400, 400),
-      })
-      return
-    }
-    if (drag.current && z.s > 1) {
-      moved.current += Math.abs(e.clientX - drag.current.x) + Math.abs(e.clientY - drag.current.y)
-      setZ((p) => ({ ...p, x: clamp(drag.current!.ox + e.clientX - drag.current!.x, -300, 300), y: clamp(drag.current!.oy + e.clientY - drag.current!.y, -500, 500) }))
-    }
-  }
-  const onUp = (e: React.PointerEvent) => {
-    pts.current.delete(e.pointerId)
-    if (pts.current.size < 2) pinch.current = null
-    if (pts.current.size === 0) drag.current = null
-    if (z.s === 1) setZ({ s: 1, x: 0, y: 0 })
-  }
-  const onClick = () => {
-    if (z.s > 1 || moved.current > 8) return
-    setZ((p) => (p.s > 1 ? { s: 1, x: 0, y: 0 } : { s: 2, x: 0, y: 0 }))
-  }
-
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      draggable={false}
-      onPointerDown={onDown}
-      onPointerMove={onMove}
-      onPointerUp={onUp}
-      onPointerCancel={onUp}
-      onClick={onClick}
-      className="max-w-full max-h-full object-contain touch-none select-none"
-      style={{ transform: `translate(${z.x}px, ${z.y}px) scale(${z.s})`, transition: pinch.current ? "none" : "transform .18s ease-out", transformOrigin: "center" }}
-    />
-  )
-}
-
-const MediaViewer = ({ items, start, onClose }: { items: ReviewMediaItem[]; start: number; onClose: () => void }) => {
+/** TikTok/Ozon-style vertical feed of a product's review photos and videos. */
+const MediaViewer = ({
+  items,
+  start,
+  onClose,
+  product,
+  onReact,
+  onFollow,
+  onShare,
+  onReport,
+}: {
+  items: ReviewMediaItem[]
+  start: number
+  onClose: () => void
+  product: FeedProduct
+  onReact: (reviewId: string) => void
+  onFollow: (review: NonNullable<ReviewMediaItem["review"]>) => void
+  onShare: (review: NonNullable<ReviewMediaItem["review"]>, text: string) => void
+  onReport: (reviewId: string) => void
+}) => {
   useBodyScrollLock(true)
   const scroller = useRef<HTMLDivElement>(null)
   const [idx, setIdx] = useState(start)
+  const [liked, setLiked] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(items.filter((m) => m.review?.reactions.liked).map((m) => [m.review_id, true]))
+  )
+  const [extra, setExtra] = useState<Record<string, number>>({})
+  const [following, setFollowing] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(items.filter((m) => m.review?.following).map((m) => [m.review_id, true]))
+  )
+  const [muted, setMuted] = useState<Record<string, boolean>>({})
+  const [added, setAdded] = useState(false)
   const last = items.length - 1
 
   useEffect(() => {
@@ -239,21 +200,52 @@ const MediaViewer = ({ items, start, onClose }: { items: ReviewMediaItem[]; star
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const go = (i: number) => {
-    const el = scroller.current
-    if (!el) return
-    el.scrollTo({ top: i * el.clientHeight, behavior: "smooth" })
+  const cur = items[idx]
+  const rv = cur?.review ?? null
+
+  const toggleLike = (m: ReviewMediaItem, on: boolean) => {
+    setLiked((s) => ({ ...s, [m.review_id]: on }))
+    setExtra((s) => ({ ...s, [m.review_id]: (s[m.review_id] ?? 0) + (on ? 1 : -1) }))
+    onReact(m.review_id)
+  }
+  const like = () => {
+    if (!rv) return
+    toggleLike(cur, !liked[cur.review_id])
+  }
+
+  const likeCount = (m: ReviewMediaItem) => (m.review?.reactions.like ?? 0) + (extra[m.review_id] ?? 0)
+
+  const follow = () => {
+    if (!rv) return
+    const on = !!following[cur.review_id]
+    setFollowing((s) => ({ ...s, [cur.review_id]: !on }))
+    onFollow(rv)
+  }
+
+  const addToCart = () => {
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1500)
+    onClose()
   }
 
   return (
-    <div className="fixed inset-0 z-[80] bg-black flex flex-col">
-      <div className="flex items-center justify-between px-4 text-white shrink-0" style={{ paddingTop: "max(env(safe-area-inset-top), 12px)", height: 56 }}>
-        <span className="text-[15px] font-medium tabular-nums">{idx + 1} / {items.length}</span>
-        <button aria-label="Close" onClick={onClose} className="w-10 h-10 flex items-center justify-center">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
-        </button>
+    <div className="fixed inset-0 z-[80] bg-black flex flex-col md:max-w-[520px] md:mx-auto md:left-1/2 md:-translate-x-1/2">
+      {/* top bar */}
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 pt-3" style={{ paddingTop: "max(env(safe-area-inset-top), 12px)" }}>
+        <div className="flex items-center gap-2">
+          <button aria-label="Back" onClick={onClose} className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+          <button aria-label="Info" className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><line x1="12" y1="11" x2="12" y2="16" /><circle cx="12" cy="8" r="0.6" fill="#fff" /></svg>
+          </button>
+        </div>
+        <span className="text-white/80 text-[13px] font-medium tabular-nums">
+          {idx + 1}/{items.length}
+        </span>
       </div>
 
+      {/* vertical feed */}
       <div
         ref={scroller}
         onScroll={(e) => {
@@ -263,52 +255,123 @@ const MediaViewer = ({ items, start, onClose }: { items: ReviewMediaItem[]; star
         className="flex-1 overflow-y-auto snap-y snap-mandatory"
         style={{ overscrollBehavior: "contain" }}
       >
-        {items.map((m, i) => (
-          <div key={m.id} className="h-full w-full snap-start snap-always flex items-center justify-center">
-            {m.type === "video" ? (
-              i === idx ? (
-                <video src={m.url} poster={m.thumbnail_url ?? undefined} controls autoPlay playsInline className="max-w-full max-h-full" />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={m.thumbnail_url ?? ""} alt="" className="max-w-full max-h-full object-contain opacity-60" />
-              )
-            ) : (
-              <ZoomImage src={m.url} alt="" />
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="shrink-0" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 12px)" }}>
-        {items.length > 1 && (
-          <div className="flex gap-1.5 overflow-x-auto px-4 pb-3 scrollbar-hide" style={{ scrollbarWidth: "none" }}>
-            {items.map((m, i) => (
-              <button
-                key={m.id}
-                aria-label={`Open item ${i + 1}`}
-                onClick={() => go(i)}
-                className={`relative shrink-0 w-[54px] h-[54px] rounded-[10px] overflow-hidden transition-opacity ${i === idx ? "opacity-100 ring-2 ring-white" : "opacity-50"}`}
-              >
+        {items.map((m, i) => {
+          const r = m.review ?? null
+          const isMuted = !!muted[m.id]
+          const isLiked = !!liked[m.review_id]
+          const total = likeCount(m)
+          return (
+            <div key={m.id} className="h-full w-full snap-start snap-always p-2.5">
+              <div className="relative h-full w-full rounded-[22px] overflow-hidden bg-[#14141A]">
                 {m.type === "video" ? (
-                  m.thumbnail_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={m.thumbnail_url} alt="" loading="lazy" className="w-full h-full object-cover" />
-                  ) : (
-                    <video src={`${m.url}#t=0.5`} muted playsInline preload="metadata" className="w-full h-full object-cover" />
-                  )
+                  <video
+                    src={m.url}
+                    poster={m.thumbnail_url ?? undefined}
+                    controls={!isMuted}
+                    autoPlay={i === idx}
+                    muted={isMuted}
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-contain"
+                  />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={m.url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                  <img src={m.url} alt="" draggable={false} className="absolute inset-0 w-full h-full object-contain" />
                 )}
-                {m.type === "video" && (
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    <PlayBadge s={18} />
-                  </span>
+
+                {/* right action rail */}
+                <div className="absolute right-2.5 bottom-40 flex flex-col items-center gap-4 z-10">
+                  {r && (
+                    <RailBtn label="Like review" onClick={() => { if (i !== idx) setIdx(i); like() }} badge={total}>
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill={isLiked ? "#FA1F4B" : "none"} stroke={isLiked ? "#FA1F4B" : "#fff"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M7 22V11L11.5 2.8c.6-.9 1.9-.4 1.9.7v5.5h5.6a2 2 0 0 1 2 2.4l-1.3 6.5a2 2 0 0 1-2 1.6H7z" />
+                        <path d="M7 11H4a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3" />
+                      </svg>
+                    </RailBtn>
+                  )}
+                  <RailBtn label="Share review" onClick={() => r && onShare(r, m.url)}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12 14 5v4c-5 0-8 3-10 8 2-4 5-5 10-5v4z" /></svg>
+                  </RailBtn>
+                  <RailBtn label="Report review" onClick={() => r && onReport(m.review_id)}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 21V4" /><path d="M4 4h11l-2 4 2 4H4" /></svg>
+                  </RailBtn>
+                  <RailBtn label="More" onClick={() => {}}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><circle cx="5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="19" cy="12" r="1.6" /></svg>
+                  </RailBtn>
+                  {m.type === "video" && (
+                    <RailBtn label={isMuted ? "Unmute" : "Mute"} onClick={() => setMuted((s) => ({ ...s, [m.id]: !isMuted }))}>
+                      {isMuted ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" /><line x1="16" y1="9" x2="22" y2="15" /><line x1="22" y1="9" x2="16" y2="15" /></svg>
+                      ) : (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" /><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" /></svg>
+                      )}
+                    </RailBtn>
+                  )}
+                </div>
+
+                {/* bottom info */}
+                {r && (
+                  <div className="absolute left-3 right-3 bottom-3 z-10 flex flex-col gap-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <span className="relative w-[42px] h-[42px] rounded-full bg-[#2A2A33] flex items-center justify-center text-white text-[17px] font-semibold shrink-0">
+                        {r.author.top && <LaurelSmall />}
+                        {r.author.initial}
+                      </span>
+                      <span className="text-white text-[15px] font-semibold truncate">{r.author.name}</span>
+                      {!r.is_own && (
+                        <button
+                          onClick={follow}
+                          className="ml-auto shrink-0 h-[32px] px-3.5 rounded-full text-[13px] font-semibold"
+                          style={{ background: following[cur.review_id] ? "rgba(255,255,255,.18)" : "#fff", color: following[cur.review_id] ? "#fff" : "#1F1F23" }}
+                        >
+                          {following[cur.review_id] ? "Subscribed" : "Subscribe"}
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-white/90">
+                      <Star s={16} />
+                      <span className="text-[14px] font-semibold">{r.rating}</span>
+                      {r.text && <span className="text-[14px] truncate">• {r.text}</span>}
+                      <Chevron s={16} c="#fff" />
+                    </div>
+
+                    {/* product card */}
+                    <button onClick={addToCart} className="w-full rounded-[16px] bg-black/55 backdrop-blur-md border border-white/10 p-2 flex items-center gap-2.5 text-left active:scale-[0.99] transition-transform">
+                      {product.image && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={product.image} alt="" className="w-[54px] h-[54px] rounded-[10px] object-cover shrink-0" />
+                      )}
+                      <span className="flex-1 min-w-0">
+                        <span className="flex items-baseline gap-1.5">
+                          {product.price && <span className="text-[16px] font-bold text-white">{fmtPrice(product.price.amount)}</span>}
+                          {product.price?.orig != null && product.price.orig > product.price.amount && (
+                            <>
+                              <span className="text-[12px] text-white/50 line-through">{fmtPrice(product.price.orig)}</span>
+                              <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: "#FA1F4B" }}>
+                                -{Math.round((1 - product.price.amount / product.price.orig) * 100)}%
+                              </span>
+                            </>
+                          )}
+                        </span>
+                        <span className="block text-[13px] text-white/85 truncate">{product.title}</span>
+                      </span>
+                      <span
+                        className="shrink-0 w-[42px] h-[42px] rounded-full flex items-center justify-center"
+                        style={{ background: added ? "#16A34A" : BLUE }}
+                      >
+                        {added ? (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="5 12.5 10 17 19 7" /></svg>
+                        ) : (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="20" r="1.4" /><circle cx="18" cy="20" r="1.4" /><path d="M2 3h3l2.5 12.5a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.2L21 8H6" /></svg>
+                        )}
+                      </span>
+                    </button>
+                  </div>
                 )}
-              </button>
-            ))}
-          </div>
-        )}
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -339,6 +402,7 @@ export const ReviewsMobile = ({
   initial,
   variants,
   initialVariantId,
+  product: productInfo,
 }: {
   productId: string
   handle: string
@@ -346,6 +410,7 @@ export const ReviewsMobile = ({
   initial: ProductReviewsResponse
   variants: Variant[]
   initialVariantId: string | null
+  product: ProductInfo
 }) => {
   const router = useRouter()
   const { addToCart, isAddingItem } = useCartContext() as any
@@ -361,7 +426,7 @@ export const ReviewsMobile = ({
   const [loading, setLoading] = useState(false)
   const [sheet, setSheet] = useState<null | "sort" | "dist" | "variant" | "variant-cart" | "media">(null)
   const [reportFor, setReportFor] = useState<string | null>(null)
-  const [lightbox, setMediaViewer] = useState<{ items: ReviewMediaItem[]; start: number } | null>(null)
+  const [lightbox, setLightbox] = useState<{ items: ReviewMediaItem[]; start: number } | null>(null)
   const [translated, setTranslated] = useState<Record<string, { text?: string; on: boolean; busy?: boolean }>>({})
   const [toast, setToast] = useState<string | null>(null)
   const [added, setAdded] = useState(false)
@@ -481,6 +546,37 @@ export const ReviewsMobile = ({
     setToast(ok ? "Thanks, we'll look into it" : "Couldn't send the report")
   }
 
+  const viewerProduct: FeedProduct = {
+    title: productInfo.title,
+    image: productInfo.image,
+    price: activeVariant?.price ?? productInfo.price,
+  }
+
+  const viewerReact = (reviewId: string) => {
+    const r = list.find((x) => x.id === reviewId)
+    if (r) react(r, "like")
+  }
+
+  const viewerFollow = (rv: NonNullable<ReviewMediaItem["review"]>) => {
+    const r = list.find((x) => x.id === rv.review_id)
+    if (r) return follow(r)
+    const authorId = rv.author.id
+    if (!authorId) return
+    api(`review-authors/${authorId}/follow`, { method: "POST", body: {} }).then(({ ok, data }) => {
+      if (!ok) return setToast(data?.message || "Something went wrong")
+      setToast(data.following ? `Subscribed to ${rv.author.name}` : `Unsubscribed from ${rv.author.name}`)
+    })
+  }
+
+  const viewerShare = (rv: NonNullable<ReviewMediaItem["review"]>) => {
+    const r = list.find((x) => x.id === rv.review_id)
+    if (r) return share(r)
+    const url = `${window.location.origin}${window.location.pathname}#${rv.review_id}`
+    navigator.clipboard?.writeText(url).then(() => setToast("Link copied")).catch(() => {})
+  }
+
+  const viewerReport = (reviewId: string) => setReportFor(reviewId)
+
   const cartVariant = activeVariant ?? (variants.length === 1 ? variants[0] : null)
   const toCart = async (v: Variant | null = cartVariant) => {
     if (added) return router.push("/cart")
@@ -561,7 +657,7 @@ export const ReviewsMobile = ({
           <>
             <div className="flex gap-1.5 overflow-x-auto scrollbar-hide px-4 mt-3">
               {strip.map((m, i) => (
-                <MediaThumb key={m.id} m={m} className="w-[96px] h-[116px] rounded-[14px]" onClick={() => setMediaViewer({ items: strip, start: i })} />
+                <MediaThumb key={m.id} m={m} className="w-[96px] h-[116px] rounded-[14px]" onClick={() => setLightbox({ items: strip, start: i })} />
               ))}
             </div>
             <button onClick={() => setSheet("media")} className="px-4 mt-3 text-[17px] font-medium" style={{ color: BLUE }}>
@@ -656,7 +752,7 @@ export const ReviewsMobile = ({
             {n > 0 && (
               <div className="flex gap-1.5 overflow-x-auto scrollbar-hide mt-4">
                 {r.media.map((m, i) => (
-                  <MediaThumb key={m.id} m={m} className={`${tileW} h-[200px] rounded-[16px]`} onClick={() => setMediaViewer({ items: r.media, start: i })} />
+                  <MediaThumb key={m.id} m={m} className={`${tileW} h-[200px] rounded-[16px]`} onClick={() => setLightbox({ items: r.media, start: i })} />
                 ))}
               </div>
             )}
@@ -786,12 +882,23 @@ export const ReviewsMobile = ({
         <h3 className="text-[20px] font-semibold text-[#1F1F23] mb-3">Photos & videos</h3>
         <div className="grid grid-cols-3 gap-1.5">
           {strip.map((m, i) => (
-            <MediaThumb key={m.id} m={m} className="w-full aspect-[4/5] rounded-[12px]" onClick={() => { setSheet(null); setMediaViewer({ items: strip, start: i }) }} />
+            <MediaThumb key={m.id} m={m} className="w-full aspect-[4/5] rounded-[12px]" onClick={() => { setSheet(null); setLightbox({ items: strip, start: i }) }} />
           ))}
         </div>
       </Sheet>
 
-      {lightbox && <MediaViewer items={lightbox.items} start={lightbox.start} onClose={() => setMediaViewer(null)} />}
+      {lightbox && (
+        <MediaViewer
+          items={lightbox.items}
+          start={lightbox.start}
+          onClose={() => setLightbox(null)}
+          product={viewerProduct}
+          onReact={viewerReact}
+          onFollow={viewerFollow}
+          onShare={viewerShare}
+          onReport={viewerReport}
+        />
+      )}
     </div>
   )
 }

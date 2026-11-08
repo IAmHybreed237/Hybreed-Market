@@ -102,7 +102,14 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const page = scoped.slice(offset, offset + limit)
 
   // author tiers: published review count per author across the platform
-  const authorIds = [...new Set(page.map((r: any) => r.customer?.id).filter(Boolean))] as string[]
+  const mediaReviewIds = new Set(media.map((m: any) => m.review_id))
+  const authorIds = [
+    ...new Set(
+      [...page, ...published.filter((r: any) => mediaReviewIds.has(r.id))].map(
+        (r: any) => r.customer?.id
+      ).filter(Boolean)
+    ),
+  ] as string[]
   const tierBy = new Map<string, { label: string; top: boolean }>()
   if (authorIds.length) {
     const { data: authors } = await query.graph({
@@ -135,10 +142,38 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   }
 
   const scopedIds = new Set(scoped.map((r: any) => r.id))
+  const byId = new Map<string, any>(published.map((r: any) => [r.id, r]))
   const mediaStrip = media
     .filter((m: any) => scopedIds.has(m.review_id))
-    .slice(0, 30)
-    .map((m: any) => ({ id: m.id, type: m.type, url: m.url, thumbnail_url: m.thumbnail_url, review_id: m.review_id }))
+    .slice(0, 60)
+    .map((m: any) => {
+      const r = byId.get(m.review_id)
+      const authorId = r?.customer?.id ?? null
+      const c = counts.get(m.review_id) ?? { like: 0, heart: 0, clap: 0 }
+      const liked = mine.get(m.review_id)?.has("like") ?? false
+      return {
+        id: m.id,
+        type: m.type,
+        url: m.url,
+        thumbnail_url: m.thumbnail_url,
+        review_id: m.review_id,
+        review: r
+          ? {
+              rating: r.rating,
+              text: r.customer_note ?? "",
+              author: {
+                id: authorId,
+                name: authorName(r.customer?.first_name, r.customer?.last_name),
+                initial: (r.customer?.first_name || r.customer?.last_name || "H").trim()[0]?.toUpperCase() ?? "H",
+                ...(tierBy.get(authorId) ?? { label: "Reviewer", top: false }),
+              },
+              reactions: { like: c.like + c.heart + c.clap, liked },
+              following: authorId ? following.has(authorId) : false,
+              is_own: !!viewerId && viewerId === authorId,
+            }
+          : null,
+      }
+    })
 
   res.json({
     summary: { average, count: published.length, distribution },

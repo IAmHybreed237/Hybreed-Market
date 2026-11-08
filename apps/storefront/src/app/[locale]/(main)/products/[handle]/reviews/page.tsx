@@ -39,6 +39,13 @@ export default async function ProductReviewsPage({
     getProductReviews(prod.id, { limit: 10 }),
   ])
 
+  const priceOf = (variantId?: string | null) => {
+    const offer = (offers as any[]).find((o) => o.variant_id === variantId) ?? (offers as any[])[0]
+    const cp = offer?.calculated_price ?? offer?.prices?.find((p: any) => p?.currency_code)
+    const amount = cp?.calculated_amount ?? cp?.amount ?? null
+    const orig = cp?.original_amount ?? null
+    return amount != null ? { amount: Number(amount), orig: orig != null ? Number(orig) : null } : null
+  }
   const variants = ((prod.variants || []) as any[]).map((v) => {
     const opts = (v.options || [])
       .filter((o: any) => o?.value)
@@ -47,6 +54,7 @@ export default async function ProductReviewsPage({
       id: v.id as string,
       label: (opts.length ? opts.join("; ") : v.title) as string,
       offerId: ((offers as any[]).find((o) => o.variant_id === v.id)?.id ?? null) as string | null,
+      price: priceOf(v.id),
     }
   })
 
@@ -59,6 +67,11 @@ export default async function ProductReviewsPage({
         initial={initial}
         variants={variants}
         initialVariantId={variants.some((v) => v.id === variant) ? variant! : null}
+        product={{
+          title: prod.title,
+          image: (prod.thumbnail as string) ?? (prod.images?.[0]?.url as string) ?? null,
+          price: priceOf(variant && variants.some((v) => v.id === variant) ? variant : null),
+        }}
       />
     </main>
   )
