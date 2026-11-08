@@ -16,9 +16,6 @@ const BellIcon = ({ size = 26 }) => (
 const BurgerIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden><line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" /></svg>
 )
-const TicketIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a3 3 0 0 0 0 6v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a3 3 0 0 0 0-6z" /></svg>
-)
 const OutlineIcon = ({ path }: { path: string }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d={path} /></svg>
 )
@@ -323,24 +320,51 @@ export const MobileAccount = ({
           />
         </LocalizedClientLink>
 
-        {/* 4) GIVEAWAY */}
-        <div className={`${card} px-4 py-3`} style={{ marginLeft: -13, marginRight: -13 }}>
-          <LocalizedClientLink href="/categories" className="flex items-center gap-1 text-[18px] font-bold text-[#1F1F23]">
-            Big giveaway <Chevron size={16} />
+        {/* 4) ORDERS (featured) */}
+        {hub && (
+          <LocalizedClientLink
+            href="/user/orders"
+            className={`${card} px-4 pt-4 pb-3 block`}
+            style={{ marginLeft: -13, marginRight: -13 }}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-[20px] font-bold text-[#1F1F23]">Orders</p>
+                  {hub.upcoming > 0 && (
+                    <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-[#EF4444] text-white text-[11px] font-bold flex items-center justify-center">
+                      {hub.upcoming}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[13px] text-[#8A8A96] mt-0.5">
+                  {hub.upcoming > 0
+                    ? `Upcoming: ${hub.upcoming} order${hub.upcoming === 1 ? "" : "s"}`
+                    : "No orders yet"}
+                </p>
+                {hub.pickupQr && (
+                  <p className="text-[13px] text-[#1F1F23] mt-2 leading-snug">
+                    Pick up your orders using this QR code
+                    {hub.pickupCode != null && (
+                      <>
+                        {" "}or pickup code{" "}
+                        <span className="font-bold">#{hub.pickupCode}</span>
+                      </>
+                    )}
+                  </p>
+                )}
+              </div>
+              {hub.pickupQr && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={hub.pickupQr}
+                  alt="Pickup QR code"
+                  className="w-[72px] h-[72px] rounded-[12px] border border-black/[0.06] shrink-0"
+                />
+              )}
+            </div>
           </LocalizedClientLink>
-          <div className="flex items-center gap-3 mt-2">
-            <span className="bg-[#F0F0F3] rounded-[14px] px-3 py-1.5 flex items-center gap-1.5 shrink-0">
-              <span className="text-[18px] font-semibold text-[#1F1F23]">0</span>
-              <span className="text-[#2563EB]"><TicketIcon /></span>
-            </span>
-            <p className="text-[14px] text-[#1F1F23] leading-tight flex-1">
-              Draw ended, results coming soon
-            </p>
-            <button className="h-9 px-5 rounded-2xl font-semibold text-[#2563EB] shrink-0" style={{ background: "var(--brand-tint)" }}>
-              View
-            </button>
-          </div>
-        </div>
+        )}
 
         {/* 5) SERVICES */}
         <div className="bg-white rounded-[24px] p-4 pr-0" style={{ marginLeft: -13, marginRight: -13 }}>
@@ -396,48 +420,6 @@ export const MobileAccount = ({
             className={`${card} overflow-hidden`}
             style={{ marginLeft: -13, marginRight: -13 }}
           >
-            {/* featured: orders + pickup */}
-            <LocalizedClientLink href="/user/orders" className="block px-4 pt-4 pb-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-[20px] font-bold text-[#1F1F23]">Orders</p>
-                    {hub.upcoming > 0 && (
-                      <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-[#EF4444] text-white text-[11px] font-bold flex items-center justify-center">
-                        {hub.upcoming}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[13px] text-[#8A8A96] mt-0.5">
-                    {hub.upcoming > 0
-                      ? `Upcoming: ${hub.upcoming} order${hub.upcoming === 1 ? "" : "s"}`
-                      : "No orders yet"}
-                  </p>
-                  {hub.pickupQr && (
-                    <p className="text-[13px] text-[#1F1F23] mt-2 leading-snug">
-                      Pick up your orders using this QR code
-                      {hub.pickupCode != null && (
-                        <>
-                          {" "}or pickup code{" "}
-                          <span className="font-bold">#{hub.pickupCode}</span>
-                        </>
-                      )}
-                    </p>
-                  )}
-                </div>
-                {hub.pickupQr && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={hub.pickupQr}
-                    alt="Pickup QR code"
-                    className="w-[72px] h-[72px] rounded-[12px] border border-black/[0.06] shrink-0"
-                  />
-                )}
-              </div>
-            </LocalizedClientLink>
-
-            <div className="border-t border-black/[0.06]" />
-
             {(
               [
                 {
