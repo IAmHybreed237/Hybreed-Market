@@ -34,10 +34,12 @@ export const WbProductTop = ({
   product,
   offers,
   locale,
+  wishlisted,
 }: {
   product: any
   offers: any[]
   locale: string
+  wishlisted?: boolean
 }) => {
   const router = useRouter()
   const { addToCart, isAddingItem } = useCartContext() as any
@@ -48,6 +50,34 @@ export const WbProductTop = ({
   const [sizeErr, setSizeErr] = useState(false)
   const [colorErr, setColorErr] = useState(false)
   const [extraErr, setExtraErr] = useState(false)
+  const [fav, setFav] = useState(!!wishlisted)
+  const [favBusy, setFavBusy] = useState(false)
+
+  const toggleFav = async () => {
+    if (favBusy || !product?.id) return
+    const next = !fav
+    setFav(next)
+    setFavBusy(true)
+    try {
+      const res = next
+        ? await fetch("/api/wishlist", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reference: "product", reference_id: product.id }),
+          })
+        : await fetch(`/api/wishlist/product/${product.id}`, { method: "DELETE" })
+      if (res.status === 401) {
+        setFav(!next)
+        router.push(`/${locale}/login`)
+        return
+      }
+      if (!res.ok) setFav(!next)
+    } catch {
+      setFav(!next)
+    } finally {
+      setFavBusy(false)
+    }
+  }
   const [added, setAdded] = useState(false)
   const [viewerOpen, setViewerOpen] = useState(false)
 
@@ -258,9 +288,10 @@ export const WbProductTop = ({
               <div className="absolute top-3 right-3 flex flex-col gap-2">
                 <button
                   aria-label="Add to favorites"
-                  className="w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center text-[#1F1F23] hover:text-[#EF4444] transition-colors"
+                  onClick={toggleFav}
+                  className={`w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center transition-colors ${fav ? "text-[#EF4444]" : "text-[#1F1F23] hover:text-[#EF4444]"}`}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill={fav ? "#EF4444" : "none"} stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
                 </button>
                 <button
                   aria-label="Share"

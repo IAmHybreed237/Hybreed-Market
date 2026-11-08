@@ -93,6 +93,9 @@ module.exports = withMercur({
       resolve: './src/modules/review-extras',
     },
     {
+      resolve: './src/modules/wishlist',
+    },
+    {
       resolve: '@medusajs/medusa/file',
       options: {
         providers: [

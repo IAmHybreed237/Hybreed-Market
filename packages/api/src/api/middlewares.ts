@@ -8,6 +8,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { defineMiddlewares } from "@medusajs/medusa"
 import { WALLET_MODULE } from "../modules/wallet/service"
 import { getInstallmentCredit } from "../lib/installments"
+import { storeWishlistMiddlewares } from "./store/wishlist/middlewares"
 
 /**
  * Blocks wallet payment sessions when the customer's Hybreed Balance can't
@@ -67,6 +68,7 @@ const walletBalanceGuard = async (
 
 export default defineMiddlewares({
   routes: [
+    ...storeWishlistMiddlewares,
     {
       matcher: "/store/auctions/*/bids",
       method: ["POST"],

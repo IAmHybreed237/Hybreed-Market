@@ -89,6 +89,7 @@ export const WbProductMobile = ({
   alsoBuy,
   reviewSummary,
   reviewMedia,
+  wishlisted,
   locale,
 }: {
   product: any
@@ -97,6 +98,7 @@ export const WbProductMobile = ({
   alsoBuy?: any[]
   reviewSummary?: { average: number | null; count: number }
   reviewMedia?: { url: string; thumbnail_url: string | null; type: string }[]
+  wishlisted?: boolean
   locale: string
 }) => {
   const router = useRouter()
@@ -105,7 +107,8 @@ export const WbProductMobile = ({
   const [size, setSize] = useState<string | null>(null)
   const [color, setColor] = useState<string | null>(null)
   const [extraSel, setExtraSel] = useState<Record<string, string>>({})
-  const [fav, setFav] = useState(false)
+  const [fav, setFav] = useState(!!wishlisted)
+  const [favBusy, setFavBusy] = useState(false)
   const [followed, setFollowed] = useState(false)
   const [added, setAdded] = useState(false)
   const [shake, setShake] = useState(false)
@@ -121,6 +124,32 @@ export const WbProductMobile = ({
   const sizesRef = useRef<HTMLDivElement>(null)
   const sheetScrollRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<number | null>(null)
+
+  const toggleFav = async () => {
+    if (favBusy || !product?.id) return
+    const next = !fav
+    setFav(next)
+    setFavBusy(true)
+    try {
+      const res = next
+        ? await fetch("/api/wishlist", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reference: "product", reference_id: product.id }),
+          })
+        : await fetch(`/api/wishlist/product/${product.id}`, { method: "DELETE" })
+      if (res.status === 401) {
+        setFav(!next)
+        router.push(`/${locale}/login`)
+        return
+      }
+      if (!res.ok) setFav(!next)
+    } catch {
+      setFav(!next)
+    } finally {
+      setFavBusy(false)
+    }
+  }
 
   const images = (product?.images || []).map((i: any) => i.url || i)
   const seller = product?.seller || offers?.[0]?.seller
@@ -403,7 +432,7 @@ export const WbProductMobile = ({
           <p className="text-[16px] font-semibold text-[#1F1F23] truncate">{brand} • {typeName}</p>
           <p className="text-[14px] text-[#FA1F4B]">{amount != null ? `${num(amount)} XAF` : ""}</p>
         </div>
-        <button aria-label="Favourite" onClick={() => setFav(!fav)} className="w-9 h-9 flex items-center justify-center">
+        <button aria-label="Favourite" onClick={toggleFav} className="w-9 h-9 flex items-center justify-center">
           <HeartIcon size={22} filled={fav} color="#2563EB" />
         </button>
         <button aria-label="Share" className="w-9 h-9 flex items-center justify-center">
@@ -489,7 +518,7 @@ export const WbProductMobile = ({
               <BackIcon size={20} />
             </button>
             <div className="absolute top-[16px] right-4 flex items-center gap-2">
-              <button aria-label="Favourite" onClick={() => setFav(!fav)} className="w-9 h-9 rounded-full bg-black/35 backdrop-blur flex items-center justify-center">
+              <button aria-label="Favourite" onClick={toggleFav} className="w-9 h-9 rounded-full bg-black/35 backdrop-blur flex items-center justify-center">
                 <HeartIcon size={20} filled={fav} />
               </button>
               <button aria-label="Share" className="w-9 h-9 rounded-full bg-black/35 backdrop-blur flex items-center justify-center">
