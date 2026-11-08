@@ -378,11 +378,7 @@ export const MobileAccount = ({
         {/* 6) PROMO BANNER */}
         <div
           className="rounded-[24px] h-[150px] relative overflow-hidden"
-          style={{
-            background: "linear-gradient(120deg,#2563EB,#60A5FA)",
-            marginLeft: -13,
-            marginRight: -13,
-          }}
+          style={{ background: "linear-gradient(120deg,#2563EB,#60A5FA)" }}
         >
           <div className="absolute left-5 top-5">
             <p className="text-white text-xl font-extrabold leading-tight">
