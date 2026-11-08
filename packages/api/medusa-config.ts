@@ -90,6 +90,9 @@ module.exports = withMercur({
       resolve: './src/modules/trending',
     },
     {
+      resolve: './src/modules/review-extras',
+    },
+    {
       resolve: '@medusajs/medusa/file',
       options: {
         providers: [

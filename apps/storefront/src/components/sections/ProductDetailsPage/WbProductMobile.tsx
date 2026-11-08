@@ -87,12 +87,14 @@ export const WbProductMobile = ({
   offers,
   similar,
   alsoBuy,
+  reviewSummary,
   locale,
 }: {
   product: any
   offers: any[]
   similar: any[]
   alsoBuy?: any[]
+  reviewSummary?: { average: number | null; count: number }
   locale: string
 }) => {
   const router = useRouter()
@@ -647,14 +649,24 @@ export const WbProductMobile = ({
 
       {/* 4. ratings + questions tiles */}
       <div className="grid grid-cols-[65fr_35fr] gap-1 mb-1">
-        <button onClick={() => scrollToId("reviews")} className="bg-white rounded-[20px] px-3 py-2.5 text-left active:scale-[0.99] transition-transform">
+        <button
+          onClick={() => router.push(`/products/${product?.handle}/reviews${selectedVariant ? `?variant=${selectedVariant.id}` : ""}`)}
+          className="bg-white rounded-[20px] px-3 py-2.5 text-left active:scale-[0.99] transition-transform"
+        >
           <span className="flex items-center gap-1.5">
             <StarIcon />
-            <span className="text-[18px] font-semibold text-[#1F1F23]">4.8</span>
+            <span className="text-[18px] font-semibold text-[#1F1F23]">
+              {reviewSummary?.average != null ? reviewSummary.average.toFixed(1) : "–"}
+            </span>
           </span>
-          <span className="block text-[13px] text-[#8A8A96] mt-0.5">128 ratings</span>
+          <span className="block text-[13px] text-[#8A8A96] mt-0.5">
+            {reviewSummary?.count ? `${reviewSummary.count} ratings` : "No ratings yet"}
+          </span>
         </button>
-        <button onClick={() => scrollToId("reviews")} className="bg-white rounded-[20px] px-3 py-2.5 text-left active:scale-[0.99] transition-transform">
+        <button
+          onClick={() => router.push(`/products/${product?.handle}/reviews${selectedVariant ? `?variant=${selectedVariant.id}` : ""}`)}
+          className="bg-white rounded-[20px] px-3 py-2.5 text-left active:scale-[0.99] transition-transform"
+        >
           <span className="flex items-center gap-1.5">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8A96" strokeWidth="2" aria-hidden><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-4.7a8.38 8.38 0 0 1-1.9-4.8 8.5 8.5 0 0 1 9-8.5 8.38 8.38 0 0 1 9 8.5z"/><text x="11" y="15" fontSize="11" fill="#8A8A96" stroke="none" fontWeight="bold">?</text></svg>
             <span className="text-[18px] font-semibold text-[#1F1F23]">14</span>

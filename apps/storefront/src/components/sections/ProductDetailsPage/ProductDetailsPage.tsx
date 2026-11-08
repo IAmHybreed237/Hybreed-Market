@@ -4,6 +4,7 @@ import { WbProductMobile } from "./WbProductMobile"
 import { listProducts } from "@/lib/data/products"
 import { listOffers } from "@/lib/data/offers"
 import { getTrends } from "@/lib/data/trending"
+import { getProductReviews } from "@/lib/data/reviews"
 import { StoreOffer } from "@/lib/helpers/buybox"
 import { HomeProductSection } from "../HomeProductSection/HomeProductSection"
 import NotFound from "@/app/not-found"
@@ -36,7 +37,8 @@ export const ProductDetailsPage = async ({
   const prodCatIds: string[] = ((prod as any).categories || [])
     .map((c: any) => c?.id)
     .filter(Boolean)
-  const trends = await getTrends(30)
+  const [trends, reviewsData] = await Promise.all([getTrends(30), getProductReviews(prod.id, { limit: 1 })])
+  const reviewSummary = reviewsData.summary
   const trendCatIds = trends.category_ids.map((c) => c.key).slice(0, 5)
   const trendProductIds = new Set(trends.product_ids.map((p) => p.key))
   const trendTerms = trends.terms.map((t) => t.key).filter((t) => t.length >= 2)
@@ -102,6 +104,7 @@ export const ProductDetailsPage = async ({
         offers={offers as StoreOffer[]}
         similar={likeList}
         alsoBuy={buyList}
+        reviewSummary={reviewSummary}
         locale={locale}
       />
       <div className="hidden md:block">

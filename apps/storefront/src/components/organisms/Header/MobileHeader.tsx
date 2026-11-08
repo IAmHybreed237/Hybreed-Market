@@ -47,7 +47,9 @@ export const MobileHeader = ({
 
   const pathname = usePathname()
   const onUserPage =
-    pathname?.includes("/user") || pathname?.includes("/search")
+    pathname?.includes("/user") ||
+    pathname?.includes("/search") ||
+    pathname?.includes("/reviews")
 
   // hide the whole header shell + its spacer below lg on /user and /search pages,
   // and keep the spacer matched to the header's real height
