@@ -37,6 +37,13 @@ const toImage = async (input: string | Buffer) => {
   return RawImage.read(source)
 }
 
+/** Product images are often stored as site-relative paths (/images/...). */
+export const resolveImageUrl = (url: string) => {
+  if (/^https?:\/\//.test(url)) return url
+  const base = (process.env.STOREFRONT_URL || "http://localhost:3000").replace(/\/$/, "")
+  return `${base}${url.startsWith("/") ? url : `/${url}`}`
+}
+
 /** Detect searchable components and return dot positions (0-100 % of image dims). */
 export const detectComponents = async (image: string | Buffer) => {
   const { det, cls } = await loadPipelines()

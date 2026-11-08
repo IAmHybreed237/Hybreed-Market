@@ -2,7 +2,7 @@ import { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import { Modules } from "@medusajs/framework/utils"
 import { IMAGE_SEARCH_MODULE } from "../modules/image-search"
 import ImageSearchService from "../modules/image-search/service"
-import { embedImage } from "../lib/vision"
+import { embedImage, resolveImageUrl } from "../lib/vision"
 
 export default async function productEmbed({ event, container }: SubscriberArgs<{ id: string }>) {
   const svc: ImageSearchService = container.resolve(IMAGE_SEARCH_MODULE)
@@ -12,7 +12,7 @@ export default async function productEmbed({ event, container }: SubscriberArgs<
   if (!url) return
 
   try {
-    const vector = await embedImage(url)
+    const vector = await embedImage(resolveImageUrl(url))
     const store = svc as any
     const [existing] = await store.listProductEmbeddings({ product_id: product.id })
     if (existing) await store.updateProductEmbeddings({ id: existing.id, embedding: vector })
