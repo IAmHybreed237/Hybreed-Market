@@ -1,5 +1,9 @@
 import { retrieveCustomer } from "@/lib/data/customer"
 import { getWalletStatement } from "@/lib/data/wallet"
+import { listOrders } from "@/lib/data/orders"
+import { getWishlistProductIds } from "@/lib/data/wishlist"
+import { createPickupToken } from "@/lib/pickup"
+import QRCode from "qrcode"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { TopUpButton } from "@/components/cells/TopUpSheet/TopUpSheet"
 import { HbMark } from "@/components/atoms"
@@ -104,6 +108,36 @@ export default async function UserPage({
     .toLocaleString("en-US")
     .replace(/,/g, " ")} XAF`
 
+  // Orders hub data (mobile profile)
+  const [orders, wishlistIds] = await Promise.all([
+    listOrders(10).catch(() => [] as any[]),
+    getWishlistProductIds().catch(() => [] as string[]),
+  ])
+  const upcomingGroups = new Set(
+    orders
+      .filter((o: any) => ["pending", "requires_action"].includes(o.status))
+      .map((o: any) => o.order_group?.id)
+      .filter(Boolean)
+  )
+  const latestGroup = (orders[0] as any)?.order_group
+  let pickupQr: string | null = null
+  if (latestGroup?.id && orders[0]?.status !== "canceled") {
+    try {
+      pickupQr = await QRCode.toDataURL(createPickupToken(latestGroup.id), {
+        width: 192,
+        margin: 1,
+      })
+    } catch {
+      pickupQr = null
+    }
+  }
+  const hub = {
+    upcoming: upcomingGroups.size,
+    pickupQr,
+    pickupCode: (latestGroup as any)?.display_id ?? null,
+    wishlistCount: wishlistIds.length,
+  }
+
   return (
     <main
       className="w-full mx-auto px-[5px] pb-12"
@@ -120,7 +154,7 @@ export default async function UserPage({
       }
     >
       {/* ===== MOBILE ACCOUNT (below 768px) ===== */}
-      <MobileAccount name={name} balance={balance} />
+      <MobileAccount name={name} balance={balance} hub={hub} />
 
       {/* ===== DESKTOP ===== */}
       <div

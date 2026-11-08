@@ -61,9 +61,16 @@ const card =
 export const MobileAccount = ({
   name,
   balance = 0,
+  hub,
 }: {
   name: string
   balance?: number
+  hub?: {
+    upcoming: number
+    pickupQr: string | null
+    pickupCode: string | number | null
+    wishlistCount: number
+  }
 }) => {
   const topUp = useTopUpSheet()
   const [open, setOpen] = useState(false)
@@ -378,6 +385,99 @@ export const MobileAccount = ({
             Ad
           </span>
         </div>
+
+        {/* 6b) ORDERS HUB */}
+        {hub && (
+          <div className={`${card} overflow-hidden`}>
+            {/* featured: orders + pickup */}
+            <LocalizedClientLink href="/user/orders" className="block px-4 pt-4 pb-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-[20px] font-bold text-[#1F1F23]">Orders</p>
+                    {hub.upcoming > 0 && (
+                      <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-[#EF4444] text-white text-[11px] font-bold flex items-center justify-center">
+                        {hub.upcoming}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[13px] text-[#8A8A96] mt-0.5">
+                    {hub.upcoming > 0
+                      ? `Upcoming: ${hub.upcoming} order${hub.upcoming === 1 ? "" : "s"}`
+                      : "No orders yet"}
+                  </p>
+                  {hub.pickupQr && (
+                    <p className="text-[13px] text-[#1F1F23] mt-2 leading-snug">
+                      Pick up your orders using this QR code
+                      {hub.pickupCode != null && (
+                        <>
+                          {" "}or pickup code{" "}
+                          <span className="font-bold">#{hub.pickupCode}</span>
+                        </>
+                      )}
+                    </p>
+                  )}
+                </div>
+                {hub.pickupQr && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={hub.pickupQr}
+                    alt="Pickup QR code"
+                    className="w-[72px] h-[72px] rounded-[12px] border border-black/[0.06] shrink-0"
+                  />
+                )}
+              </div>
+            </LocalizedClientLink>
+
+            <div className="border-t border-black/[0.06]" />
+
+            {(
+              [
+                {
+                  label: "History",
+                  sub: "Repeat purchases and view previous orders",
+                  href: "/user/orders",
+                },
+                {
+                  label: "Wishlist",
+                  sub:
+                    hub.wishlistCount > 0
+                      ? `${hub.wishlistCount} saved item${hub.wishlistCount === 1 ? "" : "s"}`
+                      : "Save items for later",
+                  href: "/user/favorites",
+                },
+                {
+                  label: "Favorites",
+                  sub: "Your liked items",
+                  href: "/user/favorites",
+                },
+                {
+                  label: "Reviews & Questions",
+                  sub: "Your reviews, questions and seller replies",
+                  href: "/user/orders",
+                },
+              ] as const
+            ).map((row, i) => (
+              <div key={row.label}>
+                {i > 0 && <div className="border-t border-black/[0.06] mx-4" />}
+                <LocalizedClientLink
+                  href={row.href}
+                  className="flex items-center gap-3 h-[68px] px-4"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[16px] font-semibold text-[#1F1F23]">
+                      {row.label}
+                    </p>
+                    <p className="text-[13px] text-[#8A8A96] truncate">
+                      {row.sub}
+                    </p>
+                  </div>
+                  <Chevron />
+                </LocalizedClientLink>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* 7) SHORTCUTS */}
         <div className="grid grid-cols-2 gap-2">

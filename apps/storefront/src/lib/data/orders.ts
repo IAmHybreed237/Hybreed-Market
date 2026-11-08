@@ -112,7 +112,7 @@ export const listOrders = async (
       offset,
       order: '-created_at',
       fields:
-        '*items,+items.metadata,*items.variant,*items.product,*seller,*order_group,shipping_total,total,created_at',
+        '*items,+items.metadata,*items.variant,*items.product,*seller,*order_group,shipping_total,total,created_at,status',
       ...filters,
       fetchOptions: {
         headers: { ...(await getAuthHeaders()) },
