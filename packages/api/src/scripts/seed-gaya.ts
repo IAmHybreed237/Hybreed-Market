@@ -351,6 +351,7 @@ export default async function seedGaya({ container }: ExecArgs) {
         gender: "Men",
         condition: "New",
         country_of_origin: "Italy",
+        pay_in_parts: { enabled: true, parts: 4, interval_days: 7 },
       },
     },
     {

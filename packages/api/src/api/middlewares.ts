@@ -7,6 +7,7 @@ import {
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { defineMiddlewares } from "@medusajs/medusa"
 import { WALLET_MODULE } from "../modules/wallet/service"
+import { getInstallmentCredit } from "../lib/installments"
 
 /**
  * Blocks wallet payment sessions when the customer's Hybreed Balance can't
@@ -34,10 +35,11 @@ const walletBalanceGuard = async (
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
     const { data } = await query.graph({
       entity: "payment_collection",
-      fields: ["id", "amount", "currency_code"],
+      fields: ["id", "amount", "currency_code", "cart.id"],
       filters: { id: req.params.id as string },
     })
-    const amount = Number(data?.[0]?.amount ?? 0)
+    const pc = data?.[0]
+    const amount = Number(pc?.amount ?? 0)
     if (amount <= 0) {
       next()
       return
@@ -46,10 +48,16 @@ const walletBalanceGuard = async (
     const wallet = req.scope.resolve(WALLET_MODULE)
     const { balance } = await wallet.getBalance(customerId)
     if (balance < amount) {
-      res.status(402).json({
-        message: `Insufficient Hybreed Wallet balance: have ${balance}, need ${amount} ${data?.[0]?.currency_code ?? "xaf"}`,
-      })
-      return
+      // Pay-in-Parts: carts containing pip-enabled products may finance the
+      // unpaid portion - the wallet balance is allowed to go negative by up
+      // to the installment credit, repaid later via MoMo top-ups.
+      const credit = await getInstallmentCredit(query, pc?.cart?.id)
+      if (amount - balance > credit) {
+        res.status(402).json({
+          message: `Insufficient Hybreed Wallet balance: have ${balance}, need ${amount} ${pc?.currency_code ?? "xaf"}`,
+        })
+        return
+      }
     }
     next()
   } catch (err) {

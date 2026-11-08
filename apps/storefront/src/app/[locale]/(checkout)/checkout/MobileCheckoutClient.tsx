@@ -305,6 +305,20 @@ const MobilePaymentCard = ({ cart, paymentMethods }: { cart: any; paymentMethods
       .then((s) => setWalletBalance(s?.balance ?? null))
       .catch(() => setWalletBalance(null))
   }, [])
+  const pipParts = (() => {
+    let max = 0
+    for (const item of cart?.items ?? []) {
+      const pip = item?.product?.metadata?.pay_in_parts as
+        | { enabled?: boolean; parts?: number }
+        | undefined
+      if (pip?.enabled) max = Math.max(max, Number(pip.parts) || 4)
+    }
+    return max
+  })()
+  const canFinance =
+    pipParts > 0 &&
+    walletBalance != null &&
+    walletBalance < (Number(cart?.total ?? 0) || Infinity)
   const providers = paymentMethods ?? []
   const showToast = (t: string) => {
     setToast(t)
@@ -338,6 +352,11 @@ const MobilePaymentCard = ({ cart, paymentMethods }: { cart: any; paymentMethods
                 ? `${Math.round(walletBalance).toLocaleString("en-US").replace(/,/g, " ")} XAF`
                 : "Top up & pay"}
             </span>
+            {canFinance && (
+              <span className="block text-[12px] font-medium text-[#2563EB] mt-0.5">
+                Pay in {pipParts} parts · repay via top-ups
+              </span>
+            )}
           </span>
         </button>
         {providers.map((p: any) => {

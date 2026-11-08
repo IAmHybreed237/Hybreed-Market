@@ -1,6 +1,7 @@
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { WALLET_MODULE } from "../modules/wallet/service"
+import { getInstallmentCredit } from "../lib/installments"
 
 const toNum = (v: unknown): number => {
   if (v == null) return 0
@@ -54,6 +55,9 @@ export default async function debitWalletForOrderGroup({
     if (!walletSessions.length) return
 
     const wallet = container.resolve(WALLET_MODULE)
+    // Pay-in-Parts: carts with pip-enabled products may drive the balance
+    // negative by up to the installment credit (repayable via top-ups).
+    const credit = await getInstallmentCredit(query, group.cart_id)
     for (const session of walletSessions) {
       const amount = toNum(session.amount)
       if (amount <= 0) continue
@@ -63,7 +67,11 @@ export default async function debitWalletForOrderGroup({
         currencyCode: session.currency_code ?? "xaf",
         reference: `wallet_session_${session.id}`,
         orderId: orderGroupId,
-        description: `Order payment · ${orderGroupId}`,
+        description:
+          credit > 0
+            ? `Order payment · Pay in Parts · ${orderGroupId}`
+            : `Order payment · ${orderGroupId}`,
+        allowNegativeUpTo: credit,
       })
     }
   } catch (e) {

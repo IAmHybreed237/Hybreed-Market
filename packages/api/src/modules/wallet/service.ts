@@ -57,15 +57,18 @@ class WalletModuleService extends MedusaService({
     reference: string
     orderId?: string
     description?: string
+    /** Pay-in-Parts: max amount the balance may go negative (installment credit). */
+    allowNegativeUpTo?: number
   }) {
     const { customerId, amount, currencyCode, reference, orderId, description } = input
+    const allowNegativeUpTo = input.allowNegativeUpTo ?? 0
 
     const [existing] = await this.listWalletEntries({ reference })
     if (existing) return existing
 
     const account = await this.getOrCreateAccount(customerId, currencyCode)
     const balance = toNum(account.balance)
-    if (MathBN.lt(balance, amount)) {
+    if (MathBN.lt(bn(balance - amount), bn(-allowNegativeUpTo))) {
       const err = new Error("Insufficient wallet balance") as Error & { status?: number }
       err.status = 402
       throw err

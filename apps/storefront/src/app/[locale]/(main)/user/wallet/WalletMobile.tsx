@@ -267,6 +267,24 @@ export const WalletMobile = ({ balance = 0, points = 0 }: { balance?: number; po
           </div>
         </div>
 
+        {/* Pay-in-Parts outstanding balance notice */}
+        {balance < 0 && (
+          <div className="mx-4 mt-4 rounded-[20px] bg-[#FEF2F2] border border-[#FECACA] px-4 py-3">
+            <p className="text-[15px] font-semibold text-[#B91C1C]">
+              Installment balance due: {fmt(Math.abs(balance))}
+            </p>
+            <p className="text-[13px] text-[#7F1D1D]/80 mt-0.5">
+              Top up your wallet to clear your Pay in Parts balance.
+            </p>
+            <button
+              onClick={() => topUp.open()}
+              className="mt-2 h-9 px-4 rounded-full bg-[#DC2626] text-white text-[13px] font-semibold"
+            >
+              Top up now
+            </button>
+          </div>
+        )}
+
         {/* B2 balance card */}
         <div
           className="mt-8 mx-4 h-[130px] px-4 pt-2.5 pb-3.5 relative"

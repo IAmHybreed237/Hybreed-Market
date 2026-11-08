@@ -121,8 +121,10 @@ export const WbProductMobile = ({
   const pip = (product?.metadata?.pay_in_parts || {}) as {
     enabled?: boolean
     parts?: number
+    interval_days?: number
   }
   const pipParts = pip.enabled ? pip.parts || 4 : 0
+  const pipIntervalDays = pip.interval_days || 7
 
   useEffect(() => {
     const el = galleryRef.current
@@ -822,7 +824,10 @@ export const WbProductMobile = ({
                 <h3 className="text-[20px] font-semibold text-[#1F1F23] mb-3">Pay in Parts</h3>
                 <p className="text-[15px] text-[#1F1F23]/80 leading-[22px]">
                   Split your payment into {pipParts} interest-free parts.
-                  {amount != null ? ` That's ${num(Math.ceil(amount / pipParts))} XAF every 2 weeks, first payment 0 XAF at pickup.` : ""}
+                  {amount != null ? ` That's about ${num(Math.ceil(amount / pipParts))} XAF every ${pipIntervalDays >= 14 ? `${Math.round(pipIntervalDays / 7)} weeks` : "week"}.` : ""}
+                </p>
+                <p className="text-[14px] text-[#6B6B76] leading-[20px] mt-2">
+                  Pay with Hybreed Wallet at checkout — whatever your balance doesn't cover stays on your wallet as an installment balance. Top up with MoMo or Orange Money each week to clear it.
                 </p>
               </>
             )}
