@@ -4,7 +4,7 @@ import { model } from "@medusajs/framework/utils"
 export const ReviewDetail = model.define("review_detail", {
   id: model.id({ prefix: "revd" }).primaryKey(),
   review_id: model.text().unique(),
-  product_id: model.text().nullable().index(),
+  product_id: model.text().index().nullable(),
   variant_id: model.text().nullable(),
   variant_label: model.text().nullable(),
   language: model.text().nullable(), // "fr" | "en" | ...
