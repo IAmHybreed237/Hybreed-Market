@@ -1,11 +1,13 @@
 import { ExecArgs } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { MercurModules } from "@mercurjs/types"
-import { REVIEW_EXTRAS_MODULE } from "../modules/review-extras/service"
 
 /**
  * Seeds demo product reviews (FR + EN, photos, a video, reactions) on two
  * products. Idempotent: removes previous demo reviews first.
+ *
+ * Uses raw knex for review/link/extras rows because custom module services
+ * don't get a DB manager under `medusa exec`.
+ *
  * Run:   bunx medusa exec ./src/scripts/seed-demo-reviews.ts
  * Clean: REVIEWS_CLEAN_ONLY=1 bunx medusa exec ./src/scripts/seed-demo-reviews.ts
  */
@@ -54,33 +56,29 @@ const PRODUCTS: { handle: string; reviews: Seed[] }[] = [
   },
 ]
 
+const rid = () => `rev_demo${Math.random().toString(36).slice(2, 10)}`
+const now = () => new Date()
+
 export default async function seedDemoReviews({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const link = container.resolve(ContainerRegistrationKeys.LINK)
   const customers = container.resolve(Modules.CUSTOMER)
-  const reviews = container.resolve(MercurModules.REVIEW) as any
-  const extras = container.resolve(REVIEW_EXTRAS_MODULE) as any
+  const knex = container.resolve(ContainerRegistrationKeys.PG_CONNECTION) as any
 
   // --- clean previous demo data
-  const oldDetails = await extras.listReviewDetails({ is_demo: true })
+  const oldDetails = await knex("review_detail").where({ is_demo: true }).select("review_id")
   const oldIds: string[] = oldDetails.map((d: any) => d.review_id)
   if (oldIds.length) {
-    const [assets, reactions] = await Promise.all([
-      extras.listReviewAssets({ review_id: oldIds }),
-      extras.listReviewReactions({ review_id: oldIds }),
-    ])
-    if (assets.length) await extras.deleteReviewAssets(assets.map((a: any) => a.id))
-    if (reactions.length) await extras.deleteReviewReactions(reactions.map((r: any) => r.id))
-    await extras.deleteReviewDetails(oldDetails.map((d: any) => d.id))
-    for (const d of oldDetails) {
-      await link
-        .dismiss([
-          ...(d.product_id ? [{ [Modules.PRODUCT]: { product_id: d.product_id }, [MercurModules.REVIEW]: { review_id: d.review_id } }] : []),
-        ])
-        .catch(() => {})
+    await knex("review_media").whereIn("review_id", oldIds).del()
+    await knex("review_reaction").whereIn("review_id", oldIds).del()
+    await knex("review_detail").whereIn("review_id", oldIds).del()
+    for (const table of [
+      "product_product_review_review",
+      "customer_customer_review_review",
+    ]) {
+      await knex(table).whereIn("review_id", oldIds).del().catch(() => {})
     }
-    await reviews.deleteReviews(oldIds).catch(() => {})
+    await knex("review").whereIn("id", oldIds).del().catch(() => {})
     logger.info(`Removed ${oldIds.length} previous demo reviews`)
   }
   if (process.env.REVIEWS_CLEAN_ONLY) return
@@ -120,25 +118,36 @@ export default async function seedDemoReviews({ container }: ExecArgs) {
     for (let i = 0; i < p.reviews.length; i++) {
       const s = p.reviews[i]
       const createdAt = new Date(Date.now() - s.days * 86400000 - i * 3600000)
-      const review = await reviews.createReviews({
+      const reviewId = rid()
+      const authorId = authorIds[s.author]
+      const variant = variants.length ? variants[(s.variant ?? 0) % variants.length] : null
+
+      await knex("review").insert({
+        id: reviewId,
         reference: "product",
         rating: s.rating,
         customer_note: s.text,
         status: "published",
+        created_at: createdAt,
+        updated_at: s.edited ? new Date(createdAt.getTime() + 86400000) : createdAt,
       })
-      await reviews
-        .updateReviews(review.id, { created_at: createdAt, updated_at: createdAt })
-        .catch(() => {})
-      const authorId = authorIds[s.author]
-      await link.create([
-        { [Modules.PRODUCT]: { product_id: product.id }, [MercurModules.REVIEW]: { review_id: review.id } },
-        { [Modules.CUSTOMER]: { customer_id: authorId }, [MercurModules.REVIEW]: { review_id: review.id } },
-      ])
 
-      const variant = variants.length ? variants[(s.variant ?? 0) % variants.length] : null
-      await extras.createReviewDetails({
-        review_id: review.id,
-        product_id: product.id,
+      const linkId = () => `link_${Math.random().toString(36).slice(2, 12)}`
+      await knex("product_product_review_review").insert({
+        id: linkId(),
+        product_id: (product as any).id,
+        review_id: reviewId,
+      })
+      await knex("customer_customer_review_review").insert({
+        id: linkId(),
+        customer_id: authorId,
+        review_id: reviewId,
+      })
+
+      await knex("review_detail").insert({
+        id: `revd_${Math.random().toString(36).slice(2, 12)}`,
+        review_id: reviewId,
+        product_id: (product as any).id,
         variant_id: variant?.id ?? null,
         variant_label: variant ? labelOf(variant) : null,
         language: s.lang,
@@ -147,10 +156,11 @@ export default async function seedDemoReviews({ container }: ExecArgs) {
       })
 
       if (s.media?.length) {
-        await extras.createReviewAssets(
+        await knex("review_media").insert(
           s.media.map((m, rank) => ({
-            review_id: review.id,
-            product_id: product.id,
+            id: `revm_${Math.random().toString(36).slice(2, 12)}`,
+            review_id: reviewId,
+            product_id: (product as any).id,
             type: m.type,
             url: m.url,
             thumbnail_url: m.thumb ?? null,
@@ -159,14 +169,20 @@ export default async function seedDemoReviews({ container }: ExecArgs) {
         )
       }
 
-      // a few reactions from pseudo actors so counts aren't all zero
       const reactions: any[] = []
       const n = (i * 3 + s.rating) % 6
       for (let k = 0; k < n; k++) {
-        reactions.push({ review_id: review.id, actor_key: `demo:${k}`, type: k % 3 === 0 ? "heart" : "like" })
-        if (k % 2 === 0) reactions.push({ review_id: review.id, actor_key: `demo:${k}`, type: "clap" })
+        reactions.push({ review_id: reviewId, actor_key: `demo:${k}`, type: k % 3 === 0 ? "heart" : "like" })
+        if (k % 2 === 0) reactions.push({ review_id: reviewId, actor_key: `demo:${k}`, type: "clap" })
       }
-      if (reactions.length) await extras.createReviewReactions(reactions)
+      if (reactions.length) {
+        await knex("review_reaction").insert(
+          reactions.map((r) => ({
+            id: `revr_${Math.random().toString(36).slice(2, 12)}`,
+            ...r,
+          }))
+        )
+      }
       created++
     }
     logger.info(`Seeded ${p.reviews.length} demo reviews on ${p.handle}`)
