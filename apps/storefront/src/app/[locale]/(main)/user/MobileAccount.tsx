@@ -35,26 +35,14 @@ const paths = {
 }
 
 const drawerGroups = [
-  [{ label: "Achievements", href: "/user", icon: paths.star }],
   [
     { label: "Orders", href: "/user/orders", icon: paths.orders },
-    { label: "History", href: "/user/orders", icon: paths.back },
     { label: "Favorites", href: "/user/favorites", icon: paths.heart },
-    { label: "Waitlist", href: "/user/favorites", icon: paths.card },
-    { label: "Favorite brands & sellers", href: "/user/favorites", icon: paths.star },
-  ],
-  [
-    { label: "Reviews & questions", href: "/user", icon: paths.star },
     { label: "Returns", href: "/user/returns", icon: paths.back },
     { label: "Chats", href: "/user/messages", icon: paths.card },
-    { label: "About Hybreed Market", href: "/about", icon: paths.user },
-    { label: "Push test", href: "/user/push-test", icon: paths.star },
   ],
   [
     { label: "Shop as a business", href: "/business", icon: paths.cart },
-    { label: "Open a pickup point", href: "/categories", icon: paths.home },
-    { label: "Open fulfillment center", href: "/categories", icon: paths.orders },
-    { label: "Jobs at Hybreed", href: "/categories", icon: paths.user },
   ],
 ]
 

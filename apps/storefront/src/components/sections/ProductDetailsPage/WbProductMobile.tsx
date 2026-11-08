@@ -658,8 +658,7 @@ export const WbProductMobile = ({
                 </button>
               ))}
             </div>
-            <div className="mt-2 h-5 flex items-center justify-between">
-              <span className="text-[15px] text-[#8A8A96]">83% True to size</span>
+            <div className="mt-2 h-5 flex items-center justify-end">
               <button onClick={() => openSheet("sizes")} className="text-[15px] font-medium text-[#2563EB]">Size Chart</button>
             </div>
           </div>
@@ -712,7 +711,7 @@ export const WbProductMobile = ({
       )}
 
       {/* 4. ratings + questions tiles */}
-      <div className="grid grid-cols-[65fr_35fr] gap-1 mb-1">
+      <div className="grid grid-cols-1 gap-1 mb-1">
         <button
           onClick={() => router.push(`/products/${product?.handle}/reviews${selectedVariant ? `?variant=${selectedVariant.id}` : ""}`)}
           className="bg-white rounded-[20px] pl-3 pr-2.5 py-2.5 text-left active:scale-[0.99] transition-transform flex items-center gap-2"
@@ -751,22 +750,13 @@ export const WbProductMobile = ({
             )
           })()}
         </button>
-        <button
-          onClick={() => router.push(`/products/${product?.handle}/reviews${selectedVariant ? `?variant=${selectedVariant.id}` : ""}`)}
-          className="bg-white rounded-[20px] px-3 py-2.5 text-left active:scale-[0.99] transition-transform"
-        >
-          <span className="flex items-center gap-1.5">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8A96" strokeWidth="2" aria-hidden><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-4.7a8.38 8.38 0 0 1-1.9-4.8 8.5 8.5 0 0 1 9-8.5 8.38 8.38 0 0 1 9 8.5z"/><text x="11" y="15" fontSize="11" fill="#8A8A96" stroke="none" fontWeight="bold">?</text></svg>
-            <span className="text-[18px] font-semibold text-[#1F1F23]">14</span>
-          </span>
-          <span className="block text-[13px] text-[#8A8A96] mt-0.5">Questions</span>
-        </button>
+
       </div>
 
       {/* 5. delivery card */}
       <button onClick={() => openSheet("delivery")} className="w-full bg-white rounded-[20px] px-4 py-2.5 mb-1 text-left active:scale-[0.99] transition-transform">
         <span className="flex items-center justify-between">
-          <span className="text-[16px] font-semibold text-[#1F1F23]">Tomorrow</span>
+          <span className="text-[16px] font-semibold text-[#1F1F23]">2–5 days</span>
           <span className="flex items-center gap-1 text-[13px] text-[#8A8A96]">Full Terms <Chevron /></span>
         </span>
         <span className="block text-[13px] text-[#8A8A96]">To pickup point or by courier</span>
@@ -808,8 +798,8 @@ export const WbProductMobile = ({
             <span className="flex items-center gap-1.5 text-[18px] font-semibold text-[#1F1F23] truncate">
               {seller?.is_premium ? <VerifiedBadge /> : null} {brand}
             </span>
-            <span className="flex items-center gap-1.5 text-[14px] text-[#8A8A96]">
-              Seller <StarIcon size={14} /> 4.9
+            <span className="block text-[14px] text-[#8A8A96]">
+              {alsoBuy?.length ? `${alsoBuy.length} items in store` : "Seller"}
             </span>
           </span>
           <span

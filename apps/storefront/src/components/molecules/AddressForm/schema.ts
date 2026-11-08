@@ -8,7 +8,7 @@ export const addressSchema = z.object({
   address: z.string().nonempty("Address is required"),
   city: z.string().nonempty("City is required"),
   countryCode: z.string().nonempty("Country is required"),
-  postalCode: z.string().nonempty("Postal code is required"),
+  postalCode: z.string().optional(),
   company: z.string().optional(),
   province: z.string().optional(),
   phone: z

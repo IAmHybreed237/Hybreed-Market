@@ -545,8 +545,8 @@ export const WbProductTop = ({
           {/* delivery */}
           <div className="bg-white rounded-[24px] p-6">
             <div className="flex items-center justify-between">
-              <p className="text-[17px] font-semibold text-[#1F1F23]">Tomorrow</p>
-              <span className="text-[14px] text-[#16A34A] font-semibold">Fast</span>
+              <p className="text-[17px] font-semibold text-[#1F1F23]">2–5 days</p>
+              <span className="text-[14px] text-[#16A34A] font-semibold">Delivery</span>
             </div>
             <p className="text-[15px] text-[#8A8A96] mt-1.5 leading-snug">
               Hybreed warehouse · Buea pickup point or courier
@@ -560,10 +560,7 @@ export const WbProductTop = ({
                   {seller?.is_premium ? <VerifiedBadge size={15} /> : null}
                   {seller?.name || "Gaya Shopping"}
                 </p>
-                <p className="flex items-center gap-1.5 text-[13px] text-[#8A8A96] mt-0.5">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="#F59E0B" aria-hidden><path d="M12 2l3 6.3L22 9.3l-5 4.9L18.2 21 12 17.8 5.8 21 7 14.2 2 9.3l7-1z"/></svg>
-                  4.9 seller rating
-                </p>
+
               </div>
             </div>
           </div>

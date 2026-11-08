@@ -8,7 +8,6 @@ const tabs = [
   { label: "My Hybreed", href: "/user/my-hybreed", active: true },
   { label: "Orders", href: "/user/orders" },
   { label: "Purchases", href: "/user/orders" },
-  { label: "Hybreed Travel", href: "/user" },
   { label: "Favorites", href: "/user/favorites" },
   { label: "Hybreed Wallet", href: "/user/wallet" },
   { label: "Reviews & questions", href: "/user" },

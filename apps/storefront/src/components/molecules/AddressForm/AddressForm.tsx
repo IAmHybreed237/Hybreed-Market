@@ -125,29 +125,29 @@ const Form: FC<Props> = ({ regions, handleClose }) => {
             {...register('company')}
           />
           <LabeledInput
-            label="Address"
-            placeholder="Type address"
+            label="Address / landmark"
+            placeholder="e.g. Melen, opposite church, behind Total Akwa"
             error={errors.address as FieldError}
             data-testid="address-form-address-input"
             {...register('address')}
           />
           <LabeledInput
             label="City"
-            placeholder="Type city"
+            placeholder="e.g. Douala, Yaoundé, Buea"
             error={errors.city as FieldError}
             data-testid="address-form-city-input"
             {...register('city')}
           />
           <LabeledInput
-            label="Postal code"
-            placeholder="Type postal code"
+            label="Postal code (optional)"
+            placeholder="Leave empty if none"
             error={errors.postalCode as FieldError}
             data-testid="address-form-postal-code-input"
             {...register('postalCode')}
           />
           <LabeledInput
-            label="State / Province"
-            placeholder="Type state / province"
+            label="Region / neighborhood"
+            placeholder="e.g. Littoral, Centre, Akwa"
             error={errors.province as FieldError}
             data-testid="address-form-province-input"
             {...register('province')}
@@ -171,8 +171,8 @@ const Form: FC<Props> = ({ regions, handleClose }) => {
           </div>
 
           <LabeledInput
-            label="Phone"
-            placeholder="Type phone number"
+            label="Phone / WhatsApp"
+            placeholder="e.g. 6XX XXX XXX"
             error={errors.phone as FieldError}
             data-testid="address-form-phone-input"
             {...register('phone')}
