@@ -874,35 +874,13 @@ export const WbProductMobile = ({
                   </h3>
 
                   <div className="relative mt-4 pl-[40px]">
-                    <style>{`@keyframes pssGlow{0%,100%{opacity:.2}50%{opacity:1}}`}</style>
-                    {/* green rail */}
-                    <span aria-hidden className="absolute left-[14.5px] top-[15px] h-[38px] w-3 rounded-full bg-[#22C55E]/20" style={{ filter: "blur(4px)", animation: "pssGlow 2.2s ease-in-out infinite" }} />
-                    <span aria-hidden className="absolute left-[15.5px] top-[15px] h-[38px] w-[3px] bg-[#22C55E] rounded-full" />
-                    {/* payment markers: 1 green + (pipParts-1) smaller green */}
-                    {Array.from({ length: pipParts }).map((_, i) => {
-                      const top = 3 + i * 10
-                      const size = i === 0 ? 26 : 10
-                      return (
-                        <span
-                          key={i}
-                          aria-hidden
-                          className="absolute rounded-full"
-                          style={{
-                            left: 15.5 - size / 2,
-                            top,
-                            width: size,
-                            height: size,
-                            background: "#22C55E",
-                            boxShadow: "0 0 8px 1px rgba(34,197,94,.45)",
-                            animation: `pssGlow ${1.8 + (i % 3) * 0.4}s ease-in-out ${(i * 0.35).toFixed(2)}s infinite`,
-                          }}
-                        />
-                      )
-                    })}
-                    {/* rail continuing below the last marker */}
-                    {pipParts > 1 && (
-                      <span aria-hidden className="absolute left-[16.5px] top-[53px] bottom-0 w-[3px] bg-gradient-to-b from-[#C7C7D1] to-transparent rounded-full" />
-                    )}
+                    <style>{`@keyframes pssPulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}70%{box-shadow:0 0 0 7px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}`}</style>
+                    <span aria-hidden className="absolute left-[13px] top-[14px] h-[40px] w-[3px] bg-[#22C55E] rounded-full" />
+                    <span aria-hidden className="absolute left-[13px] top-[64px] bottom-0 w-[3px] bg-gradient-to-b from-[#C7C7D1] to-transparent rounded-full" />
+                    <span aria-hidden className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#22C55E] flex items-center justify-center" style={{ animation: "pssPulse 2.2s ease-out infinite" }}>
+                      <span className="w-2 h-2 rounded-full bg-white" />
+                    </span>
+                    <span aria-hidden className="absolute left-[9px] top-[54px] w-2.5 h-2.5 rounded-full bg-[#A1A1AA]" />
 
                     <p className="h-6 leading-6 text-[16px] font-medium text-[#16A34A] pr-[60px]">
                       First payment: {pipFirst != null ? `${num(pipFirst)} XAF` : "-"}
