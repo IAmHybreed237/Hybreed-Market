@@ -714,22 +714,45 @@ export const WbProductMobile = ({
       )}
 
       {/* 4. ratings + questions tiles */}
-      <div className="grid grid-cols-2 gap-2 mb-1">
+      <div className="grid gap-2 mb-1" style={{ gridTemplateColumns: "6.5fr 3.5fr" }}>
         <button
           onClick={() => router.push(`/products/${product?.handle}/reviews${selectedVariant ? `?variant=${selectedVariant.id}` : ""}`)}
-          className="bg-white rounded-[20px] pl-3 pr-2.5 py-2.5 text-left active:scale-[0.99] transition-transform flex items-center gap-2"
+          className="bg-white rounded-[20px] pl-3 pr-2.5 py-2.5 text-left active:scale-[0.99] transition-transform flex items-center gap-2 min-w-0"
         >
           <span className="min-w-0">
-            <span className="flex items-center gap-1.5">
+            <span className="block text-[11px] font-semibold uppercase tracking-wide text-[#8A8A96]">Ratings</span>
+            <span className="flex items-center gap-1.5 mt-0.5">
               <StarIcon />
               <span className="text-[18px] font-semibold text-[#1F1F23]">
                 {reviewSummary?.average != null ? reviewSummary.average.toFixed(1) : "–"}
               </span>
             </span>
-            <span className="block text-[13px] text-[#8A8A96] mt-0.5">
+            <span className="block text-[12px] text-[#8A8A96] mt-0.5 truncate">
               {reviewSummary?.count ? `${reviewSummary.count} ratings` : "No ratings yet"}
             </span>
           </span>
+          {(() => {
+            const all = reviewMedia ?? []
+            const imgs = all.filter((m) => m.type === "image").slice(0, 3)
+            const rest = imgs.length < 3 ? all.filter((m) => m.thumbnail_url && !imgs.includes(m)).slice(0, 3 - imgs.length) : []
+            const pics = [...imgs, ...rest]
+            if (!pics.length) return null
+            return (
+              <span className="relative shrink-0 ml-auto" style={{ width: 40 + (pics.length - 1) * 14, height: 50 }}>
+                {pics.map((m, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={m.url + i}
+                    src={m.type === "image" ? m.url : m.thumbnail_url ?? m.url}
+                    alt=""
+                    loading="lazy"
+                    className="absolute top-0 rounded-[10px] border-2 border-white object-cover bg-[#F0F0F3]"
+                    style={{ left: i * 14, width: 40, height: 50, zIndex: pics.length - i }}
+                  />
+                ))}
+              </span>
+            )
+          })()}
         </button>
         <button
           onClick={() => setAskOpen(true)}
