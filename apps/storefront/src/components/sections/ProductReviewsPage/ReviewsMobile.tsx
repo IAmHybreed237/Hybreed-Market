@@ -160,6 +160,38 @@ const Sheet = ({ open, onClose, children }: { open: boolean; onClose: () => void
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
 
+type FeedProduct = { title: string; image: string | null; price: { amount: number; orig: number | null } | null }
+
+const fmtPrice = (n: number) => `${Math.round(n).toLocaleString("fr-FR")} F`
+
+const RailBtn = ({ children, label, onClick, badge }: { children: React.ReactNode; label: string; onClick: () => void; badge?: number }) => (
+  <button aria-label={label} onClick={onClick} className="relative flex flex-col items-center gap-1 text-white">
+    <span className="w-[46px] h-[46px] rounded-full bg-white/15 backdrop-blur flex items-center justify-center active:scale-90 transition-transform">
+      {children}
+    </span>
+    {badge != null && badge > 0 && <span className="text-[12px] font-semibold tabular-nums">{badge}</span>}
+  </button>
+)
+
+const LaurelSmall = () => (
+  <svg width="34" height="34" viewBox="0 0 60 60" className="absolute -top-3 left-1/2 -translate-x-1/2" aria-hidden>
+    <defs>
+      <linearGradient id="hbLaurelS" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#F8D778" />
+        <stop offset="1" stopColor="#C88A1C" />
+      </linearGradient>
+    </defs>
+    {[1, -1].map((side) =>
+      Array.from({ length: 5 }).map((_, k) => {
+        const a = (205 + k * 28) * (Math.PI / 180)
+        const cx = 30 + side * Math.cos(a) * -25
+        const cy = 31 - Math.sin(a) * -25
+        return <ellipse key={`${side}${k}`} cx={cx} cy={cy} rx="3" ry="6" transform={`rotate(${side * (k * 28 + 20)} ${cx} ${cy})`} fill="url(#hbLaurelS)" />
+      })
+    )}
+  </svg>
+)
+
 /** TikTok/Ozon-style vertical feed of a product's review photos and videos. */
 const MediaViewer = ({
   items,
