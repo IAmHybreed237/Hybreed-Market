@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { REVIEW_EXTRAS_MODULE } from "../../../../modules/review-extras/service"
+import { REVIEW_EXTRAS_MODULE } from "../../../modules/review-extras/service"
 
 /** Lists the ids (sellers, review authors) the customer follows. */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
