@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { LocationSelector } from "@/components/molecules/LocationSelector/LocationSelector"
 import { CATEGORIES, FEATURES, HERO, PARTNERS } from "./catalog.config"
+import { DepartmentSheet, type Department } from "./DepartmentSheet"
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
 const SearchGlyph = () => (
@@ -80,10 +81,17 @@ const TileIcon = ({ icon }: { icon: { bg: string; border?: string; text?: string
   </span>
 )
 
-export const CatalogMobile = ({ remainingCategories = 20 }: { remainingCategories?: number }) => {
+export const CatalogMobile = ({
+  remainingCategories = 20,
+  departments = [],
+}: {
+  remainingCategories?: number
+  departments?: Department[]
+}) => {
   const router = useRouter()
   const [sheet, setSheet] = useState<string | null>(null)
-  useBodyScrollLock(!!sheet)
+  const [dept, setDept] = useState<Department | null>(null)
+  useBodyScrollLock(!!sheet || !!dept)
 
   // desktop gets the normal site chrome + home page instead
   useEffect(() => {
@@ -93,7 +101,28 @@ export const CatalogMobile = ({ remainingCategories = 20 }: { remainingCategorie
     }
   }, [router])
 
-  const open = (href?: string, soon?: boolean, name?: string) => {
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "")
+  const findDept = (label: string) => {
+    const needle = norm(label)
+    if (!needle) return undefined
+    const exact = departments.find(
+      (d) => norm(d.name) === needle || norm(d.handle) === needle
+    )
+    if (exact) return exact
+    return departments.find(
+      (d) =>
+        norm(d.name).startsWith(needle) ||
+        needle.startsWith(norm(d.name)) ||
+        norm(d.handle).startsWith(needle)
+    )
+  }
+
+  const open = (href?: string, soon?: boolean, name?: string, label?: string) => {
+    const match = label ? findDept(label) : undefined
+    if (match) {
+      setDept(match)
+      return
+    }
     if (href) {
       const locale = window.location.pathname.split("/")[1] || ""
       router.push(`/${locale}${href}`)
@@ -183,7 +212,7 @@ export const CatalogMobile = ({ remainingCategories = 20 }: { remainingCategorie
             <button
               key={t.id}
               type="button"
-              onClick={() => open(t.href, t.soon, t.label)}
+              onClick={() => open(t.href, t.soon, t.label, t.label)}
               className="relative h-[123px] rounded-[28px] bg-white overflow-hidden text-left transition-transform duration-100 active:scale-[0.97]"
             >
               <span className="absolute left-4 top-3.5 z-[2] max-w-[62%]">
@@ -208,7 +237,7 @@ export const CatalogMobile = ({ remainingCategories = 20 }: { remainingCategorie
             <button
               key={t.id}
               type="button"
-              onClick={() => open(t.href, t.soon, t.label)}
+              onClick={() => open(t.href, t.soon, t.label, t.label)}
               className="relative h-[86px] rounded-[28px] bg-white overflow-hidden text-left transition-transform duration-100 active:scale-[0.97]"
             >
               <span className="absolute left-4 top-3.5 z-[2] max-w-[62%] text-[17px] min-[390px]:text-[18px] font-semibold text-[#1F1F23] whitespace-pre-line leading-[1.1] tracking-[-0.3px]">
@@ -249,21 +278,22 @@ export const CatalogMobile = ({ remainingCategories = 20 }: { remainingCategorie
 
             return (
               <div key={c.id} className="min-w-0">
-                {c.href ? (
-                  <LocalizedClientLink href={c.href} className={cls}>
-                    {inner}
-                  </LocalizedClientLink>
-                ) : (
-                  <button type="button" onClick={() => setSheet(c.label)} className={`${cls} w-full`}>
-                    {inner}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => open(c.href, c.soon, c.label, c.label)}
+                  className={`${cls} w-full`}
+                >
+                  {inner}
+                </button>
                 {label}
               </div>
             )
           })}
         </div>
       </div>
+
+      {/* department slide-over */}
+      <DepartmentSheet dept={dept} onClose={() => setDept(null)} />
 
       {/* coming soon sheet */}
       {sheet && (
