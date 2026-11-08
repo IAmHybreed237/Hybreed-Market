@@ -55,10 +55,25 @@ export const MobileSearch = ({
 
   const headerInputRef = useRef<HTMLInputElement>(null)
   const overlayInputRef = useRef<HTMLInputElement>(null)
+  const overlayRef = useRef<HTMLDivElement>(null)
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // pin:false - iOS drops keyboard focus when body becomes position:fixed
+  // pin:false - iOS drops keyboard focus when body becomes position:fixed.
+  // Instead, block scroll-chaining: touchmove outside scrollable regions is
+  // prevented so the page behind can't scroll (iOS ignores overflow:hidden).
   useBodyScrollLock(open, { pin: false })
+
+  useEffect(() => {
+    const el = overlayRef.current
+    if (!open || !el) return
+    const onTouchMove = (e: TouchEvent) => {
+      if (!(e.target as HTMLElement | null)?.closest("[data-scrollable]")) {
+        e.preventDefault()
+      }
+    }
+    el.addEventListener("touchmove", onTouchMove, { passive: false })
+    return () => el.removeEventListener("touchmove", onTouchMove)
+  }, [open])
 
   // focus the overlay input on mount. The header input is never blurred, so
   // focus transfers directly and the keyboard stays open.
@@ -180,6 +195,7 @@ export const MobileSearch = ({
       {/* full-screen search page */}
       {open && (
         <div
+          ref={overlayRef}
           className="fixed inset-0 z-[90] bg-white flex flex-col"
           style={{ animation: "searchOverlayIn .18s ease-out" }}
         >
@@ -234,6 +250,7 @@ export const MobileSearch = ({
           </div>
 
           <div
+            data-scrollable
             className="flex-1 overflow-y-auto overscroll-contain px-4 pb-8"
             style={{ animation: "searchOverlayIn .22s ease-out .14s both" }}
           >
@@ -316,7 +333,7 @@ export const MobileSearch = ({
                     <p className="text-[13px] font-semibold text-[#8A8A96] uppercase tracking-wide mb-2.5">
                       Recently viewed
                     </p>
-                    <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4">
+                    <div data-scrollable className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4">
                       {recents.map((p) => (
                         <LocalizedClientLink
                           key={p.handle}
