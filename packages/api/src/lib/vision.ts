@@ -30,7 +30,11 @@ const loadPipelines = () => {
 
 const toImage = async (input: string | Buffer) => {
   const { RawImage } = await import("@huggingface/transformers")
-  return RawImage.read(input)
+  const source =
+    typeof input === "string"
+      ? input
+      : new Blob([input as unknown as BlobPart])
+  return RawImage.read(source)
 }
 
 /** Detect searchable components and return dot positions (0-100 % of image dims). */
@@ -43,7 +47,7 @@ export const detectComponents = async (image: string | Buffer) => {
 
   for (const d of detections.slice(0, 8)) {
     const { xmin, ymin, xmax, ymax } = d.box
-    const crop = await img.crop(xmin, ymin, xmax - xmin, ymax - ymin)
+    const crop = await img.crop([xmin, ymin, xmax, ymax])
     const [best] = await cls(crop, FASHION_LABELS)
     if (!best || best.score < 0.25) continue
 

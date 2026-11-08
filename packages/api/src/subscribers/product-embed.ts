@@ -1,8 +1,8 @@
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import { Modules } from "@medusajs/framework/utils"
-import { IMAGE_SEARCH_MODULE } from "../../modules/image-search"
-import ImageSearchService from "../../modules/image-search/service"
-import { embedImage } from "../vision"
+import { IMAGE_SEARCH_MODULE } from "../modules/image-search"
+import ImageSearchService from "../modules/image-search/service"
+import { embedImage } from "../lib/vision"
 
 export default async function productEmbed({ event, container }: SubscriberArgs<{ id: string }>) {
   const svc: ImageSearchService = container.resolve(IMAGE_SEARCH_MODULE)
@@ -13,9 +13,10 @@ export default async function productEmbed({ event, container }: SubscriberArgs<
 
   try {
     const vector = await embedImage(url)
-    const [existing] = await svc.listProductEmbeddings({ product_id: product.id })
-    if (existing) await svc.updateProductEmbeddings({ id: existing.id, embedding: vector })
-    else await svc.createProductEmbeddings({ product_id: product.id, embedding: vector })
+    const store = svc as any
+    const [existing] = await store.listProductEmbeddings({ product_id: product.id })
+    if (existing) await store.updateProductEmbeddings({ id: existing.id, embedding: vector })
+    else await store.createProductEmbeddings({ product_id: product.id, embedding: vector })
   } catch (e) {
     console.error("product-embed failed:", e)
   }

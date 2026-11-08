@@ -1,8 +1,8 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { IMAGE_SEARCH_MODULE } from "../../modules/image-search"
-import ImageSearchService from "../../modules/image-search/service"
-import { embedImage, cosine } from "../vision"
+import { Modules } from "@medusajs/framework/utils"
+import { IMAGE_SEARCH_MODULE } from "../../../../modules/image-search"
+import ImageSearchService from "../../../../modules/image-search/service"
+import { embedImage, cosine } from "../../../../lib/vision"
 
 // POST /store/image-search/query - { image, box?: {x,y,w,h} in % } -> ranked products
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
@@ -17,12 +17,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     // Optional region crop (percentages of image dims)
     if (body.box && typeof input !== "string") {
       const { RawImage } = await import("@huggingface/transformers")
-      const img = await RawImage.read(input)
+      const img = await RawImage.read(new Blob([input as unknown as BlobPart]))
       const { x, y, w, h } = body.box
-      const crop = await img.crop(
-        Math.round((x / 100) * img.width), Math.round((y / 100) * img.height),
-        Math.round((w / 100) * img.width), Math.round((h / 100) * img.height)
-      )
+      const crop = await img.crop([
+        Math.round((x / 100) * img.width),
+        Math.round((y / 100) * img.height),
+        Math.round(((x + w) / 100) * img.width),
+        Math.round(((y + h) / 100) * img.height),
+      ])
       input = Buffer.from(await crop.toBlob().then(b => b.arrayBuffer())) as Buffer
     }
 
@@ -37,12 +39,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     if (!ranked.length) return res.json({ products: [] })
 
-    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-    const { data: products } = await query.graph({
-      entity: "product",
-      fields: ["id", "title", "handle", "thumbnail", "images.url"],
-      filters: { id: ranked.map((r) => r.product_id) },
-    })
+    const productModule = req.scope.resolve(Modules.PRODUCT)
+    const products = await productModule.listProducts(
+      { id: ranked.map((r) => r.product_id) },
+      { take: 24 }
+    )
 
     const byId = new Map(products.map((p: any) => [p.id, p]))
     res.json({

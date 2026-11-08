@@ -102,6 +102,9 @@ module.exports = withMercur({
       resolve: './src/modules/product-qa',
     },
     {
+      resolve: './src/modules/image-search',
+    },
+    {
       resolve: '@medusajs/medusa/file',
       options: {
         providers: [
