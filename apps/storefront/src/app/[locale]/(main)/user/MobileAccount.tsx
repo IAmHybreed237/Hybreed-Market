@@ -259,16 +259,16 @@ export const MobileAccount = ({
               </p>
               <Chevron />
             </div>
-            <p className="text-[12px] -mt-0.5 leading-tight pr-12" style={{ color: "var(--muted)" }}>
+            <p className="text-[12px] -mt-0.5 leading-tight pr-14" style={{ color: "var(--muted)" }}>
               Pay in parts on eligible items
             </p>
-            <p className="text-[13px] text-[#1F1F23] mt-auto pr-12">Wallet-powered installments</p>
+            <p className="text-[13px] text-[#1F1F23] mt-auto pr-14">Wallet-powered installments</p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/pay-small-small.png"
               alt=""
               aria-hidden
-              className="absolute -bottom-1.5 -right-1.5 w-[72px] h-[72px] object-contain"
+              className="absolute bottom-2 right-2 w-12 h-12 object-contain"
             />
           </LocalizedClientLink>
         </div>
