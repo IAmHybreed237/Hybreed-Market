@@ -14,7 +14,7 @@ import {
 } from "@/lib/behavior"
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 
-const imageSearchEnabled = process.env.NEXT_PUBLIC_IMAGE_SEARCH_ENABLED === "true"
+const imageSearchEnabled = process.env.NEXT_PUBLIC_IMAGE_SEARCH_ENABLED !== "false"
 const RETRACT_MS = 160
 
 const CameraIcon = () => (

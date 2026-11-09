@@ -7,7 +7,7 @@ import { useState } from "react"
 import { redirect } from "next/navigation"
 import clsx from "clsx"
 
-const imageSearchEnabled = process.env.NEXT_PUBLIC_IMAGE_SEARCH_ENABLED === "true"
+const imageSearchEnabled = process.env.NEXT_PUBLIC_IMAGE_SEARCH_ENABLED !== "false"
 
 const CameraIcon = () => (
   // eslint-disable-next-line @next/next/no-img-element
