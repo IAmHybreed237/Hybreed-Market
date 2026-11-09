@@ -258,7 +258,7 @@ export const MobileAccount = ({
               <img src="/images/pay-small-small.png" alt="" className="w-7 h-7 object-contain" />
               <Chevron />
             </div>
-            <p className="text-[14px] font-medium text-[#1F1F23] leading-tight mt-1 truncate">
+            <p className="text-[16px] font-medium text-[#1F1F23] leading-tight mt-1 truncate">
               Pay Small Small
             </p>
             <p className="text-[11px] -mt-0.5 leading-tight" style={{ color: "var(--muted)" }}>
