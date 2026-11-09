@@ -9,6 +9,11 @@ import { applyPromotions, deletePromotionCode } from "@/lib/data/cart"
 import { convertToLocale } from "@/lib/helpers/money"
 import { paymentInfoMap, WALLET_PROVIDER_ID } from "@/lib/constants"
 import { getWalletStatement } from "@/lib/data/wallet"
+import {
+  createInstallmentMomoCharge,
+  createInstallmentPlan,
+  payInstallmentWithWallet,
+} from "@/lib/data/installments"
 import { Cash } from "@medusajs/icons"
 import { DeliveryGroups } from "@/app/[locale]/(main)/cart/CheckoutOverlay"
 import {
@@ -305,20 +310,6 @@ const MobilePaymentCard = ({ cart, paymentMethods }: { cart: any; paymentMethods
       .then((s) => setWalletBalance(s?.balance ?? null))
       .catch(() => setWalletBalance(null))
   }, [])
-  const pipParts = (() => {
-    let max = 0
-    for (const item of cart?.items ?? []) {
-      const pip = item?.product?.metadata?.pay_in_parts as
-        | { enabled?: boolean; parts?: number }
-        | undefined
-      if (pip?.enabled) max = Math.max(max, Number(pip.parts) || 4)
-    }
-    return max
-  })()
-  const canFinance =
-    pipParts > 0 &&
-    walletBalance != null &&
-    walletBalance < (Number(cart?.total ?? 0) || Infinity)
   const providers = paymentMethods ?? []
   const showToast = (t: string) => {
     setToast(t)
@@ -352,11 +343,6 @@ const MobilePaymentCard = ({ cart, paymentMethods }: { cart: any; paymentMethods
                 ? `${Math.round(walletBalance).toLocaleString("en-US").replace(/,/g, " ")} XAF`
                 : "Top up & pay"}
             </span>
-            {canFinance && (
-              <span className="block text-[12px] font-medium text-[#2563EB] mt-0.5">
-                Pay Small Small · repay via top-ups
-              </span>
-            )}
           </span>
         </button>
         {providers.map((p: any) => {
@@ -429,6 +415,101 @@ const MobilePaymentCard = ({ cart, paymentMethods }: { cart: any; paymentMethods
           {convertToLocale({ amount: cart?.total ?? 0, currency_code: (cart?.region?.currency_code ?? "XAF").toUpperCase() })} now.
         </div>
       )}
+    </section>
+  )
+}
+
+/* ---------- C2. Pay Small Small card ---------- */
+const PaySmallSmallCard = ({ cart }: { cart: any }) => {
+  const router = useRouter()
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [walletBalance, setWalletBalance] = useState<number | null>(null)
+
+  const pip = (() => {
+    let parts = 0
+    let interval = 0
+    for (const item of cart?.items ?? []) {
+      const p = item?.product?.metadata?.pay_in_parts as
+        | { enabled?: boolean; parts?: number; interval_days?: number }
+        | undefined
+      if (p?.enabled) {
+        parts = Math.max(parts, Number(p.parts) || 4)
+        interval = Math.max(interval, Number(p.interval_days) || 7)
+      }
+    }
+    return { parts, interval }
+  })()
+
+  useEffect(() => {
+    getWalletStatement()
+      .then((s) => setWalletBalance(s?.balance ?? null))
+      .catch(() => setWalletBalance(null))
+  }, [])
+
+  if (!pip.parts || !cart?.id) return null
+
+  const partAmount = Math.ceil((Number(cart?.total ?? 0) || 0) / pip.parts)
+
+  const start = async () => {
+    if (busy) return
+    setBusy(true)
+    setError(null)
+    try {
+      const created = await createInstallmentPlan({ cart_id: cart.id })
+      if (!created.ok || !created.plan) {
+        setError(created.message || "Could not start Pay Small Small")
+        setBusy(false)
+        return
+      }
+      const planId = created.plan.id
+      // Pay part 1: wallet if it covers the amount, otherwise MoMo.
+      if (walletBalance != null && walletBalance >= partAmount) {
+        const paid = await payInstallmentWithWallet(planId, 1)
+        if (paid.ok) {
+          router.push("/user/installments")
+          return
+        }
+      }
+      const momo = await createInstallmentMomoCharge(planId, 1)
+      if (momo.ok && momo.authorization_url) {
+        window.location.href = momo.authorization_url
+        return
+      }
+      setError(momo.message || "Could not start MoMo payment")
+      router.push("/user/installments")
+    } catch {
+      setError("Something went wrong - please try again")
+      setBusy(false)
+    }
+  }
+
+  return (
+    <section className="bg-white rounded-[28px] p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-[18px] font-semibold text-[#1F1F23]" style={{ fontFamily: WB_FONT }}>
+            Pay Small Small
+          </h2>
+          <p className="text-[13px] text-[#6B6B76] mt-0.5 leading-snug">
+            Split into {pip.parts} payments of ~{partAmount.toLocaleString("en-US").replace(/,/g, " ")} XAF,
+            one every {pip.interval} days. Items stay reserved until fully paid.
+          </p>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/pay-small-small.png" alt="" aria-hidden className="w-14 h-14 object-contain shrink-0" />
+      </div>
+      {error && <p className="mt-2 text-[13px] text-[#B91C1C]">{error}</p>}
+      <button
+        onClick={start}
+        disabled={busy}
+        className="mt-3 w-full h-12 rounded-2xl bg-[#2563EB] text-white text-[16px] font-medium disabled:opacity-60"
+      >
+        {busy ? "Starting..." : `Pay part 1 of ${pip.parts} now`}
+      </button>
+      <p className="mt-2 text-[11px] text-[#8A8A96] text-center">
+        You&apos;ll choose Wallet or MoMo for each installment. Cancel anytime - refund minus a small fee.
+      </p>
     </section>
   )
 }
@@ -777,6 +858,7 @@ export const MobileCheckoutClient = ({
             setAddrOpen={setAddrOpen}
           />
           <MobilePaymentCard cart={cart} paymentMethods={paymentMethods} />
+          <PaySmallSmallCard cart={cart} />
           <PromoCard cart={cart} currencyCode={currencyCode} />
           </Suspense>
         </PaymentWrapper>

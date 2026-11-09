@@ -1,5 +1,6 @@
 import { retrieveCustomer } from "@/lib/data/customer"
 import { getWalletStatement } from "@/lib/data/wallet"
+import { getOutstandingInstallments } from "@/lib/data/installments"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { TopUpButton } from "@/components/cells/TopUpSheet/TopUpSheet"
 import { redirect } from "next/navigation"
@@ -53,9 +54,10 @@ export default async function WalletPage() {
   const wallet = await getWalletStatement().catch(() => null)
   const balance = wallet?.balance ?? 0
   const points = wallet?.points ?? 0
+  const pipOutstanding = await getOutstandingInstallments().catch(() => 0)
   const balances = [
     { value: fmt(balance), label: "Hybreed Wallet", href: "/user/wallet", tint: "#fff", icon: <SparkIcon />, active: true },
-    { value: "100,000 XAF", label: "Pay Small Small", href: "/user", tint: "#DBEAFE", icon: <CloverIcon /> },
+    { value: fmt(pipOutstanding), label: "Pay Small Small remaining", href: "/user/installments", tint: "#DBEAFE", icon: <CloverIcon /> },
     { value: `${Math.round(points).toLocaleString("en-US")} HB`, label: "Cashback", href: "/user", tint: "#E0F2FE", icon: <CoinIcon /> },
     { value: "0 XAF", label: "Certificates", href: "/user", tint: "#E0E7FF", icon: <TicketIcon /> },
     { value: "0 XAF", label: "Gift funds", href: "/user", tint: "#DBEAFE", icon: <GiftIcon /> },
@@ -75,7 +77,7 @@ export default async function WalletPage() {
       }
     >
       {/* ===== MOBILE (<768px) ===== */}
-      <WalletMobile balance={balance} points={points} customerId={user.id} userName={[user.first_name, user.last_name].filter(Boolean).join(" ") || "Hybreed user"} />
+      <WalletMobile balance={balance} points={points} pipOutstanding={pipOutstanding} customerId={user.id} userName={[user.first_name, user.last_name].filter(Boolean).join(" ") || "Hybreed user"} />
 
       {/* ===== TABLET (768-1023) ===== */}
       <div className="hidden md:block lg:hidden">
@@ -87,13 +89,13 @@ export default async function WalletPage() {
           <div className="flex items-baseline gap-3 mt-3 flex-wrap">
             <p className="text-4xl font-extrabold text-[#1F1F23]">{fmt(balance)}</p>
             <p className="text-sm text-[#8A8A96]">
-              Installments up to <span className="font-semibold text-[#1F1F23]">100,000 XAF</span>
+              Pay Small Small · {fmt(pipOutstanding)} remaining
             </p>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2 mt-3">
           {[
-            { title: "1,600", sub: "HB points · cashback", tint: "#DBEAFE", iconColor: "#2563EB" },
+            { title: `${Math.round(points).toLocaleString("en-US")} HB`, sub: "Cashback points", tint: "#DBEAFE", iconColor: "#2563EB" },
             { title: "Gift cards", sub: "Buy & redeem", tint: "#E0E7FF", iconColor: "#1D4ED8" },
             { title: "Gift funds", sub: "Group gifts", tint: "#DBEAFE", iconColor: "#2563EB" },
           ].map((t) => (

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { useTopUpSheet } from "@/components/cells/TopUpSheet/TopUpSheet"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { HbMark } from "@/components/atoms"
@@ -57,7 +58,8 @@ const promos = [
   { t: "Hybreed+ membership", s: "Extra cashback and free delivery", bg: "#DBEAFE", fg: "#1E3A8A" },
 ]
 
-export const WalletMobile = ({ balance = 0, points = 0, customerId, userName }: { balance?: number; points?: number; customerId?: string; userName?: string }) => {
+export const WalletMobile = ({ balance = 0, points = 0, pipOutstanding = 0, customerId, userName }: { balance?: number; points?: number; pipOutstanding?: number; customerId?: string; userName?: string }) => {
+  const router = useRouter()
   const fmt = (n: number) => `${Math.round(n).toLocaleString("en-US").replace(/,/g, " ")} XAF`
   const topUp = useTopUpSheet()
   const [scrolled, setScrolled] = useState(false)
@@ -352,13 +354,13 @@ export const WalletMobile = ({ balance = 0, points = 0, customerId, userName }: 
           { t: "Hybreed Cash", v: "+100 000 XAF", sub: null, icon: null, apply: true, bag: true },
           { t: "Savings", v: "0 XAF", sub: "Accounts, deposits, and investments", icon: ic.chest, green: true },
           { t: "Loans", v: null, sub: "For any purpose", icon: ic.loan },
-          { t: "Pay Small Small", v: "100 000 XAF", sub: "Buy now, pay small small over time", icon: ic.clover },
+          { t: "Pay Small Small", v: pipOutstanding > 0 ? `${Math.round(pipOutstanding).toLocaleString("en-US").replace(/,/g, " ")} XAF` : "0 XAF", sub: "Pay in parts on eligible items", icon: ic.clover, href: "/user/installments" },
           { t: "Hybreed bonus points", v: `${Math.round(points).toLocaleString("en-US")} HB`, sub: "Cashback on your purchases", icon: null, hbPill: true },
           { t: "Certificates", v: null, sub: "To shop on Hybreed", icon: ic.ticket },
         ].map((c) => (
           <button
             key={c.t}
-            onClick={() => setSheet("soon")}
+            onClick={() => ("href" in c && c.href ? router.push(c.href as string) : setSheet("soon"))}
             className="relative bg-white rounded-[28px] px-4 pt-4 pb-4 text-left transition-transform duration-100 active:scale-[0.98] overflow-hidden"
             style={{ minHeight: 140 }}
           >

@@ -250,7 +250,7 @@ export const MobileAccount = ({
             </button>
           </div>
           <LocalizedClientLink
-            href="/user/wallet"
+            href="/user/installments"
             className={`${card} relative h-[130px] p-4 flex flex-col overflow-hidden`}
           >
             <div className="flex items-start justify-between">

@@ -1,5 +1,6 @@
 import { retrieveCustomer } from "@/lib/data/customer"
 import { getWalletStatement } from "@/lib/data/wallet"
+import { getOutstandingInstallments } from "@/lib/data/installments"
 import { listOrders } from "@/lib/data/orders"
 import { getWishlistProductIds } from "@/lib/data/wishlist"
 import { createPickupToken } from "@/lib/pickup"
@@ -133,6 +134,7 @@ export default async function UserPage({
   }
   const loyalty = (user.metadata as any)?.loyalty ?? {}
   const loyaltyPoints = Number(loyalty.points ?? loyalty.xp ?? 0)
+  const installmentsOutstanding = await getOutstandingInstallments().catch(() => 0)
 
   const hub = {
     upcoming: upcomingGroups.size,
@@ -278,7 +280,7 @@ export default async function UserPage({
 
           {/* installments card */}
           <LocalizedClientLink
-            href="/user"
+            href="/user/installments"
             className={`${cardCls} p-5 h-[96px] flex items-center justify-between`}
           >
             <div className="flex items-center gap-3">
@@ -287,7 +289,9 @@ export default async function UserPage({
               <div>
                 <p style={cardTitleStyle}>Pay Small Small</p>
                 <p className="text-[17px] font-[350]" style={{ color: "var(--muted)" }}>
-                  Nothing here yet
+                  {installmentsOutstanding > 0
+                    ? `${Math.round(installmentsOutstanding).toLocaleString("en-US").replace(/,/g, " ")} XAF remaining`
+                    : "Pay in parts on eligible items"}
                 </p>
               </div>
             </div>
