@@ -131,6 +131,9 @@ export default async function UserPage({
       pickupQr = null
     }
   }
+  const loyalty = (user.metadata as any)?.loyalty ?? {}
+  const loyaltyPoints = Number(loyalty.points ?? loyalty.xp ?? 0)
+
   const hub = {
     upcoming: upcomingGroups.size,
     pickupQr,
@@ -154,7 +157,7 @@ export default async function UserPage({
       }
     >
       {/* ===== MOBILE ACCOUNT (below 768px) ===== */}
-      <MobileAccount name={name} balance={balance} hub={hub} />
+      <MobileAccount name={name} balance={balance} points={loyaltyPoints} hub={hub} />
 
       {/* ===== DESKTOP ===== */}
       <div
@@ -303,7 +306,7 @@ export default async function UserPage({
                 <span className="text-[22px] font-bold text-[#1F1F23]">my</span>
                 <HbMark h={22} />
                 <span className="bg-white text-[#1F1F23] font-bold px-3 py-1 rounded-full text-[15px] inline-flex items-center whitespace-nowrap">
-                  1 600
+                  {loyaltyPoints.toLocaleString("fr-FR")}
                   <span className="flex -space-x-2 ml-1">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/images/pill-1.png" alt="" className="h-[20px] w-auto object-contain" />

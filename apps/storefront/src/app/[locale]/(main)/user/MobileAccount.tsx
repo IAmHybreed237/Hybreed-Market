@@ -58,10 +58,12 @@ const card =
 export const MobileAccount = ({
   name,
   balance = 0,
+  points = 0,
   hub,
 }: {
   name: string
   balance?: number
+  points?: number
   hub?: {
     upcoming: number
     pickupQr: string | null
@@ -252,15 +254,17 @@ export const MobileAccount = ({
             className={`${card} h-[130px] p-4 flex flex-col`}
           >
             <div className="flex items-start justify-between">
-              <p className="text-[18px] font-medium text-[#1F1F23] leading-none">
-                100 000
-              </p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/pay-small-small.png" alt="" className="w-8 h-8 object-contain" />
               <Chevron />
             </div>
-            <p className="text-[15px] -mt-0.5" style={{ color: "var(--muted)" }}>
-              XAF instalment limit
+            <p className="text-[15px] font-medium text-[#1F1F23] leading-tight mt-1">
+              Pay Small Small
             </p>
-            <p className="text-base text-[#1F1F23] mt-auto">No active orders</p>
+            <p className="text-[12px] -mt-0.5" style={{ color: "var(--muted)" }}>
+              Pay in parts on eligible items
+            </p>
+            <p className="text-[13px] text-[#1F1F23] mt-auto">Wallet-powered installments</p>
           </LocalizedClientLink>
         </div>
 
@@ -285,7 +289,9 @@ export const MobileAccount = ({
           </div>
           <div className="flex flex-col justify-center h-full w-[62%]">
             <span className="bg-white rounded-full px-3 py-1 self-start inline-flex items-center gap-1.5 whitespace-nowrap">
-              <span className="text-[18px] leading-none font-medium text-[#1F1F23]">1 600</span>
+              <span className="text-[18px] leading-none font-medium text-[#1F1F23]">
+                {points.toLocaleString("fr-FR")}
+              </span>
               <span className="flex -space-x-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/images/pill-1.png" alt="" className="h-[22px] w-auto object-contain" />
