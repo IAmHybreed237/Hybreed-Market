@@ -255,16 +255,16 @@ export const MobileAccount = ({
           >
             <div className="flex items-start justify-between">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/pay-small-small.png" alt="" className="w-8 h-8 object-contain" />
+              <img src="/images/pay-small-small.png" alt="" className="w-7 h-7 object-contain" />
               <Chevron />
             </div>
-            <p className="text-[15px] font-medium text-[#1F1F23] leading-tight mt-1">
+            <p className="text-[14px] font-medium text-[#1F1F23] leading-tight mt-1 truncate">
               Pay Small Small
             </p>
-            <p className="text-[12px] -mt-0.5" style={{ color: "var(--muted)" }}>
+            <p className="text-[11px] -mt-0.5 leading-tight" style={{ color: "var(--muted)" }}>
               Pay in parts on eligible items
             </p>
-            <p className="text-[13px] text-[#1F1F23] mt-auto">Wallet-powered installments</p>
+            <p className="text-[12px] text-[#1F1F23] mt-auto truncate">Wallet-powered installments</p>
           </LocalizedClientLink>
         </div>
 
