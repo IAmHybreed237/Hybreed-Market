@@ -391,8 +391,8 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
                   className="h-full rounded-full bg-[#3B82F6] transition-[width] duration-[600ms] ease-out"
                   style={{ width: mounted ? `${(SPEND.cur / SPEND.max) * 100}%` : "0%", minWidth: mounted && SPEND.cur ? undefined : 0 }}
                 />
-                <span className="absolute inset-0 px-2.5 flex items-center justify-between text-[15px] font-medium text-white" style={{ textShadow: "0 0 3px rgba(37,99,235,0.5)" }}>
-                  <span>{Math.round(SPEND.cur).toLocaleString("fr-FR")} XAF</span><span>{SPEND.max.toLocaleString("fr-FR")} XAF</span>
+                <span className="absolute inset-0 flex items-center justify-center text-[13px] font-medium text-white whitespace-nowrap" style={{ textShadow: "0 0 3px rgba(37,99,235,0.5)" }}>
+                  {Math.round(SPEND.cur).toLocaleString("fr-FR")} / {SPEND.max.toLocaleString("fr-FR")} XAF
                 </span>
               </div>
               <div className="h-[22px] rounded-full relative overflow-hidden" style={{ background: "var(--xp-soft)" }}>
@@ -400,8 +400,8 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
                   className="h-full rounded-full transition-[width] duration-[600ms] ease-out"
                   style={{ width: mounted ? `${(XP.cur / XP.max) * 100}%` : "0%", background: "var(--xp)" }}
                 />
-                <span className="absolute inset-0 px-2.5 flex items-center justify-between text-[15px] font-medium text-white" style={{ textShadow: "0 0 3px rgba(249,115,22,0.5)" }}>
-                  <span>{XP.cur} XP</span><span>{XP.max} XP</span>
+                <span className="absolute inset-0 flex items-center justify-center text-[13px] font-medium text-white whitespace-nowrap" style={{ textShadow: "0 0 3px rgba(249,115,22,0.5)" }}>
+                  {XP.cur} / {XP.max} XP
                 </span>
               </div>
             </div>
@@ -464,7 +464,7 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
         </div>
 
         {/* filter chips */}
-        <div className="mt-4 -mx-2.5 pl-5 pr-2.5 md:mx-0 md:px-0 flex gap-[5px] overflow-x-auto scrollbar-hide" style={{ scrollSnapType: "x proximity" }}>
+        <div className="mt-4 flex gap-[5px] overflow-x-auto scrollbar-hide" style={{ scrollSnapType: "x proximity" }}>
           {TASK_CATS.map((c) => (
             <button
               key={c}
