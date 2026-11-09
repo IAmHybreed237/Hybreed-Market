@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import LocalizedClientLink from "@/components/molecules/LocalizedLink/LocalizedLink"
 import { HbMark } from "@/components/atoms"
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
@@ -10,43 +10,19 @@ import { useBodyScrollLock } from "@/hooks/useBodyScrollLock"
 const BackIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="15 18 9 12 15 6" /></svg>
 )
-const ChatIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z" /><line x1="8" y1="10" x2="16" y2="10" /><line x1="8" y1="14" x2="13" y2="14" /></svg>
-)
 const Chevron = ({ s = 14 }: { s?: number }) => (
   <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="9 18 15 12 9 6" /></svg>
-)
-const ClockIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
 )
 const MonitorIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>
 )
-const GiftBox = () => (
-  <svg width="155" height="130" viewBox="0 0 155 130" fill="none" aria-hidden>
-    <ellipse cx="78" cy="118" rx="55" ry="8" fill="#BFDBFE" opacity="0.6" />
-    <path d="M35 60 L70 45 v10 l-30 12z" fill="#93C5FD" />
-    <path d="M120 60 L85 45 v10 l30 12z" fill="#60A5FA" />
-    <rect x="40" y="58" width="75" height="55" rx="6" fill="#DBEAFE" />
-    <rect x="40" y="58" width="75" height="14" rx="6" fill="#BFDBFE" />
-    <path d="M77.5 58 v55" stroke="#93C5FD" strokeWidth="3" />
-    <rect x="68" y="34" width="20" height="20" rx="4" fill="#2563EB" />
-    <path d="M78 34v20M68 44h20" stroke="#fff" strokeWidth="2" />
-    <circle cx="55" cy="50" r="7" fill="#3B82F6" />
-    <circle cx="102" cy="48" r="5" fill="#22D3EE" />
-    <path d="M120 30l2.5 6.5L129 39l-6.5 2.5L120 48l-2.5-6.5L111 39l6.5-2.5z" fill="#3B82F6" />
-    <path d="M40 28l1.8 4.7L46.5 34.5l-4.7 1.8L40 41l-1.8-4.7-4.7-1.8 4.7-1.8z" fill="#60A5FA" />
-  </svg>
-)
-
 /* ---------- loyalty config ---------- */
 const LEVELS = [
-  { n: 1, name: "M-m-m-m, I think", xp: 300 },
-  { n: 2, name: "A good start", xp: 1500 },
-  { n: 3, name: "Hybreed regular", xp: 5000 },
+  { n: 1, name: "New to Hybreed", xp: 300 },
+  { n: 2, name: "Hybreed Regular", xp: 1500 },
+  { n: 3, name: "Hybreed VIP", xp: 5000 },
 ]
 const STREAK_DAYS = [5, 8, 10, 15, 20, 25, 50]
-const WOW_OFFERS = 3
 
 type MyHybreedData = {
   xpTotal: number
@@ -55,33 +31,34 @@ type MyHybreedData = {
   spendMax: number
   streakDone: number
   claimedToday: boolean
+  claimedTasks?: number[]
   hasAddress: boolean
   hasPhone: boolean
   hasOrders: boolean
 }
 const TASK_CATS = ["All", "Earn more", "Discovery", "Partners", "Trust"]
-const now = Date.now()
-const TASKS = [
-  { id: 1, cat: "Earn more", title: "Invite a friend to Hybreed", sub: "You both earn when they sign up", xp: 50, ends: now + 6 * 24 * 3600e3, done: false },
-  { id: 2, cat: "Earn more", title: "Make your first order", sub: "Any item, protected by escrow", xp: 40, ends: now + 72 * 3600e3, done: false },
-  { id: 3, cat: "Trust", title: "Leave a photo review", sub: "Help buyers trust what they see", xp: 25, ends: now + 48 * 3600e3, done: false },
-  { id: 4, cat: "Partners", title: "Pre-order from MK's Gifts", sub: "Girlfriend's Day boxes, limited slots", xp: 25, ends: now + 48 * 3600e3, done: false },
-  { id: 5, cat: "Discovery", title: "Share a find on WhatsApp", sub: "Send any listing to a friend or group", xp: 15, ends: now + 24 * 3600e3, done: false },
-  { id: 6, cat: "Earn more", title: "Pay with Mobile Money", sub: "Complete an order via MTN or Orange", xp: 15, ends: now + 72 * 3600e3, done: false },
-  { id: 7, cat: "Discovery", title: "Tour of Hybreed: Fashion", sub: "Browse the category", xp: 10, ends: now + 23 * 3600e3 + 53 * 60e3, done: false },
-  { id: 8, cat: "Earn more", title: "List something to sell", sub: "Your first listing, new or used", xp: 30, ends: now + 7 * 24 * 3600e3, done: false },
-  { id: 9, cat: "Trust", title: "Verify your phone number", sub: "Unlocks buyer protection perks", xp: 20, ends: now + 5 * 24 * 3600e3, done: false },
-  { id: 10, cat: "Discovery", title: "Save 3 items to favorites", sub: "Build your wishlist", xp: 10, ends: now + 24 * 3600e3, done: false },
-  { id: 11, cat: "Trust", title: "Complete your profile", sub: "Add a delivery address", xp: 20, ends: now - 60e3, done: true },
-]
-
-const fmtLeft = (ms: number) => {
-  if (ms <= 0) return "Expired"
-  const d = Math.floor(ms / 86400e3)
-  const h = Math.floor((ms % 86400e3) / 3600e3)
-  const m = Math.floor((ms % 3600e3) / 60e3)
-  return d > 0 ? `${d} d ${h} h` : `${h} h ${m} m`
+type Task = {
+  id: number
+  cat: string
+  title: string
+  sub: string
+  xp: number
+  href?: string
+  share?: boolean
 }
+const TASKS: Task[] = [
+  { id: 1, cat: "Earn more", title: "Invite a friend to Hybreed", sub: "You both earn when they sign up", xp: 50, share: true },
+  { id: 2, cat: "Earn more", title: "Make your first order", sub: "Any item, protected by escrow", xp: 40, href: "/categories" },
+  { id: 3, cat: "Trust", title: "Leave a photo review", sub: "Help buyers trust what they see", xp: 25, href: "/user/orders" },
+  { id: 4, cat: "Partners", title: "Pre-order from MK's Gifts", sub: "Girlfriend's Day boxes, limited slots", xp: 25, href: "/categories/gifts" },
+  { id: 5, cat: "Discovery", title: "Share a find on WhatsApp", sub: "Send any listing to a friend or group", xp: 15, share: true },
+  { id: 6, cat: "Earn more", title: "Pay with Mobile Money", sub: "Complete an order via MTN or Orange", xp: 15, href: "/user/wallet" },
+  { id: 7, cat: "Discovery", title: "Tour of Hybreed: Fashion", sub: "Browse the category", xp: 10, href: "/categories" },
+  { id: 8, cat: "Earn more", title: "List something to sell", sub: "Your first listing, new or used", xp: 30, href: "/sell" },
+  { id: 9, cat: "Trust", title: "Verify your phone number", sub: "Unlocks buyer protection perks", xp: 20, href: "/user/account" },
+  { id: 10, cat: "Discovery", title: "Save 3 items to favorites", sub: "Build your wishlist", xp: 10, href: "/user/favorites" },
+  { id: 11, cat: "Trust", title: "Complete your profile", sub: "Add a delivery address", xp: 20, href: "/user/account" },
+]
 
 const DayTile = ({
   day,
@@ -129,6 +106,7 @@ const DayTile = ({
 
 export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
   const router = useRouter()
+  const locale = (useParams() as { locale?: string })?.locale || "en"
   const [mounted, setMounted] = useState(false)
   const [cat, setCat] = useState("All")
   const [, setMinute] = useState(0)
@@ -137,6 +115,7 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
     points: data.points,
     streakDone: data.streakDone,
     claimedToday: data.claimedToday,
+    claimedTasks: data.claimedTasks ?? [],
   })
 
   // derived live values
@@ -150,11 +129,43 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
   const streakDone = loy.streakDone
   const todayIdx = loy.claimedToday ? loy.streakDone - 1 : loy.streakDone
 
-  const taskDone = (t: (typeof TASKS)[number]) =>
-    t.done ||
+  const taskDone = (t: Task) =>
+    loy.claimedTasks.includes(t.id) ||
     (t.id === 2 && data.hasOrders) ||
     (t.id === 9 && data.hasPhone) ||
     (t.id === 11 && data.hasAddress)
+
+  const onTask = async (t: Task) => {
+    if (taskDone(t)) return
+    try {
+      const r = await fetch("/api/loyalty/task", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: t.id }),
+      })
+      const j = r.ok ? await r.json() : null
+      if (j && typeof j.xp === "number")
+        setLoy({
+          xp: j.xp,
+          points: j.points,
+          streakDone: j.streakDone,
+          claimedToday: j.claimedToday,
+          claimedTasks: j.claimedTasks ?? loy.claimedTasks,
+        })
+    } catch {
+      /* XP claim is best-effort; navigation still happens */
+    }
+    if (t.share) {
+      const shareData = { title: "Hybreed", url: window.location.origin }
+      if (navigator.share) {
+        navigator.share(shareData).catch(() => {})
+      } else {
+        navigator.clipboard?.writeText(shareData.url).catch(() => {})
+      }
+      return
+    }
+    if (t.href) router.push(`/${locale}${t.href}`)
+  }
 
   // claim today's daily XP on visit (idempotent - safe to re-fire)
   useEffect(() => {
@@ -162,7 +173,13 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => {
         if (j && typeof j.xp === "number")
-          setLoy({ xp: j.xp, points: j.points, streakDone: j.streakDone, claimedToday: j.claimedToday })
+          setLoy({
+            xp: j.xp,
+            points: j.points,
+            streakDone: j.streakDone,
+            claimedToday: j.claimedToday,
+            claimedTasks: j.claimedTasks ?? data.claimedTasks ?? [],
+          })
       })
       .catch(() => {})
   }, [])
@@ -239,7 +256,6 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
     () => TASKS.filter((t) => cat === "All" || t.cat === cat),
     [cat]
   )
-  const nowMs = Date.now()
 
   const tile = "bg-white rounded-[24px] transition-transform duration-100 active:scale-[0.98]"
 
@@ -293,9 +309,7 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
             </span>
             <HbMark h={24} />
           </div>
-          <button aria-label="Support chat" className="w-11 h-11 -mr-2 flex items-center justify-center" style={{ color: "var(--text)" }}>
-            <ChatIcon />
-          </button>
+          <span className="w-11" aria-hidden />
         </div>
       </div>
       {/* pull-to-refresh loader - stretches in-flow between header and hero */}
@@ -355,7 +369,7 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
             />
           </div>
           <div className="w-[160px] min-[420px]:w-[170px] md:w-[180px] flex flex-col ml-auto md:ml-0 md:mr-6">
-            <LocalizedClientLink href="/user" className={`${tile} px-3.5 py-2.5 flex flex-col gap-1`} style={{ background: "rgba(255,255,255,0.7)" }}>
+            <LocalizedClientLink href="/user/wallet" className={`${tile} px-3.5 py-2.5 flex flex-col gap-1`} style={{ background: "rgba(255,255,255,0.7)" }}>
               <span className="flex items-center justify-between text-[15px]" style={{ color: "var(--muted)" }}>
                 Benefits <Chevron />
               </span>
@@ -370,10 +384,6 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
               </span>
             </LocalizedClientLink>
 
-            <LocalizedClientLink href="/user" className="mt-3.5 flex items-center justify-between text-[15px]" style={{ color: "var(--muted)" }}>
-              Next level <Chevron />
-            </LocalizedClientLink>
-
             {/* progress bars */}
             <div className="mt-2 flex flex-col gap-[3px]">
               <div className="h-[22px] rounded-full bg-[#BFDBFE] relative overflow-hidden">
@@ -382,7 +392,7 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
                   style={{ width: mounted ? `${(SPEND.cur / SPEND.max) * 100}%` : "0%", minWidth: mounted && SPEND.cur ? undefined : 0 }}
                 />
                 <span className="absolute inset-0 px-2.5 flex items-center justify-between text-[15px] font-medium text-white" style={{ textShadow: "0 0 3px rgba(37,99,235,0.5)" }}>
-                  <span>0 XAF</span><span>5 000 XAF</span>
+                  <span>{Math.round(SPEND.cur).toLocaleString("fr-FR")} XAF</span><span>{SPEND.max.toLocaleString("fr-FR")} XAF</span>
                 </span>
               </div>
               <div className="h-[22px] rounded-full relative overflow-hidden" style={{ background: "var(--xp-soft)" }}>
@@ -391,14 +401,11 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
                   style={{ width: mounted ? `${(XP.cur / XP.max) * 100}%` : "0%", background: "var(--xp)" }}
                 />
                 <span className="absolute inset-0 px-2.5 flex items-center justify-between text-[15px] font-medium text-white" style={{ textShadow: "0 0 3px rgba(249,115,22,0.5)" }}>
-                  <span>253 XP</span><span>300 XP</span>
+                  <span>{XP.cur} XP</span><span>{XP.max} XP</span>
                 </span>
               </div>
             </div>
 
-            <LocalizedClientLink href="/user" className="mt-2.5 flex items-center gap-1 text-base font-medium text-[#2563EB]">
-              Level benefits <Chevron />
-            </LocalizedClientLink>
           </div>
         </div>
       </div>
@@ -406,7 +413,7 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
       {/* ===== 2) FEATURE TILES ===== */}
       <div className="grid grid-cols-[0.82fr_1fr] md:flex md:flex-col gap-1.5 md:gap-2.5 px-2.5 md:px-0 mt-2 md:mt-0">
         {/* Hybreed Wow */}
-        <button className={`${tile} h-[67px] md:h-auto md:flex-1 px-3.5 py-2.5 md:px-5 md:py-4 flex flex-col justify-between text-left`}>
+        <LocalizedClientLink href="/categories" className={`${tile} h-[67px] md:h-auto md:flex-1 px-3.5 py-2.5 md:px-5 md:py-4 flex flex-col justify-between text-left`}>
           <div className="flex items-center gap-1.5">
             <span className="h-[22px] md:h-[26px] px-2 md:px-2.5 rounded-full bg-[#2563EB] text-white text-[13px] md:text-base font-semibold flex items-center">Wow</span>
             <span className="text-[14px] md:text-lg font-medium truncate" style={{ color: "var(--text)" }}>Hybreed Wow</span>
@@ -417,11 +424,11 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
                 <span key={i} className="w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-white" style={{ background: c }} />
               ))}
             </span>
-            <span className="ml-auto flex items-center gap-0.5 text-[14px] md:text-lg shrink-0" style={{ color: "var(--muted)" }}>
-              3 <Chevron />
+            <span className="ml-auto flex items-center text-[14px] md:text-lg shrink-0" style={{ color: "var(--muted)" }}>
+              <Chevron />
             </span>
           </div>
-        </button>
+        </LocalizedClientLink>
 
         {/* Daily XP */}
         <button onClick={() => setDailyOpen(true)} className={`${tile} h-[67px] md:h-auto md:flex-1 px-3.5 py-2.5 md:px-5 md:py-4 flex flex-col justify-between text-left`}>
@@ -452,10 +459,9 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
       </div>
       {/* ===== 3) TASKS ===== */}
       <div className="bg-white rounded-t-[36px] md:rounded-[28px] mt-2 md:mt-0 pt-5 pb-[calc(72px+env(safe-area-inset-bottom,0px))] md:pb-6 px-2.5 md:px-6">
-        <LocalizedClientLink href="/user" className="pl-1.5 md:pl-0 flex items-center gap-1.5">
+        <div className="pl-1.5 md:pl-0 flex items-center gap-1.5">
           <span className="text-[26px] font-semibold" style={{ color: "var(--text)" }}>Tasks</span>
-          <Chevron s={22} />
-        </LocalizedClientLink>
+        </div>
 
         {/* filter chips */}
         <div className="mt-4 -mx-2.5 pl-5 pr-2.5 md:mx-0 md:px-0 flex gap-[5px] overflow-x-auto scrollbar-hide" style={{ scrollSnapType: "x proximity" }}>
@@ -479,12 +485,11 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
         {/* task cards */}
         <div className="mt-3 flex flex-col gap-[5px] md:grid md:grid-cols-2 md:gap-2.5">
           {tasks.map((t) => {
-            const left = t.ends - nowMs
             const done = taskDone(t)
-            const expired = !done && left <= 0
             return (
               <button
                 key={t.id}
+                onClick={() => onTask(t)}
                 className="min-h-[105px] rounded-[28px] px-3.5 py-3 flex gap-3 text-left transition-all duration-100 active:scale-[0.98]"
                 style={{ background: "#F7F7FA", opacity: done ? 0.6 : 1 }}
               >
@@ -498,9 +503,8 @@ export const MyHybreedClient = ({ data }: { data: MyHybreedData }) => {
                   <span className="block text-base mt-0.5 truncate" style={{ color: "var(--text)", opacity: 0.85 }}>
                     {t.sub}
                   </span>
-                  <span className="flex items-center gap-1.5 mt-1.5 text-[17px] font-medium" style={{ color: "var(--muted)" }}>
-                    <ClockIcon />
-                    {done ? "Completed" : expired ? "Expired" : fmtLeft(left)}
+                  <span className="flex items-center gap-1 mt-1.5 text-[15px] font-medium" style={{ color: "var(--muted)" }}>
+                    {done ? "Completed" : t.cat}
                   </span>
                 </span>
                 {done ? (

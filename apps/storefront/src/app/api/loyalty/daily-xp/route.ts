@@ -15,6 +15,7 @@ type Loyalty = {
   points: number
   streakDay: number
   lastClaim: string
+  claimedTasks?: number[]
 }
 
 const readLoyalty = (user: any): Loyalty => ({
@@ -35,7 +36,13 @@ const stateOf = (l: Loyalty) => {
     : l.lastClaim === yest
       ? l.streakDay
       : 0
-  return { xp: l.xp, points: l.points, streakDone, claimedToday }
+  return {
+    xp: l.xp,
+    points: l.points,
+    streakDone,
+    claimedToday,
+    claimedTasks: l.claimedTasks ?? [],
+  }
 }
 
 export async function GET() {

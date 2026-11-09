@@ -11,7 +11,8 @@ export const ConditionalFooter = ({
   const pathname = usePathname()
   const isProductPage = /\/products\//.test(pathname)
   const isCartPage = /\/cart\/?$/.test(pathname)
+  const isMyHybreedPage = /\/my-hybreed\/?$/.test(pathname)
   return (
-    <div className={isProductPage || isCartPage ? "hidden md:block" : ""}>{children}</div>
+    <div className={isProductPage || isCartPage || isMyHybreedPage ? "hidden md:block" : ""}>{children}</div>
   )
 }

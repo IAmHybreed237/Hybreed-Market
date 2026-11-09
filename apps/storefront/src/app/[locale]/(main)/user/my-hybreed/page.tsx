@@ -48,6 +48,7 @@ export default async function MyHybreedPage() {
     points: loyalty.points || loyalty.xp,
     streakDone,
     claimedToday,
+    claimedTasks: (loyalty as any).claimedTasks ?? [],
     hasAddress: !!(user.addresses as any)?.length,
     hasPhone: !!user.phone,
     hasOrders: orders.length > 0,
