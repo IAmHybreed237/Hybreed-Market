@@ -76,12 +76,18 @@ export const DepartmentSheet = ({
         style={{
           transform: mounted ? "translateX(0)" : "translateX(100%)",
           background: "#F5F5F7",
-          paddingTop: "env(safe-area-inset-top, 0px)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
         {/* header */}
-        <div className="bg-white px-4 pt-2 pb-3" style={{ borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}>
+        <div
+          className="bg-white px-4 pt-2 pb-3"
+          style={{
+            borderBottomLeftRadius: 24,
+            borderBottomRightRadius: 24,
+            paddingTop: "calc(0.5rem + env(safe-area-inset-top, 0px))",
+          }}
+        >
           <div className="flex items-center min-h-[40px]">
             <button
               onClick={onClose}
