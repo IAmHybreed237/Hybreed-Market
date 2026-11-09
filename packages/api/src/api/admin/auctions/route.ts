@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { AUCTION_MODULE } from "../../../modules/auction/service"

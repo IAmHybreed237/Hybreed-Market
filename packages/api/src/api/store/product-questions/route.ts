@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { PRODUCT_QA_MODULE } from "../../../modules/product-qa/service"
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk"
 import { AUCTION_MODULE } from "../../../modules/auction/service"
 

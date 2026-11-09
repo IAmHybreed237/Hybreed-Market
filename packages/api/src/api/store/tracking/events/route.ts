@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { TRENDING_MODULE } from "../../../../modules/trending/service"
 

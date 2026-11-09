@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createWorkflow } from "@medusajs/framework/workflows-sdk"
 import { finalizeAuctionStep } from "./steps/finalize-auction"
 

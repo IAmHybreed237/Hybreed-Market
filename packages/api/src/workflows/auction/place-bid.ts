@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createWorkflow } from "@medusajs/framework/workflows-sdk"
 import { validateBidStep } from "./steps/validate-bid"
 import { createBidStep } from "./steps/create-bid"

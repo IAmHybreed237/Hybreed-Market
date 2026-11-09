@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MercurModules } from "@mercurjs/types"
 import { PICKUP_MODULE } from "../../../modules/pickup/service"

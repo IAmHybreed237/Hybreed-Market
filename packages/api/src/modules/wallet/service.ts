@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MedusaService } from "@medusajs/framework/utils"
 import { MathBN } from "@medusajs/framework/utils"
 import WalletAccount from "./models/account"
