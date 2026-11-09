@@ -11,21 +11,33 @@ const FASHION_LABELS = [
   "watch", "glasses", "jewelry", "phone", "laptop", "furniture", "food", "cosmetics",
 ]
 
-let _pipelines: Promise<{ det: any; emb: any; cls: any }> | null = null
+let _emb: Promise<any> | null = null
+let _detCls: Promise<{ det: any; cls: any }> | null = null
 
-const loadPipelines = () => {
-  if (!_pipelines) {
-    _pipelines = (async () => {
+/** CLIP image embeddings only - used by search queries and product embedding. */
+const loadEmbedding = () => {
+  if (!_emb) {
+    _emb = (async () => {
       const { pipeline } = await import("@huggingface/transformers")
-      const [det, emb, cls] = await Promise.all([
-        pipeline("object-detection" as never, "Xenova/yolos-tiny" as never),
-        pipeline("image-feature-extraction" as never, "Xenova/clip-vit-base-patch32" as never),
-        pipeline("zero-shot-image-classification" as never, "Xenova/clip-vit-base-patch32" as never),
-      ])
-      return { det, emb, cls }
+      return pipeline("image-feature-extraction" as never, "Xenova/clip-vit-base-patch32" as never)
     })()
   }
-  return _pipelines
+  return _emb
+}
+
+/** Object detection + zero-shot labels - only needed for component detection. */
+const loadDetection = () => {
+  if (!_detCls) {
+    _detCls = (async () => {
+      const { pipeline } = await import("@huggingface/transformers")
+      const [det, cls] = await Promise.all([
+        pipeline("object-detection" as never, "Xenova/yolos-tiny" as never),
+        pipeline("zero-shot-image-classification" as never, "Xenova/clip-vit-base-patch32" as never),
+      ])
+      return { det, cls }
+    })()
+  }
+  return _detCls
 }
 
 const toImage = async (input: string | Buffer) => {
@@ -46,7 +58,7 @@ export const resolveImageUrl = (url: string) => {
 
 /** Detect searchable components and return dot positions (0-100 % of image dims). */
 export const detectComponents = async (image: string | Buffer) => {
-  const { det, cls } = await loadPipelines()
+  const { det, cls } = await loadDetection()
   const img = await toImage(image)
   const detections: Det[] = await det(img, { threshold: 0.35, percentage: true } as never)
 
@@ -75,7 +87,7 @@ export const detectComponents = async (image: string | Buffer) => {
 
 /** 512-dim normalized CLIP embedding for an image/crop. */
 export const embedImage = async (image: string | Buffer): Promise<number[]> => {
-  const { emb } = await loadPipelines()
+  const emb = await loadEmbedding()
   const img = await toImage(image)
   const out = await emb(img, { pooling: "mean", normalize: true } as never)
   return Array.from(out.data as Float32Array)

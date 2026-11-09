@@ -15,28 +15,28 @@ export default function ImageSearchCapture() {
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState("")
   const [cameraError, setCameraError] = useState(false)
+  const [camOn, setCamOn] = useState(false)
 
-  useEffect(() => {
-    let cancelled = false
+  const startCamera = useCallback(() => {
     navigator.mediaDevices
       ?.getUserMedia({ video: { facingMode: "environment" }, audio: false })
       .then((stream) => {
-        if (cancelled) {
-          stream.getTracks().forEach((t) => t.stop())
-          return
-        }
         streamRef.current = stream
         if (videoRef.current) {
           videoRef.current.srcObject = stream
           videoRef.current.play().catch(() => {})
         }
+        setCamOn(true)
       })
       .catch(() => setCameraError(true))
-    return () => {
-      cancelled = true
-      streamRef.current?.getTracks().forEach((t) => t.stop())
-    }
   }, [])
+
+  useEffect(
+    () => () => {
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+    },
+    []
+  )
 
   // CLIP only needs ~224px; downscale to keep payloads small and fast.
   const downscale = (dataUrl: string) =>
@@ -132,6 +132,17 @@ export default function ImageSearchCapture() {
             <p className="text-white/80 text-sm px-6 text-center">
               Camera unavailable - choose a photo below
             </p>
+          ) : !camOn ? (
+            <>
+              <button
+                onClick={startCamera}
+                aria-label="Start camera"
+                className="h-[52px] px-8 rounded-2xl bg-white/15 backdrop-blur-md text-white font-semibold text-[16px]"
+              >
+                Start camera
+              </button>
+              <span className="text-[15px] text-white/70">or choose a photo below</span>
+            </>
           ) : (
             <>
               <button

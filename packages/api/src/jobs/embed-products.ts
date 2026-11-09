@@ -4,12 +4,12 @@ import { IMAGE_SEARCH_MODULE } from "../modules/image-search"
 import ImageSearchService from "../modules/image-search/service"
 import { embedImagesMean, resolveImageUrl } from "../lib/vision"
 
-const MAX_PER_RUN = 30
+const MAX_PER_RUN = 10
 const MAX_IMAGES = 4
 
 /**
  * Keeps product image embeddings in sync with the catalog.
- * Runs every 15 minutes: embeds products that have no embedding yet, or
+ * Runs hourly: embeds products that have no embedding yet, or
  * whose product was updated after the embedding was last written.
  * Each product is represented by the mean of up to 4 gallery images.
  */
@@ -57,5 +57,5 @@ export default async function embedProductsJob(container: MedusaContainer) {
 
 export const config = {
   name: "embed-products",
-  schedule: "*/15 * * * *",
+  schedule: "7 * * * *",
 }
