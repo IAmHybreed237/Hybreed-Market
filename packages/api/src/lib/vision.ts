@@ -81,6 +81,35 @@ export const embedImage = async (image: string | Buffer): Promise<number[]> => {
   return Array.from(out.data as Float32Array)
 }
 
+const l2normalize = (v: number[]) => {
+  let norm = 0
+  for (const x of v) norm += x * x
+  norm = Math.sqrt(norm) || 1
+  return v.map((x) => x / norm)
+}
+
+/**
+ * Mean CLIP embedding across several product images.
+ * Embedding every gallery photo (not just the thumbnail) means detail shots
+ * still match buyer photos. Falls back to the first image on failure.
+ */
+export const embedImagesMean = async (urls: string[]): Promise<number[] | null> => {
+  const vectors: number[][] = []
+  for (const url of urls.slice(0, 4)) {
+    try {
+      vectors.push(await embedImage(url))
+    } catch {
+      // skip unreadable image
+    }
+  }
+  if (!vectors.length) return null
+  if (vectors.length === 1) return vectors[0]
+  const dim = vectors[0].length
+  const mean = new Array(dim).fill(0)
+  for (const v of vectors) for (let i = 0; i < dim; i++) mean[i] += v[i] / vectors.length
+  return l2normalize(mean)
+}
+
 export const cosine = (a: number[], b: number[]) => {
   let dot = 0
   for (let i = 0; i < a.length; i++) dot += a[i] * b[i]

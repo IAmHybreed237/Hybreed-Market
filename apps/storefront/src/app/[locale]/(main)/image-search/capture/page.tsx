@@ -38,18 +38,35 @@ export default function ImageSearchCapture() {
     }
   }, [])
 
+  // CLIP only needs ~224px; downscale to keep payloads small and fast.
+  const downscale = (dataUrl: string) =>
+    new Promise<string>((resolve) => {
+      const img = new Image()
+      img.onload = () => {
+        const scale = Math.min(1, 640 / Math.max(img.width, img.height))
+        const canvas = document.createElement("canvas")
+        canvas.width = Math.max(1, Math.round(img.width * scale))
+        canvas.height = Math.max(1, Math.round(img.height * scale))
+        canvas.getContext("2d")?.drawImage(img, 0, 0, canvas.width, canvas.height)
+        resolve(canvas.toDataURL("image/jpeg", 0.85))
+      }
+      img.onerror = () => resolve(dataUrl)
+      img.src = dataUrl
+    })
+
   const search = useCallback(
     async (dataUrl: string) => {
       setBusy(true)
       setStatus("Finding matches...")
       try {
+        const image = await downscale(dataUrl)
         const res = await fetch(`${API}/store/image-search/query`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "x-publishable-api-key": KEY!,
           },
-          body: JSON.stringify({ image: dataUrl }),
+          body: JSON.stringify({ image }),
         })
         const data = await res.json()
         const ids = (data.products || []).map((p: any) => p.id).join(",")
