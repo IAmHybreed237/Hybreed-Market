@@ -254,11 +254,14 @@ export const MobileAccount = ({
             className={`${card} relative h-[130px] p-4 flex flex-col overflow-hidden`}
           >
             <div className="flex items-start justify-between">
-              <p className="text-[16px] font-medium text-[#1F1F23] leading-tight mt-1">
+              <p className="text-[18px] font-medium text-[#1F1F23] leading-none">
                 Pay Small Small
               </p>
               <Chevron />
             </div>
+            <p className="text-[15px] -mt-0.5" style={{ color: "var(--muted)" }}>
+              Wallet installments
+            </p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/pay-small-small.png"
