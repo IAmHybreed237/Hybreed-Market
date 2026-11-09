@@ -91,6 +91,9 @@ module.exports = withMercur({
       resolve: './src/modules/installments',
     },
     {
+      resolve: './src/modules/image-search',
+    },
+    {
       resolve: './src/modules/wallet',
     },
     {
