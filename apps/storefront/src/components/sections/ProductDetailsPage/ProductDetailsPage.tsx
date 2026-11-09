@@ -38,12 +38,17 @@ export const ProductDetailsPage = async ({
   const prodCatIds: string[] = ((prod as any).categories || [])
     .map((c: any) => c?.id)
     .filter(Boolean)
-  const [trends, reviewsData, wishlistIds, followedIds] = await Promise.all([
-    getTrends(30),
-    getProductReviews(prod.id, { limit: 1 }),
-    getWishlistProductIds(),
-    getFollowedIds(),
-  ])
+  const sellerId = (prod as any).seller?.id
+  const [trends, reviewsData, wishlistIds, followedIds, sellerOffers] =
+    await Promise.all([
+      getTrends(30),
+      getProductReviews(prod.id, { limit: 1 }),
+      getWishlistProductIds(),
+      getFollowedIds(),
+      sellerId
+        ? listOffers({ sellerId, countryCode: locale, limit: 1 })
+        : Promise.resolve({ offers: [], count: 0 }),
+    ])
   const wishlisted = wishlistIds.includes(prod.id)
   const reviewSummary = reviewsData.summary
   const trendCatIds = trends.category_ids.map((c) => c.key).slice(0, 5)
@@ -117,6 +122,7 @@ export const ProductDetailsPage = async ({
         wishlisted={wishlisted}
         followedIds={followedIds}
         locale={locale}
+        storeCount={sellerOffers.count}
       />
       <div className="hidden md:block">
         <WbProductReviews

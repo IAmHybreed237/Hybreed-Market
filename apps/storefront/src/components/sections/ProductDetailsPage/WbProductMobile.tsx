@@ -94,11 +94,13 @@ export const WbProductMobile = ({
   wishlisted,
   followedIds,
   locale,
+  storeCount,
 }: {
   product: any
   offers: any[]
   similar: any[]
   alsoBuy?: any[]
+  storeCount?: number
   reviewSummary?: { average: number | null; count: number }
   reviewMedia?: { url: string; thumbnail_url: string | null; type: string }[]
   wishlisted?: boolean
@@ -816,7 +818,7 @@ export const WbProductMobile = ({
               {seller?.is_premium ? <VerifiedBadge /> : null} {brand}
             </span>
             <span className="block text-[14px] text-[#8A8A96]">
-              {alsoBuy?.length ? `${alsoBuy.length} items in store` : "Seller"}
+              {storeCount ? `${storeCount} items in store` : "Seller"}
             </span>
           </span>
           <span
