@@ -251,20 +251,25 @@ export const MobileAccount = ({
           </div>
           <LocalizedClientLink
             href="/user/wallet"
-            className={`${card} h-[130px] p-4 flex flex-col`}
+            className={`${card} relative h-[130px] p-4 flex flex-col overflow-hidden`}
           >
             <div className="flex items-start justify-between">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/pay-small-small.png" alt="" className="w-7 h-7 object-contain" />
+              <p className="text-[16px] font-medium text-[#1F1F23] leading-tight mt-1 truncate">
+                Pay Small Small
+              </p>
               <Chevron />
             </div>
-            <p className="text-[16px] font-medium text-[#1F1F23] leading-tight mt-1 truncate">
-              Pay Small Small
-            </p>
-            <p className="text-[11px] -mt-0.5 leading-tight" style={{ color: "var(--muted)" }}>
+            <p className="text-[12px] -mt-0.5 leading-tight pr-12" style={{ color: "var(--muted)" }}>
               Pay in parts on eligible items
             </p>
-            <p className="text-[12px] text-[#1F1F23] mt-auto truncate">Wallet-powered installments</p>
+            <p className="text-[13px] text-[#1F1F23] mt-auto pr-12">Wallet-powered installments</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/pay-small-small.png"
+              alt=""
+              aria-hidden
+              className="absolute -bottom-1.5 -right-1.5 w-[72px] h-[72px] object-contain"
+            />
           </LocalizedClientLink>
         </div>
 
