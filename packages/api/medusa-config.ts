@@ -74,11 +74,21 @@ module.exports = withMercur({
             resolve: './src/providers/wallet',
             id: 'wallet',
           },
+          {
+            // Pay Small Small settlement: money was already collected via
+            // installment payments, so this provider only satisfies the
+            // cart payment state machine - it never moves money.
+            resolve: './src/providers/layaway',
+            id: 'layaway',
+          },
         ],
       },
     },
     {
       resolve: './src/modules/auction',
+    },
+    {
+      resolve: './src/modules/installments',
     },
     {
       resolve: './src/modules/wallet',

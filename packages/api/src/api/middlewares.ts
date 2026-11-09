@@ -7,7 +7,6 @@ import {
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { defineMiddlewares } from "@medusajs/medusa"
 import { WALLET_MODULE } from "../modules/wallet/service"
-import { getInstallmentCredit } from "../lib/installments"
 import { storeWishlistMiddlewares } from "./store/wishlist/middlewares"
 
 /**
@@ -49,16 +48,10 @@ const walletBalanceGuard = async (
     const wallet = req.scope.resolve(WALLET_MODULE)
     const { balance } = await wallet.getBalance(customerId)
     if (balance < amount) {
-      // Pay-in-Parts: carts containing pip-enabled products may finance the
-      // unpaid portion - the wallet balance is allowed to go negative by up
-      // to the installment credit, repaid later via MoMo top-ups.
-      const credit = await getInstallmentCredit(query, pc?.cart?.id)
-      if (amount - balance > credit) {
-        res.status(402).json({
-          message: `Insufficient Hybreed Wallet balance: have ${balance}, need ${amount} ${pc?.currency_code ?? "xaf"}`,
-        })
-        return
-      }
+      res.status(402).json({
+        message: `Insufficient Hybreed Wallet balance: have ${balance}, need ${amount} ${pc?.currency_code ?? "xaf"}`,
+      })
+      return
     }
     next()
   } catch (err) {
@@ -81,6 +74,11 @@ export default defineMiddlewares({
     },
     {
       matcher: "/store/wallet*",
+      method: ["GET", "POST"],
+      middlewares: [authenticate("customer", ["session", "bearer"])],
+    },
+    {
+      matcher: "/store/installments*",
       method: ["GET", "POST"],
       middlewares: [authenticate("customer", ["session", "bearer"])],
     },
